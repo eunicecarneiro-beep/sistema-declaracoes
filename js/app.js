@@ -2,6 +2,7 @@ const SUPABASE_URL = "https://cujlebxqqposqomtfvdk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx";
 
 const App = (() => {
+
   const NAV = [
     { key: "dashboard", href: "index.html", icon: "⌂", label: "Dashboard" },
     { key: "funcionarios", href: "funcionarios.html", icon: "👥", label: "Funcionários" },
@@ -13,6 +14,7 @@ const App = (() => {
     { key: "relatorios", href: "relatorios.html", icon: "▥", label: "Relatórios" }
   ];
 
+
   function escapeHTML(value = "") {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -22,31 +24,53 @@ const App = (() => {
       .replace(/'/g, "&#039;");
   }
 
+
   function formatDate(dateValue) {
-    if (!dateValue) return "—";
 
-    const [y, m, d] = String(dateValue)
-      .slice(0, 10)
-      .split("-");
+    if (!dateValue) {
+      return "—";
+    }
 
-    if (!y || !m || !d) return dateValue;
+    const [y, m, d] =
+      String(dateValue)
+        .slice(0, 10)
+        .split("-");
+
+    if (!y || !m || !d) {
+      return dateValue;
+    }
 
     return `${d}/${m}/${y}`;
   }
+
 
   function getPageKey() {
     return document.body.dataset.page || "";
   }
 
-  function layout(title, subtitle, content) {
-    const page = getPageKey();
 
-    document.title = `${title} | Sistema de Declarações`;
+  function layout(
+    title,
+    subtitle,
+    content
+  ) {
 
-    document.getElementById("app").innerHTML = `
+    const page =
+      getPageKey();
+
+    document.title =
+      `${title} | Sistema de Declarações`;
+
+    document.getElementById(
+      "app"
+    ).innerHTML = `
+
       <div class="app-shell">
 
-        <aside class="sidebar" id="sidebar">
+        <aside
+          class="sidebar"
+          id="sidebar"
+        >
 
           <div class="brand">
 
@@ -55,29 +79,47 @@ const App = (() => {
             </div>
 
             <div class="brand-text">
-              <strong>Sistema de Declarações</strong>
-              <span>E.M. Profª Eunice Carneiro</span>
+
+              <strong>
+                Sistema de Declarações
+              </strong>
+
+              <span>
+                E.M. Profª Eunice Carneiro
+              </span>
+
             </div>
 
           </div>
 
+
           <nav class="nav">
 
             ${NAV.map(item => `
+
               <a
                 href="${item.href}"
-                class="${item.key === page ? "active" : ""}"
+                class="${
+                  item.key === page
+                    ? "active"
+                    : ""
+                }"
               >
+
                 <span class="nav-icon">
                   ${item.icon}
                 </span>
+
                 <span>
                   ${item.label}
                 </span>
+
               </a>
+
             `).join("")}
 
           </nav>
+
 
           <div class="sidebar-footer">
             Banco de dados online • Supabase
@@ -85,12 +127,17 @@ const App = (() => {
 
         </aside>
 
+
         <main class="main">
 
           <header class="topbar">
 
             <div
-              style="display:flex;align-items:center;gap:12px"
+              style="
+                display:flex;
+                align-items:center;
+                gap:12px
+              "
             >
 
               <button
@@ -100,6 +147,7 @@ const App = (() => {
               >
                 ☰
               </button>
+
 
               <div class="topbar-title">
 
@@ -115,13 +163,21 @@ const App = (() => {
 
             </div>
 
+
             <div
               class="no-print"
-              style="display:flex;gap:8px"
+              style="
+                display:flex;
+                gap:8px
+              "
             >
 
               <a
-                class="btn btn-secondary btn-sm"
+                class="
+                  btn
+                  btn-secondary
+                  btn-sm
+                "
                 href="nova-declaracao.html"
               >
                 ＋ Nova declaração
@@ -131,6 +187,7 @@ const App = (() => {
 
           </header>
 
+
           <section class="content">
             ${content}
           </section>
@@ -139,19 +196,33 @@ const App = (() => {
 
       </div>
 
+
       <div id="modalRoot"></div>
+
     `;
 
+
     document
-      .getElementById("menuToggle")
-      ?.addEventListener("click", () => {
+      .getElementById(
+        "menuToggle"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
 
-        document
-          .getElementById("sidebar")
-          ?.classList.toggle("open");
+          document
+            .getElementById(
+              "sidebar"
+            )
+            ?.classList.toggle(
+              "open"
+            );
 
-      });
+        }
+      );
+
   }
+
 
   function openModal({
     title,
@@ -160,11 +231,17 @@ const App = (() => {
   }) {
 
     const root =
-      document.getElementById("modalRoot");
+      document.getElementById(
+        "modalRoot"
+      );
 
     root.innerHTML = `
+
       <div
-        class="modal-backdrop show"
+        class="
+          modal-backdrop
+          show
+        "
         id="modalBackdrop"
       >
 
@@ -190,56 +267,87 @@ const App = (() => {
 
           </div>
 
+
           <div class="modal-body">
             ${body}
           </div>
 
+
           ${
             footer
-              ? `<div class="modal-footer">${footer}</div>`
+              ? `
+                <div class="modal-footer">
+                  ${footer}
+                </div>
+              `
               : ""
           }
 
         </div>
 
       </div>
+
     `;
 
+
     root
-      .querySelectorAll("[data-close-modal]")
-      .forEach(btn =>
-        btn.addEventListener(
-          "click",
-          closeModal
-        )
+      .querySelectorAll(
+        "[data-close-modal]"
+      )
+      .forEach(
+        btn =>
+          btn.addEventListener(
+            "click",
+            closeModal
+          )
       );
 
+
     root
-      .querySelector("#modalBackdrop")
-      ?.addEventListener("click", e => {
+      .querySelector(
+        "#modalBackdrop"
+      )
+      ?.addEventListener(
+        "click",
+        e => {
 
-        if (e.target.id === "modalBackdrop") {
-          closeModal();
+          if (
+            e.target.id ===
+            "modalBackdrop"
+          ) {
+            closeModal();
+          }
+
         }
+      );
 
-      });
 
     document.addEventListener(
       "keydown",
       escClose
     );
+
   }
 
+
   function escClose(e) {
-    if (e.key === "Escape") {
+
+    if (
+      e.key ===
+      "Escape"
+    ) {
       closeModal();
     }
+
   }
+
 
   function closeModal() {
 
     const root =
-      document.getElementById("modalRoot");
+      document.getElementById(
+        "modalRoot"
+      );
 
     if (root) {
       root.innerHTML = "";
@@ -249,33 +357,47 @@ const App = (() => {
       "keydown",
       escClose
     );
+
   }
+
 
   function toast(
     message,
     type = "success"
   ) {
 
-    const id = "toastRoot";
+    const id =
+      "toastRoot";
 
     let root =
-      document.getElementById(id);
+      document.getElementById(
+        id
+      );
+
 
     if (!root) {
 
       root =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       root.id = id;
 
       root.style.cssText =
         "position:fixed;right:18px;bottom:18px;z-index:5000;display:flex;flex-direction:column;gap:10px";
 
-      document.body.appendChild(root);
+      document.body.appendChild(
+        root
+      );
     }
 
+
     const item =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     const map = {
       success: "alert-success",
@@ -284,25 +406,38 @@ const App = (() => {
       info: "alert-info"
     };
 
+
     item.className =
-      `alert ${map[type] || map.info}`;
+      `alert ${
+        map[type] || map.info
+      }`;
+
 
     item.style.cssText +=
       "box-shadow:0 12px 30px rgba(16,24,40,.14);max-width:360px;margin:0;";
 
+
     item.innerHTML =
       escapeHTML(message);
 
-    root.appendChild(item);
+
+    root.appendChild(
+      item
+    );
+
 
     setTimeout(
       () => item.remove(),
       3200
     );
+
   }
 
+
   const API =
-    SUPABASE_URL + "/rest/v1";
+    SUPABASE_URL +
+    "/rest/v1";
+
 
   async function api(
     path,
@@ -324,6 +459,7 @@ const App = (() => {
 
     };
 
+
     const res =
       await fetch(
         API + path,
@@ -332,6 +468,7 @@ const App = (() => {
           headers
         }
       );
+
 
     if (!res.ok) {
 
@@ -342,15 +479,20 @@ const App = (() => {
         t ||
         "Erro no Supabase"
       );
+
     }
+
 
     const text =
       await res.text();
 
+
     return text
       ? JSON.parse(text)
       : null;
+
   }
+
 
   function generateId() {
 
@@ -362,14 +504,23 @@ const App = (() => {
         Math.random() * 1000
       )
     );
+
   }
+
 
   function fromDB(
     store,
     x
   ) {
 
-    if (!x) return x;
+    if (!x) {
+      return x;
+    }
+
+
+    /* ================================================
+       FUNCIONÁRIOS
+       ================================================ */
 
     if (
       store ===
@@ -395,6 +546,10 @@ const App = (() => {
           x.cargo ||
           "",
 
+        categoriaCargo:
+          x.categoria_cargo ||
+          "",
+
         setor:
           x.setor ||
           "",
@@ -404,9 +559,24 @@ const App = (() => {
           x.vinculo ||
           "",
 
+        status:
+          x.status ||
+          "Ativo",
+
+        turno:
+          x.turno ||
+          "",
+
+        cargaHoraria:
+          x.carga_horaria ||
+          "",
+
         dataAdmissao:
           x.data_admissao ||
-          x.dataAdmissao ||
+          "",
+
+        dataEntradaEscola:
+          x.data_entrada_escola ||
           "",
 
         cpf:
@@ -421,9 +591,25 @@ const App = (() => {
           x.email ||
           "",
 
-        status:
-          x.status ||
-          "Ativo",
+        endereco:
+          x.endereco ||
+          "",
+
+        formacao:
+          x.formacao ||
+          "",
+
+        especializacao:
+          x.especializacao ||
+          "",
+
+        naturalidade:
+          x.naturalidade ||
+          "",
+
+        dataNascimento:
+          x.data_nascimento ||
+          "",
 
         motivoInatividade:
           x.motivo_inatividade ||
@@ -436,8 +622,15 @@ const App = (() => {
         observacoes:
           x.observacoes ||
           ""
+
       };
+
     }
+
+
+    /* ================================================
+       DECLARAÇÕES
+       ================================================ */
 
     if (
       store ===
@@ -480,8 +673,15 @@ const App = (() => {
 
         observacoes:
           x.observacoes
+
       };
+
     }
+
+
+    /* ================================================
+       FALTAS
+       ================================================ */
 
     if (
       store ===
@@ -509,15 +709,27 @@ const App = (() => {
 
         createdAt:
           x.created_at
+
       };
+
     }
 
+
+    /* ================================================
+       OUTRAS TABELAS
+       ================================================ */
+
     return {
+
       ...x,
+
       id:
         String(x.id)
+
     };
+
   }
+
 
   function toDB(
     store,
@@ -525,6 +737,11 @@ const App = (() => {
   ) {
 
     let payload = {};
+
+
+    /* ================================================
+       FUNCIONÁRIOS
+       ================================================ */
 
     if (
       store ===
@@ -538,51 +755,124 @@ const App = (() => {
             ? Number(x.id)
             : generateId(),
 
+
         nome_completo:
-          x.nome,
-
-        matricula:
-          x.matricula,
-
-        cargo_funcao:
-          x.cargo,
-
-        setor:
-          x.setor,
-
-        tipo_vinculo:
-          x.vinculo,
-
-        data_admissao:
-          x.dataAdmissao ||
+          x.nome ||
           null,
 
-        cpf:
-          x.cpf,
 
-        telefone:
-          x.telefone,
+        matricula:
+          x.matricula ||
+          null,
 
-        email:
-          x.email,
+
+        cargo_funcao:
+          x.cargo ||
+          null,
+
+
+        categoria_cargo:
+          x.categoriaCargo ||
+          null,
+
+
+        setor:
+          x.setor ||
+          null,
+
+
+        tipo_vinculo:
+          x.vinculo ||
+          null,
+
 
         status:
           x.status ||
           "Ativo",
 
+
+        turno:
+          x.turno ||
+          null,
+
+
+        carga_horaria:
+          x.cargaHoraria ||
+          null,
+
+
+        data_admissao:
+          x.dataAdmissao ||
+          null,
+
+
+        data_entrada_escola:
+          x.dataEntradaEscola ||
+          null,
+
+
+        cpf:
+          x.cpf ||
+          null,
+
+
+        telefone:
+          x.telefone ||
+          null,
+
+
+        email:
+          x.email ||
+          null,
+
+
+        endereco:
+          x.endereco ||
+          null,
+
+
+        formacao:
+          x.formacao ||
+          null,
+
+
+        especializacao:
+          x.especializacao ||
+          null,
+
+
+        naturalidade:
+          x.naturalidade ||
+          null,
+
+
+        data_nascimento:
+          x.dataNascimento ||
+          null,
+
+
         motivo_inatividade:
           x.motivoInatividade ||
           null,
+
 
         data_inatividade:
           x.dataInatividade ||
           null,
 
+
         observacoes:
           x.observacoes ||
           null
+
       };
+
     }
+
+
+    /* ================================================
+       DECLARAÇÕES
+       ================================================ */
 
     else if (
       store ===
@@ -635,8 +925,15 @@ const App = (() => {
         observacoes:
           x.observacoes ||
           null
+
       };
+
     }
+
+
+    /* ================================================
+       FALTAS
+       ================================================ */
 
     else if (
       store ===
@@ -666,8 +963,15 @@ const App = (() => {
         justificativa:
           x.justificativa ||
           null
+
       };
+
     }
+
+
+    /* ================================================
+       AGENDA / OUTRAS TABELAS
+       ================================================ */
 
     else {
 
@@ -675,15 +979,21 @@ const App = (() => {
         ...x
       };
 
+
       if (!payload.id) {
+
         payload.id =
           generateId();
+
       }
 
     }
 
+
     return payload;
+
   }
+
 
   async function add(
     store,
@@ -696,10 +1006,12 @@ const App = (() => {
         value
       );
 
+
     const r =
       await api(
         `/${store}`,
         {
+
           method:
             "POST",
 
@@ -712,27 +1024,34 @@ const App = (() => {
             JSON.stringify(
               dataToSend
             )
+
         }
       );
+
 
     const item =
       Array.isArray(r)
         ? r[0]
         : r;
 
+
     return fromDB(
       store,
       item ||
       dataToSend
     );
+
   }
+
 
   async function put(
     store,
     value
   ) {
 
-    if (value.id) {
+    if (
+      value.id
+    ) {
 
       const dataToSend =
         toDB(
@@ -740,10 +1059,18 @@ const App = (() => {
           value
         );
 
+
       const r =
         await api(
-          `/${store}?id=eq.${encodeURIComponent(value.id)}`,
+
+          `/${store}?id=eq.${
+            encodeURIComponent(
+              value.id
+            )
+          }`,
+
           {
+
             method:
               "PATCH",
 
@@ -756,26 +1083,34 @@ const App = (() => {
               JSON.stringify(
                 dataToSend
               )
+
           }
+
         );
+
 
       const item =
         Array.isArray(r)
           ? r[0]
           : r;
 
+
       return fromDB(
         store,
         item ||
         value
       );
+
     }
+
 
     return add(
       store,
       value
     );
+
   }
+
 
   async function get(
     store,
@@ -784,15 +1119,24 @@ const App = (() => {
 
     const r =
       await api(
-        `/${store}?id=eq.${encodeURIComponent(key)}&select=*`
+
+        `/${store}?id=eq.${
+          encodeURIComponent(
+            key
+          )
+        }&select=*`
+
       );
+
 
     return fromDB(
       store,
       r?.[0] ||
       null
     );
+
   }
+
 
   async function getAll(
     store
@@ -803,8 +1147,10 @@ const App = (() => {
         `/${store}?select=*&order=id.asc`
       );
 
+
     return (
-      r || []
+      r ||
+      []
     ).map(
       x =>
         fromDB(
@@ -812,7 +1158,9 @@ const App = (() => {
           x
         )
     );
+
   }
+
 
   async function remove(
     store,
@@ -820,19 +1168,25 @@ const App = (() => {
   ) {
 
     await api(
-      `/${store}?id=eq.${encodeURIComponent(key)}`,
+
+      `/${store}?id=eq.${
+        encodeURIComponent(
+          key
+        )
+      }`,
+
       {
         method:
           "DELETE"
       }
+
     );
 
+
     return true;
+
   }
 
-  async function seedDemoData() {
-    return;
-  }
 
   async function counts() {
 
@@ -841,10 +1195,12 @@ const App = (() => {
         "funcionarios"
       );
 
+
     const declaracoes =
       await getAll(
         "declaracoes"
       );
+
 
     return {
 
@@ -857,15 +1213,13 @@ const App = (() => {
       horas:
         declaracoes.filter(
           d =>
-            d.tipo ===
-            "horas"
+            d.tipo === "horas"
         ).length,
 
       dias:
         declaracoes.filter(
           d =>
-            d.tipo ===
-            "dias"
+            d.tipo === "dias"
         ).length,
 
       listaFuncionarios:
@@ -873,8 +1227,11 @@ const App = (() => {
 
       listaDeclaracoes:
         declaracoes
+
     };
+
   }
+
 
   return {
 
@@ -902,9 +1259,10 @@ const App = (() => {
 
     remove,
 
-    seedDemoData,
-
     counts,
+
+    seedDemoData:
+      async () => {},
 
     uid:
       () =>
@@ -915,182 +1273,229 @@ const App = (() => {
 })();
 
 
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
 const DashboardPage = {
 
   async init() {
 
-    await App.seedDemoData();
+    try {
 
-    const stats =
-      await App.counts();
-
-    App.layout(
-      "Dashboard",
-      "Visão geral do sistema interno de declarações",
-
-      `
-        <div class="page-header">
-
-          <div>
-
-            <h2>
-              Visão geral
-            </h2>
-
-            <p>
-              Acompanhe funcionários e documentos cadastrados.
-            </p>
-
-          </div>
-
-          <div
-            class="actions no-print"
-          >
-
-            <a
-              class="btn btn-primary"
-              href="nova-declaracao.html"
-            >
-              ＋ Nova Declaração
-            </a>
-
-            <a
-              class="btn btn-secondary"
-              href="novo-funcionario.html"
-            >
-              ＋ Novo Funcionário
-            </a>
-
-          </div>
-
-        </div>
+      const stats =
+        await App.counts();
 
 
-        <div class="cards">
+      App.layout(
 
-          ${this.statCard(
-            "Funcionários",
-            stats.funcionarios,
-            "👥"
-          )}
+        "Dashboard",
 
-          ${this.statCard(
-            "Declarações",
-            stats.declaracoes,
-            "📄"
-          )}
+        "Visão geral do sistema interno de declarações",
 
-          ${this.statCard(
-            "Declarações de Horas",
-            stats.horas,
-            "◷"
-          )}
+        `
 
-          ${this.statCard(
-            "Declarações de Dias",
-            stats.dias,
-            "▣"
-          )}
+          <div class="page-header">
 
-        </div>
+            <div>
 
+              <h2>
+                Visão geral
+              </h2>
 
-        <div class="grid-2">
-
-          <section
-            class="card panel"
-          >
-
-            <div
-              class="panel-header"
-            >
-
-              <h3>
-                Declarações recentes
-              </h3>
-
-              <a
-                href="declaracoes.html"
-                class="btn btn-secondary btn-sm"
-              >
-                Ver todas
-              </a>
-
-            </div>
-
-            ${this.recentTable(
-              stats.listaDeclaracoes,
-              stats.listaFuncionarios
-            )}
-
-          </section>
-
-
-          <section
-            class="card panel"
-          >
-
-            <div
-              class="panel-header"
-            >
-
-              <h3>
-                Ações rápidas
-              </h3>
+              <p>
+                Acompanhe funcionários e documentos cadastrados.
+              </p>
 
             </div>
 
 
             <div
-              class="quick-actions"
+              class="actions no-print"
             >
 
               <a
-                href="funcionarios.html"
-              >
-                👥 Gerenciar funcionários
-              </a>
-
-              <a
-                href="declaracoes.html"
-              >
-                📄 Consultar declarações
-              </a>
-
-              <a
-                href="agenda.html"
-              >
-                🗓️ Abrir Agenda da Escola
-              </a>
-
-              <a
-                href="relatorios.html"
-              >
-                ▥ Abrir relatórios
-              </a>
-
-              <a
+                class="btn btn-primary"
                 href="nova-declaracao.html"
               >
-                ＋ Lançar documento
+                ＋ Nova Declaração
+              </a>
+
+
+              <a
+                class="btn btn-secondary"
+                href="novo-funcionario.html"
+              >
+                ＋ Novo Funcionário
               </a>
 
             </div>
 
+          </div>
 
-            <div
-              style="margin-top:16px"
-              class="alert alert-warning"
+
+          <div class="cards">
+
+            ${this.statCard(
+              "Funcionários",
+              stats.funcionarios,
+              "👥"
+            )}
+
+
+            ${this.statCard(
+              "Declarações",
+              stats.declaracoes,
+              "📄"
+            )}
+
+
+            ${this.statCard(
+              "Declarações de Horas",
+              stats.horas,
+              "◷"
+            )}
+
+
+            ${this.statCard(
+              "Declarações de Dias",
+              stats.dias,
+              "▣"
+            )}
+
+          </div>
+
+
+          <div class="grid-2">
+
+
+            <section
+              class="card panel"
             >
-              Dados salvos online no Supabase.
-            </div>
 
-          </section>
+              <div
+                class="panel-header"
+              >
 
-        </div>
-      `
-    );
+                <h3>
+                  Declarações recentes
+                </h3>
+
+
+                <a
+                  href="declaracoes.html"
+                  class="
+                    btn
+                    btn-secondary
+                    btn-sm
+                  "
+                >
+                  Ver todas
+                </a>
+
+              </div>
+
+
+              ${this.recentTable(
+                stats.listaDeclaracoes,
+                stats.listaFuncionarios
+              )}
+
+            </section>
+
+
+            <section
+              class="card panel"
+            >
+
+              <div
+                class="panel-header"
+              >
+
+                <h3>
+                  Ações rápidas
+                </h3>
+
+              </div>
+
+
+              <div
+                class="quick-actions"
+              >
+
+                <a
+                  href="funcionarios.html"
+                >
+                  👥 Gerenciar funcionários
+                </a>
+
+
+                <a
+                  href="declaracoes.html"
+                >
+                  📄 Consultar declarações
+                </a>
+
+
+                <a
+                  href="agenda.html"
+                >
+                  🗓️ Abrir Agenda da Escola
+                </a>
+
+
+                <a
+                  href="relatorios.html"
+                >
+                  ▥ Abrir relatórios
+                </a>
+
+
+                <a
+                  href="nova-declaracao.html"
+                >
+                  ＋ Lançar documento
+                </a>
+
+              </div>
+
+
+              <div
+                style="margin-top:16px"
+                class="alert alert-warning"
+              >
+                Dados salvos online no Supabase.
+              </div>
+
+            </section>
+
+
+          </div>
+
+        `
+
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      App.toast(
+
+        "Erro ao carregar o dashboard: " +
+        (
+          err.message ||
+          err
+        ),
+
+        "danger"
+
+      );
+
+    }
+
   },
+
 
   statCard(
     label,
@@ -1109,8 +1514,11 @@ const DashboardPage = {
           <div
             class="stat-label"
           >
-            ${label}
+            ${App.escapeHTML(
+              label
+            )}
           </div>
+
 
           <div
             class="stat-value"
@@ -1119,6 +1527,7 @@ const DashboardPage = {
           </div>
 
         </div>
+
 
         <div
           class="stat-icon"
@@ -1129,7 +1538,9 @@ const DashboardPage = {
       </div>
 
     `;
+
   },
+
 
   recentTable(
     list,
@@ -1146,6 +1557,7 @@ const DashboardPage = {
             ]
         )
       );
+
 
     const rows =
       [...list]
@@ -1166,7 +1578,10 @@ const DashboardPage = {
           8
         );
 
-    if (!rows.length) {
+
+    if (
+      !rows.length
+    ) {
 
       return `
 
@@ -1178,14 +1593,14 @@ const DashboardPage = {
             Nenhuma declaração
           </strong>
 
-          Cadastre a primeira
-          declaração para começar.
+          Cadastre a primeira declaração para começar.
 
         </div>
 
       `;
 
     }
+
 
     return `
 
@@ -1219,6 +1634,7 @@ const DashboardPage = {
 
           </thead>
 
+
           <tbody>
 
             ${rows.map(
@@ -1228,6 +1644,7 @@ const DashboardPage = {
                   map[
                     d.funcionarioId
                   ];
+
 
                 return `
 
@@ -1246,15 +1663,19 @@ const DashboardPage = {
 
                     </td>
 
+
                     <td>
 
                       <span
-                        class="badge ${
-                          d.tipo ===
-                          "horas"
-                            ? "badge-hours"
-                            : "badge-days"
-                        }"
+                        class="
+                          badge
+                          ${
+                            d.tipo ===
+                            "horas"
+                              ? "badge-hours"
+                              : "badge-days"
+                          }
+                        "
                       >
 
                         ${
@@ -1268,6 +1689,7 @@ const DashboardPage = {
 
                     </td>
 
+
                     <td>
 
                       ${App.formatDate(
@@ -1276,6 +1698,7 @@ const DashboardPage = {
                       )}
 
                     </td>
+
 
                     <td>
 
@@ -1311,6 +1734,7 @@ const DashboardPage = {
       </div>
 
     `;
+
   }
 
 };
