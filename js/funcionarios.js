@@ -1,10 +1,13 @@
 /* =========================================================
-   FUNCIONÁRIOS
-   CADASTRO COMPLETO
-   PESQUISA
-   FILTROS
-   ATIVO / INATIVO
-   EXPORTAÇÃO DE PLANILHA
+   FUNCIONÁRIOS - E.M. PROFª EUNICE CARNEIRO
+
+   Cadastro completo
+   Pesquisa por nome
+   Filtros
+   Ativo / Inativo
+   Motivo da inativação
+   Data da inativação
+   Exportação
    ========================================================= */
 
 
@@ -32,7 +35,9 @@ const FuncionariosPage = {
     try {
 
       this.state.funcionarios =
-        await App.getAll("funcionarios") || [];
+        await App.getAll(
+          "funcionarios"
+        ) || [];
 
 
       this.ordenar();
@@ -83,8 +88,8 @@ const FuncionariosPage = {
           display:grid;
 
           grid-template-columns:
-            minmax(280px, 2fr)
-            repeat(4, minmax(150px, 1fr));
+            minmax(280px,2fr)
+            repeat(4,minmax(150px,1fr));
 
           gap:10px;
 
@@ -116,7 +121,7 @@ const FuncionariosPage = {
           display:grid;
 
           grid-template-columns:
-            repeat(7, minmax(105px, 1fr));
+            repeat(7,minmax(105px,1fr));
 
           gap:10px;
 
@@ -129,7 +134,8 @@ const FuncionariosPage = {
 
           background:#fff;
 
-          border:1px solid #e5e7eb;
+          border:
+            1px solid #e5e7eb;
 
           border-radius:12px;
 
@@ -162,7 +168,7 @@ const FuncionariosPage = {
 
           background:#ecfdf3 !important;
 
-          color:#027a48;
+          color:#027a48 !important;
 
         }
 
@@ -171,7 +177,7 @@ const FuncionariosPage = {
 
           background:#fef3f2 !important;
 
-          color:#b42318;
+          color:#b42318 !important;
 
         }
 
@@ -187,34 +193,15 @@ const FuncionariosPage = {
         }
 
 
-        .fx-section {
+        .fx-inativo-info {
 
-          font-weight:800;
+          margin-top:6px;
 
-          font-size:16px;
+          font-size:12px;
 
-          margin:4px 0 12px;
+          line-height:1.4;
 
-          color:#101828;
-
-        }
-
-
-        .fx-grid {
-
-          display:grid;
-
-          grid-template-columns:
-            repeat(3, minmax(220px, 1fr));
-
-          gap:14px;
-
-        }
-
-
-        .fx-full {
-
-          grid-column:1 / -1;
+          color:#b42318;
 
         }
 
@@ -226,6 +213,40 @@ const FuncionariosPage = {
           gap:6px;
 
           flex-wrap:wrap;
+
+        }
+
+
+        .fx-modal-danger {
+
+          background:#fff7ed;
+
+          border:
+            1px solid #fed7aa;
+
+          color:#9a3412;
+
+          border-radius:10px;
+
+          padding:12px;
+
+          margin-bottom:14px;
+
+        }
+
+
+        .fx-modal-info {
+
+          background:#f8fafc;
+
+          border:
+            1px solid #e4e7ec;
+
+          border-radius:10px;
+
+          padding:12px;
+
+          margin-bottom:14px;
 
         }
 
@@ -252,8 +273,7 @@ const FuncionariosPage = {
 
         @media(max-width:700px) {
 
-          .fx-filtros,
-          .fx-grid {
+          .fx-filtros {
 
             grid-template-columns:
               1fr;
@@ -265,13 +285,6 @@ const FuncionariosPage = {
 
             grid-template-columns:
               repeat(2,1fr);
-
-          }
-
-
-          .fx-full {
-
-            grid-column:auto;
 
           }
 
@@ -289,7 +302,7 @@ const FuncionariosPage = {
 
           .fx-filtros {
 
-            display:none;
+            display:none !important;
 
           }
 
@@ -423,21 +436,15 @@ const FuncionariosPage = {
               class="input"
             >
 
-              <option
-                value="todos"
-              >
+              <option value="todos">
                 Todos
               </option>
 
-              <option
-                value="Ativo"
-              >
+              <option value="Ativo">
                 Ativos
               </option>
 
-              <option
-                value="Inativo"
-              >
+              <option value="Inativo">
                 Inativos
               </option>
 
@@ -560,9 +567,7 @@ const FuncionariosPage = {
       </div>
 
 
-      <div
-        id="fxCards"
-      ></div>
+      <div id="fxCards"></div>
 
 
       <div class="card panel">
@@ -585,9 +590,7 @@ const FuncionariosPage = {
         </div>
 
 
-        <div
-          id="fxTabela"
-        ></div>
+        <div id="fxTabela"></div>
 
       </div>
 
@@ -599,7 +602,9 @@ const FuncionariosPage = {
   bind() {
 
     document
-      .getElementById("fxBusca")
+      .getElementById(
+        "fxBusca"
+      )
       ?.addEventListener(
         "input",
         e => {
@@ -610,12 +615,13 @@ const FuncionariosPage = {
           this.render();
 
         }
-
       );
 
 
     document
-      .getElementById("fxStatus")
+      .getElementById(
+        "fxStatus"
+      )
       ?.addEventListener(
         "change",
         e => {
@@ -626,12 +632,13 @@ const FuncionariosPage = {
           this.render();
 
         }
-
       );
 
 
     document
-      .getElementById("fxSetor")
+      .getElementById(
+        "fxSetor"
+      )
       ?.addEventListener(
         "change",
         e => {
@@ -642,12 +649,13 @@ const FuncionariosPage = {
           this.render();
 
         }
-
       );
 
 
     document
-      .getElementById("fxVinculo")
+      .getElementById(
+        "fxVinculo"
+      )
       ?.addEventListener(
         "change",
         e => {
@@ -658,12 +666,13 @@ const FuncionariosPage = {
           this.render();
 
         }
-
       );
 
 
     document
-      .getElementById("fxCategoria")
+      .getElementById(
+        "fxCategoria"
+      )
       ?.addEventListener(
         "change",
         e => {
@@ -674,31 +683,39 @@ const FuncionariosPage = {
           this.render();
 
         }
-
       );
 
 
     document
-      .getElementById("fxLimpar")
+      .getElementById(
+        "fxLimpar"
+      )
       ?.addEventListener(
         "click",
-        () => this.limpar()
+        () =>
+          this.limpar()
       );
 
 
     document
-      .getElementById("fxExportar")
+      .getElementById(
+        "fxExportar"
+      )
       ?.addEventListener(
         "click",
-        () => this.exportar()
+        () =>
+          this.exportar()
       );
 
 
     document
-      .getElementById("fxImprimir")
+      .getElementById(
+        "fxImprimir"
+      )
       ?.addEventListener(
         "click",
-        () => window.print()
+        () =>
+          window.print()
       );
 
   },
@@ -706,34 +723,35 @@ const FuncionariosPage = {
 
   limpar() {
 
-    Object.assign(
-      this.state,
-      {
-        busca:"",
-        status:"todos",
-        setor:"todos",
-        vinculo:"todos",
-        categoria:"todos"
-      }
-    );
+    this.state.busca =
+      "";
+
+    this.state.status =
+      "todos";
+
+    this.state.setor =
+      "todos";
+
+    this.state.vinculo =
+      "todos";
+
+    this.state.categoria =
+      "todos";
 
 
-    const campos = [
-
+    [
       "fxBusca",
       "fxStatus",
       "fxSetor",
       "fxVinculo",
       "fxCategoria"
-
-    ];
-
-
-    campos.forEach(
+    ].forEach(
       id => {
 
         const el =
-          document.getElementById(id);
+          document.getElementById(
+            id
+          );
 
         if (!el) return;
 
@@ -754,14 +772,19 @@ const FuncionariosPage = {
   ordenar() {
 
     this.state.funcionarios.sort(
-
       (a,b) =>
 
-        String(a.nome || "")
+        String(
+          a.nome ||
+          ""
+        )
           .trim()
           .localeCompare(
 
-            String(b.nome || "")
+            String(
+              b.nome ||
+              ""
+            )
               .trim(),
 
             "pt-BR",
@@ -772,7 +795,6 @@ const FuncionariosPage = {
             }
 
           )
-
     );
 
   },
@@ -780,13 +802,10 @@ const FuncionariosPage = {
 
   status(f) {
 
-    return (
-      String(
-        f?.status ||
-        "Ativo"
-      ).trim()
-      || "Ativo"
-    );
+    return String(
+      f?.status ||
+      "Ativo"
+    ).trim() || "Ativo";
 
   },
 
@@ -805,12 +824,12 @@ const FuncionariosPage = {
     }
 
 
-    const texto =
+    const t =
       s.toLowerCase();
 
 
     if (
-      texto.includes(
+      t.includes(
         "administr"
       )
     ) {
@@ -821,7 +840,7 @@ const FuncionariosPage = {
 
 
     if (
-      texto.includes(
+      t.includes(
         "pedag"
       )
     ) {
@@ -868,11 +887,21 @@ const FuncionariosPage = {
 
 
     if (
-      /(peb|professor|regente|supervisor)/
+      /(peb|professor|regente)/
         .test(cargo)
     ) {
 
       return "Pedagógico";
+
+    }
+
+
+    if (
+      /(supervisor|supervis)/
+        .test(cargo)
+    ) {
+
+      return "Especialista";
 
     }
 
@@ -899,108 +928,114 @@ const FuncionariosPage = {
         this.state.busca ||
         ""
       )
-      .trim()
-      .toLocaleLowerCase(
-        "pt-BR"
-      );
+        .trim()
+        .toLocaleLowerCase(
+          "pt-BR"
+        );
 
 
-    return (
+    return this.state.funcionarios
 
-      this.state.funcionarios
+      .filter(
+        f => {
 
-        .filter(
-          f => {
-
-            const nome =
-              String(
-                f.nome ||
-                ""
-              )
+          const nome =
+            String(
+              f.nome ||
+              ""
+            )
               .toLocaleLowerCase(
                 "pt-BR"
               );
 
 
-            return (
+          return (
 
-              (
-                !busca ||
-                nome.includes(
-                  busca
-                )
+            (
+              !busca ||
+              nome.includes(
+                busca
               )
-
-              &&
-
-              (
-                this.state.status === "todos"
-                ||
-                this.status(f) ===
-                this.state.status
-              )
-
-              &&
-
-              (
-                this.state.setor === "todos"
-                ||
-                this.setor(f) ===
-                this.state.setor
-              )
-
-              &&
-
-              (
-                this.state.vinculo === "todos"
-                ||
-                String(
-                  f.vinculo ||
-                  ""
-                ) ===
-                this.state.vinculo
-              )
-
-              &&
-
-              (
-                this.state.categoria === "todos"
-                ||
-                this.categoria(f) ===
-                this.state.categoria
-              )
-
-            );
-
-          }
-        )
-
-
-        .sort(
-
-          (a,b) =>
-
-            String(
-              a.nome || ""
             )
-            .localeCompare(
+
+            &&
+
+            (
+              this.state.status ===
+              "todos"
+
+              ||
+
+              this.status(f) ===
+              this.state.status
+            )
+
+            &&
+
+            (
+              this.state.setor ===
+              "todos"
+
+              ||
+
+              this.setor(f) ===
+              this.state.setor
+            )
+
+            &&
+
+            (
+              this.state.vinculo ===
+              "todos"
+
+              ||
 
               String(
-                b.nome || ""
-              ),
-
-              "pt-BR",
-
-              {
-                sensitivity:
-                  "base"
-              }
-
+                f.vinculo ||
+                ""
+              ) ===
+              this.state.vinculo
             )
 
-        )
+            &&
 
-    );
+            (
+              this.state.categoria ===
+              "todos"
+
+              ||
+
+              this.categoria(f) ===
+              this.state.categoria
+            )
+
+          );
+
+        }
+      )
+
+      .sort(
+        (a,b) =>
+
+          String(
+            a.nome ||
+            ""
+          ).localeCompare(
+
+            String(
+              b.nome ||
+              ""
+            ),
+
+            "pt-BR",
+
+            {
+              sensitivity:
+                "base"
+            }
+
+          )
+      );
 
   },
 
@@ -1016,9 +1051,9 @@ const FuncionariosPage = {
 
 
     const count =
-      key =>
+      fn =>
         all.filter(
-          key
+          fn
         ).length;
 
 
@@ -1090,8 +1125,10 @@ const FuncionariosPage = {
             count(
               f =>
                 String(
-                  f.vinculo || ""
-                ) === "Efetivo"
+                  f.vinculo ||
+                  ""
+                ) ===
+                "Efetivo"
             )
           )}
 
@@ -1100,7 +1137,8 @@ const FuncionariosPage = {
             count(
               f =>
                 String(
-                  f.vinculo || ""
+                  f.vinculo ||
+                  ""
                 ) ===
                 "Contratado"
             )
@@ -1157,7 +1195,9 @@ const FuncionariosPage = {
       <div class="fx-card">
 
         <div class="fx-label">
-          ${label}
+          ${App.escapeHTML(
+            label
+          )}
         </div>
 
         <div class="fx-num">
@@ -1199,7 +1239,9 @@ const FuncionariosPage = {
 
     return `
 
-      <div class="table-wrap">
+      <div
+        class="table-wrap"
+      >
 
         <table>
 
@@ -1252,13 +1294,64 @@ const FuncionariosPage = {
                 const st =
                   this.status(f);
 
+
                 const id =
                   String(
                     f.id
-                  ).replace(
-                    /'/g,
-                    "\\'"
-                  );
+                  )
+                    .replace(
+                      /'/g,
+                      "\\'"
+                    );
+
+
+                const detalhe =
+                  st === "Inativo" &&
+                  (
+                    f.dataInatividade ||
+                    f.motivoInatividade
+                  )
+
+                    ? `
+
+                      <div
+                        class="fx-inativo-info"
+                      >
+
+                        ${
+                          f.dataInatividade
+                            ? `Data: ${
+                                App.escapeHTML(
+                                  App.formatDate(
+                                    f.dataInatividade
+                                  )
+                                )
+                              }`
+                            : ""
+                        }
+
+                        ${
+                          f.dataInatividade &&
+                          f.motivoInatividade
+                            ? "<br>"
+                            : ""
+                        }
+
+                        ${
+                          f.motivoInatividade
+                            ? `Motivo: ${
+                                App.escapeHTML(
+                                  f.motivoInatividade
+                                )
+                              }`
+                            : ""
+                        }
+
+                      </div>
+
+                    `
+
+                    : "";
 
 
                 return `
@@ -1349,6 +1442,8 @@ const FuncionariosPage = {
 
                       </span>
 
+                      ${detalhe}
+
                     </td>
 
 
@@ -1404,6 +1499,7 @@ const FuncionariosPage = {
                 `;
 
               }
+
             ).join("")}
 
           </tbody>
@@ -1440,53 +1536,274 @@ const FuncionariosPage = {
       }
 
 
-      const novo =
-        this.status(f) ===
+      const atual =
+        this.status(f);
+
+
+      /* ===================================================
+         ATIVAR
+         =================================================== */
+
+      if (
+        atual ===
         "Inativo"
-          ? "Ativo"
-          : "Inativo";
+      ) {
+
+        App.openModal({
+
+          title:
+            "Ativar servidor",
+
+          body: `
+
+            <div
+              class="fx-modal-info"
+            >
+
+              <strong>
+                ${App.escapeHTML(
+                  f.nome ||
+                  "Servidor"
+                )}
+              </strong>
+
+              <br>
+
+              O servidor voltará
+              a ficar com situação
+              <strong>Ativo</strong>.
+
+            </div>
+
+            <p>
+
+              O motivo e a data da última
+              inativação permanecerão
+              registrados para consulta
+              histórica.
+
+            </p>
+
+          `,
+
+          footer: `
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-close-modal
+            >
+              Cancelar
+            </button>
 
 
-      const confirmar =
-        confirm(
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="fxConfirmarAtivacao"
+            >
+              Ativar servidor
+            </button>
 
-          `Deseja ${
-            novo === "Inativo"
-              ? "inativar"
-              : "ativar"
-          } o servidor "${
-            f.nome
-          }"?`
+          `
 
-        );
+        });
 
 
-      if (!confirmar) {
+        document
+          .getElementById(
+            "fxConfirmarAtivacao"
+          )
+          ?.addEventListener(
+            "click",
+            async () => {
+
+              await this.salvarStatus(
+                f,
+                "Ativo"
+              );
+
+            }
+          );
+
+
         return;
+
       }
 
 
-      await App.put(
-        "funcionarios",
-        {
-          ...f,
-          status: novo
-        }
-      );
+      /* ===================================================
+         INATIVAR
+         =================================================== */
+
+      App.openModal({
+
+        title:
+          "Inativar servidor",
+
+        body: `
+
+          <div
+            class="fx-modal-danger"
+          >
+
+            <strong>
+              ${App.escapeHTML(
+                f.nome ||
+                "Servidor"
+              )}
+            </strong>
+
+            <br>
+
+            Informe o motivo e a data
+            da inativação.
+
+          </div>
 
 
-      App.toast(
+          <div
+            class="field"
+          >
 
-        `Servidor ${
-          novo === "Inativo"
-            ? "inativado"
-            : "ativado"
-        } com sucesso!`
+            <label
+              for="fxMotivoInatividade"
+            >
+              Motivo da inativação *
+            </label>
 
-      );
+            <textarea
+              id="fxMotivoInatividade"
+              class="input"
+              rows="4"
+              placeholder="Ex.: término de contrato, transferência, licença, afastamento, aposentadoria..."
+            ></textarea>
+
+          </div>
 
 
-      await this.init();
+          <div
+            class="field"
+            style="margin-top:12px"
+          >
+
+            <label
+              for="fxDataInatividade"
+            >
+              Data da inativação *
+            </label>
+
+            <input
+              id="fxDataInatividade"
+              class="input"
+              type="date"
+              value="${this.hojeISO()}"
+            >
+
+          </div>
+
+        `,
+
+        footer: `
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-close-modal
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn-danger"
+            id="fxConfirmarInativacao"
+          >
+            Inativar servidor
+          </button>
+
+        `
+
+      });
+
+
+      document
+        .getElementById(
+          "fxConfirmarInativacao"
+        )
+        ?.addEventListener(
+          "click",
+          async () => {
+
+            const motivoEl =
+              document.getElementById(
+                "fxMotivoInatividade"
+              );
+
+
+            const dataEl =
+              document.getElementById(
+                "fxDataInatividade"
+              );
+
+
+            const motivo =
+              String(
+                motivoEl?.value ||
+                ""
+              ).trim();
+
+
+            const data =
+              String(
+                dataEl?.value ||
+                ""
+              ).trim();
+
+
+            if (!motivo) {
+
+              App.toast(
+                "Informe o motivo da inativação.",
+                "warning"
+              );
+
+              motivoEl?.focus();
+
+              return;
+
+            }
+
+
+            if (!data) {
+
+              App.toast(
+                "Informe a data da inativação.",
+                "warning"
+              );
+
+              dataEl?.focus();
+
+              return;
+
+            }
+
+
+            await this.salvarStatus(
+
+              f,
+
+              "Inativo",
+
+              motivo,
+
+              data
+
+            );
+
+          }
+        );
 
     } catch (err) {
 
@@ -1506,12 +1823,130 @@ const FuncionariosPage = {
   },
 
 
+  async salvarStatus(
+
+    f,
+
+    status,
+
+    motivo =
+      f.motivoInatividade ||
+      "",
+
+    data =
+      f.dataInatividade ||
+      ""
+
+  ) {
+
+    try {
+
+      await App.put(
+
+        "funcionarios",
+
+        {
+
+          ...f,
+
+          status:
+
+            status,
+
+          motivoInatividade:
+
+            motivo ||
+            null,
+
+          dataInatividade:
+
+            data ||
+            null
+
+        }
+
+      );
+
+
+      App.closeModal();
+
+
+      App.toast(
+
+        status ===
+        "Inativo"
+
+          ? "Servidor inativado com sucesso!"
+
+          : "Servidor ativado com sucesso!"
+
+      );
+
+
+      await this.init();
+
+
+    } catch (err) {
+
+      console.error(err);
+
+      App.toast(
+
+        "Erro ao salvar situação: " +
+        (err.message || err),
+
+        "danger"
+
+      );
+
+    }
+
+  },
+
+
+  hojeISO() {
+
+    const d =
+      new Date();
+
+
+    const y =
+      d.getFullYear();
+
+
+    const m =
+      String(
+        d.getMonth() + 1
+      )
+        .padStart(
+          2,
+          "0"
+        );
+
+
+    const day =
+      String(
+        d.getDate()
+      )
+        .padStart(
+          2,
+          "0"
+        );
+
+
+    return `${y}-${m}-${day}`;
+
+  },
+
+
   async deleteItem(id) {
 
     if (
 
       !confirm(
+
         "Tem certeza que deseja excluir este funcionário? Esta ação não poderá ser desfeita."
+
       )
 
     ) {
@@ -1535,6 +1970,7 @@ const FuncionariosPage = {
 
 
       await this.init();
+
 
     } catch (err) {
 
@@ -1600,6 +2036,10 @@ const FuncionariosPage = {
 
       "Situação",
 
+      "Motivo da inativação",
+
+      "Data da inativação",
+
       "Turno",
 
       "Carga horária",
@@ -1647,6 +2087,10 @@ const FuncionariosPage = {
 
           this.status(f),
 
+          f.motivoInatividade,
+
+          f.dataInatividade,
+
           f.turno,
 
           f.cargaHoraria,
@@ -1686,29 +2130,41 @@ const FuncionariosPage = {
     ]
 
       .map(
+
         row =>
           row
+
             .map(
               value =>
-                this.csv(value)
+                this.csv(
+                  value
+                )
             )
+
             .join(";")
+
       )
 
-      .join("\r\n");
+      .join(
+        "\r\n"
+      );
 
 
     const blob =
       new Blob(
 
         [
+
           "\ufeff" +
           csv
+
         ],
 
         {
+
           type:
             "text/csv;charset=utf-8;"
+
         }
 
       );
@@ -1741,6 +2197,7 @@ const FuncionariosPage = {
 
     link.click();
 
+
     link.remove();
 
 
@@ -1769,13 +2226,13 @@ const FuncionarioPage = {
 
     const id =
       new URLSearchParams(
-        location.search
+        window.location.search
       ).get("id");
 
 
     if (!id) {
 
-      location.href =
+      window.location.href =
         "funcionarios.html";
 
       return;
@@ -1801,28 +2258,21 @@ const FuncionarioPage = {
 
 
         setTimeout(
-          () =>
-            location.href =
-              "funcionarios.html",
+          () => {
+
+            window.location.href =
+              "funcionarios.html";
+
+          },
+
           1200
+
         );
 
 
         return;
 
       }
-
-
-      const cat =
-        f.categoriaCargo ||
-        this.inferirCategoria(
-          f.cargo
-        );
-
-
-      const setor =
-        f.setor ||
-        "Outro";
 
 
       App.layout(
@@ -1832,9 +2282,7 @@ const FuncionarioPage = {
         "Ficha cadastral completa e edição dos dados",
 
         this.form(
-          f,
-          cat,
-          setor
+          f
         )
 
       );
@@ -1842,7 +2290,7 @@ const FuncionarioPage = {
 
       document
         .getElementById(
-          "fxEdit"
+          "funcEditForm"
         )
         ?.addEventListener(
           "submit",
@@ -1853,9 +2301,11 @@ const FuncionarioPage = {
             )
         );
 
+
     } catch (err) {
 
       console.error(err);
+
 
       App.toast(
 
@@ -1883,22 +2333,22 @@ const FuncionarioPage = {
     current
   ) {
 
-    const selected =
-      String(
-        current ||
-        ""
-      ) === value
-        ? " selected"
-        : "";
-
-
     return `
 
       <option
         value="${this.esc(value)}"
-        ${selected}
+        ${
+          String(
+            current ||
+            ""
+          ) === value
+            ? "selected"
+            : ""
+        }
       >
+
         ${this.esc(value)}
+
       </option>
 
     `;
@@ -1914,7 +2364,8 @@ const FuncionarioPage = {
       String(
         cargo ||
         ""
-      ).toLowerCase();
+      )
+        .toLowerCase();
 
 
     if (
@@ -1928,11 +2379,21 @@ const FuncionarioPage = {
 
 
     if (
-      /(peb|professor|regente|supervisor)/
+      /(peb|professor|regente)/
         .test(c)
     ) {
 
       return "Pedagógico";
+
+    }
+
+
+    if (
+      /(supervisor|supervis)/
+        .test(c)
+    ) {
+
+      return "Especialista";
 
     }
 
@@ -1952,11 +2413,24 @@ const FuncionarioPage = {
   },
 
 
-  form(
-    f,
-    cat,
-    setor
-  ) {
+  form(f) {
+
+    const categoria =
+      f.categoriaCargo ||
+      this.inferirCategoria(
+        f.cargo
+      );
+
+
+    const setor =
+      f.setor ||
+      "Outro";
+
+
+    const status =
+      f.status ||
+      "Ativo";
+
 
     return `
 
@@ -1967,7 +2441,13 @@ const FuncionarioPage = {
           display:grid;
 
           grid-template-columns:
-            repeat(3, minmax(220px,1fr));
+            repeat(
+              3,
+              minmax(
+                220px,
+                1fr
+              )
+            );
 
           gap:14px;
 
@@ -1988,9 +2468,28 @@ const FuncionarioPage = {
 
           font-size:16px;
 
-          margin:4px 0 12px;
+          margin:
+            4px 0 12px;
 
           color:#101828;
+
+        }
+
+
+        .fxe-inativo {
+
+          background:#fff7ed;
+
+          border:
+            1px solid #fed7aa;
+
+          color:#9a3412;
+
+          border-radius:10px;
+
+          padding:14px;
+
+          margin-bottom:18px;
 
         }
 
@@ -2033,9 +2532,54 @@ const FuncionarioPage = {
       >
 
         <form
-          id="fxEdit"
+          id="funcEditForm"
           class="form"
         >
+
+
+          ${
+            status ===
+            "Inativo"
+
+              ? `
+
+                <div
+                  class="fxe-inativo"
+                >
+
+                  <strong>
+                    Servidor inativo
+                  </strong>
+
+                  <br>
+
+                  Data da inativação:
+
+                  <strong>
+                    ${this.esc(
+                      App.formatDate(
+                        f.dataInatividade
+                      )
+                    )}
+                  </strong>
+
+                  <br>
+
+                  Motivo:
+
+                  <strong>
+                    ${this.esc(
+                      f.motivoInatividade ||
+                      "Não informado"
+                    )}
+                  </strong>
+
+                </div>
+
+              `
+
+              : ""
+          }
 
 
           <div
@@ -2050,7 +2594,9 @@ const FuncionarioPage = {
           >
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="nome"
@@ -2070,7 +2616,9 @@ const FuncionarioPage = {
             </div>
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="matricula"
@@ -2089,7 +2637,9 @@ const FuncionarioPage = {
             </div>
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="cpf"
@@ -2108,7 +2658,9 @@ const FuncionarioPage = {
             </div>
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="dataNascimento"
@@ -2128,7 +2680,9 @@ const FuncionarioPage = {
             </div>
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="naturalidade"
@@ -2147,7 +2701,9 @@ const FuncionarioPage = {
             </div>
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="telefone"
@@ -2166,7 +2722,9 @@ const FuncionarioPage = {
             </div>
 
 
-            <div class="field">
+            <div
+              class="field"
+            >
 
               <label
                 for="email"
@@ -2256,9 +2814,7 @@ const FuncionarioPage = {
                 class="input"
               >
 
-                <option
-                  value=""
-                >
+                <option value="">
                   Selecione
                 </option>
 
@@ -2271,15 +2827,13 @@ const FuncionarioPage = {
                     "Especialista",
                     "Outro"
                   ]
-
                     .map(
                       v =>
                         this.op(
                           v,
-                          cat
+                          categoria
                         )
                     )
-
                     .join("")
                 }
 
@@ -2301,9 +2855,7 @@ const FuncionarioPage = {
                 class="input"
               >
 
-                <option
-                  value=""
-                >
+                <option value="">
                   Selecione
                 </option>
 
@@ -2313,7 +2865,6 @@ const FuncionarioPage = {
                     "Pedagógico",
                     "Outro"
                   ]
-
                     .map(
                       v =>
                         this.op(
@@ -2321,7 +2872,6 @@ const FuncionarioPage = {
                           setor
                         )
                     )
-
                     .join("")
                 }
 
@@ -2347,7 +2897,8 @@ const FuncionarioPage = {
                 <option
                   value="Efetivo"
                   ${
-                    f.vinculo === "Efetivo"
+                    f.vinculo ===
+                    "Efetivo"
                       ? "selected"
                       : ""
                   }
@@ -2389,10 +2940,8 @@ const FuncionarioPage = {
                 <option
                   value="Ativo"
                   ${
-                    (
-                      f.status ||
-                      "Ativo"
-                    ) === "Ativo"
+                    status ===
+                    "Ativo"
                       ? "selected"
                       : ""
                   }
@@ -2403,7 +2952,7 @@ const FuncionarioPage = {
                 <option
                   value="Inativo"
                   ${
-                    f.status ===
+                    status ===
                     "Inativo"
                       ? "selected"
                       : ""
@@ -2430,9 +2979,7 @@ const FuncionarioPage = {
                 class="input"
               >
 
-                <option
-                  value=""
-                >
+                <option value="">
                   Selecione
                 </option>
 
@@ -2444,7 +2991,6 @@ const FuncionarioPage = {
                     "Noturno",
                     "Outro"
                   ]
-
                     .map(
                       v =>
                         this.op(
@@ -2452,7 +2998,6 @@ const FuncionarioPage = {
                           f.turno
                         )
                     )
-
                     .join("")
                 }
 
@@ -2599,7 +3144,9 @@ const FuncionarioPage = {
           </div>
 
 
-          <div class="form-actions">
+          <div
+            class="form-actions"
+          >
 
             <a
               href="funcionarios.html"
@@ -2643,7 +3190,8 @@ const FuncionarioPage = {
 
 
     if (btn) {
-      btn.disabled = true;
+      btn.disabled =
+        true;
     }
 
 
@@ -2655,7 +3203,15 @@ const FuncionarioPage = {
             .getElementById(
               campo
             )
-            .value;
+            ?.value ||
+          "";
+
+
+      const atual =
+        await App.get(
+          "funcionarios",
+          id
+        );
 
 
       await App.put(
@@ -2700,7 +3256,6 @@ const FuncionarioPage = {
             val("endereco")
               .trim(),
 
-
           cargo:
             val("cargo")
               .trim(),
@@ -2711,16 +3266,33 @@ const FuncionarioPage = {
             ),
 
           setor:
-            val("setor"),
+            val(
+              "setor"
+            ),
 
           vinculo:
-            val("vinculo"),
+            val(
+              "vinculo"
+            ),
 
           status:
-            val("status"),
+            val(
+              "status"
+            ) ||
+            "Ativo",
+
+          motivoInatividade:
+            atual?.motivoInatividade ||
+            null,
+
+          dataInatividade:
+            atual?.dataInatividade ||
+            null,
 
           turno:
-            val("turno"),
+            val(
+              "turno"
+            ),
 
           cargaHoraria:
             val(
@@ -2737,10 +3309,10 @@ const FuncionarioPage = {
               "dataEntradaEscola"
             ) || null,
 
-
           formacao:
-            val("formacao")
-              .trim(),
+            val(
+              "formacao"
+            ).trim(),
 
           especializacao:
             val(
@@ -2763,9 +3335,13 @@ const FuncionarioPage = {
 
 
       setTimeout(
-        () =>
-          location.href =
-            "funcionarios.html",
+        () => {
+
+          window.location.href =
+            "funcionarios.html";
+
+        },
+
         800
       );
 
@@ -2819,13 +3395,20 @@ const NovoFuncionarioPage = {
 
     document
       .getElementById(
-        "fxNovo"
+        "novoFuncForm"
       )
       ?.addEventListener(
         "submit",
         e =>
           this.save(e)
       );
+
+  },
+
+
+  esc(v = "") {
+
+    return App.escapeHTML(v);
 
   },
 
@@ -2841,7 +3424,13 @@ const NovoFuncionarioPage = {
           display:grid;
 
           grid-template-columns:
-            repeat(3, minmax(220px,1fr));
+            repeat(
+              3,
+              minmax(
+                220px,
+                1fr
+              )
+            );
 
           gap:14px;
 
@@ -2862,7 +3451,8 @@ const NovoFuncionarioPage = {
 
           font-size:16px;
 
-          margin:4px 0 12px;
+          margin:
+            4px 0 12px;
 
           color:#101828;
 
@@ -2907,7 +3497,7 @@ const NovoFuncionarioPage = {
       >
 
         <form
-          id="fxNovo"
+          id="novoFuncForm"
           class="form"
         >
 
@@ -3432,7 +4022,8 @@ const NovoFuncionarioPage = {
 
 
     if (btn) {
-      btn.disabled = true;
+      btn.disabled =
+        true;
     }
 
 
@@ -3444,103 +4035,125 @@ const NovoFuncionarioPage = {
             .getElementById(
               campo
             )
-            .value;
-
-
-      const payload = {
-
-        nome:
-          val("nome")
-            .trim(),
-
-        matricula:
-          val("matricula")
-            .trim(),
-
-        cpf:
-          val("cpf")
-            .trim(),
-
-        dataNascimento:
-          val(
-            "dataNascimento"
-          ) || null,
-
-        naturalidade:
-          val(
-            "naturalidade"
-          ).trim(),
-
-        telefone:
-          val("telefone")
-            .trim(),
-
-        email:
-          val("email")
-            .trim(),
-
-        endereco:
-          val("endereco")
-            .trim(),
-
-
-        cargo:
-          val("cargo")
-            .trim(),
-
-        categoriaCargo:
-          val(
-            "categoriaCargo"
-          ),
-
-        setor:
-          val("setor"),
-
-        vinculo:
-          val("vinculo"),
-
-        status:
-          val("status"),
-
-        turno:
-          val("turno"),
-
-        cargaHoraria:
-          val(
-            "cargaHoraria"
-          ).trim(),
-
-        dataAdmissao:
-          val(
-            "dataAdmissao"
-          ) || null,
-
-        dataEntradaEscola:
-          val(
-            "dataEntradaEscola"
-          ) || null,
-
-
-        formacao:
-          val("formacao")
-            .trim(),
-
-        especializacao:
-          val(
-            "especializacao"
-          ).trim(),
-
-        observacoes:
-          val(
-            "observacoes"
-          ).trim()
-
-      };
+            ?.value ||
+          "";
 
 
       await App.add(
+
         "funcionarios",
-        payload
+
+        {
+
+          nome:
+            val(
+              "nome"
+            ).trim(),
+
+          matricula:
+            val(
+              "matricula"
+            ).trim(),
+
+          cpf:
+            val(
+              "cpf"
+            ).trim(),
+
+          dataNascimento:
+            val(
+              "dataNascimento"
+            ) || null,
+
+          naturalidade:
+            val(
+              "naturalidade"
+            ).trim(),
+
+          telefone:
+            val(
+              "telefone"
+            ).trim(),
+
+          email:
+            val(
+              "email"
+            ).trim(),
+
+          endereco:
+            val(
+              "endereco"
+            ).trim(),
+
+          cargo:
+            val(
+              "cargo"
+            ).trim(),
+
+          categoriaCargo:
+            val(
+              "categoriaCargo"
+            ),
+
+          setor:
+            val(
+              "setor"
+            ),
+
+          vinculo:
+            val(
+              "vinculo"
+            ),
+
+          status:
+            val(
+              "status"
+            ) ||
+            "Ativo",
+
+          motivoInatividade:
+            null,
+
+          dataInatividade:
+            null,
+
+          turno:
+            val(
+              "turno"
+            ),
+
+          cargaHoraria:
+            val(
+              "cargaHoraria"
+            ).trim(),
+
+          dataAdmissao:
+            val(
+              "dataAdmissao"
+            ) || null,
+
+          dataEntradaEscola:
+            val(
+              "dataEntradaEscola"
+            ) || null,
+
+          formacao:
+            val(
+              "formacao"
+            ).trim(),
+
+          especializacao:
+            val(
+              "especializacao"
+            ).trim(),
+
+          observacoes:
+            val(
+              "observacoes"
+            ).trim()
+
+        }
+
       );
 
 
@@ -3550,9 +4163,13 @@ const NovoFuncionarioPage = {
 
 
       setTimeout(
-        () =>
-          location.href =
-            "funcionarios.html",
+        () => {
+
+          window.location.href =
+            "funcionarios.html";
+
+        },
+
         800
       );
 

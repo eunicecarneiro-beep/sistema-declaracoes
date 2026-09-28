@@ -3,46 +3,39 @@ const SUPABASE_KEY = "sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx";
 
 const App = (() => {
   const NAV = [
-    { key:"dashboard", href:"index.html", icon:"⌂", label:"Dashboard" },
-    { key:"funcionarios", href:"funcionarios.html", icon:"👥", label:"Funcionários" },
-    { key:"declaracoes", href:"declaracoes.html", icon:"📄", label:"Declarações" },
-    { key:"nova-declaracao", href:"nova-declaracao.html", icon:"＋", label:"Nova Declaração" },
-    { key:"novo-funcionario", href:"novo-funcionario.html", icon:"＋", label:"Novo Funcionário" },
-    { key:"faltas", href:"faltas.html", icon:"📅", label:"Faltas" },
-    { key:"agenda", href:"agenda.html", icon:"🗓️", label:"Agenda" },
-    { key:"relatorios", href:"relatorios.html", icon:"▥", label:"Relatórios" }
+    { key: "dashboard", href: "index.html", icon: "⌂", label: "Dashboard" },
+    { key: "funcionarios", href: "funcionarios.html", icon: "👥", label: "Funcionários" },
+    { key: "declaracoes", href: "declaracoes.html", icon: "📄", label: "Declarações" },
+    { key: "nova-declaracao", href: "nova-declaracao.html", icon: "＋", label: "Nova Declaração" },
+    { key: "novo-funcionario", href: "novo-funcionario.html", icon: "＋", label: "Novo Funcionário" },
+    { key: "faltas", href: "faltas.html", icon: "📅", label: "Faltas" },
+    { key: "agenda", href: "agenda.html", icon: "🗓️", label: "Agenda" },
+    { key: "relatorios", href: "relatorios.html", icon: "▥", label: "Relatórios" }
   ];
 
-  const API = SUPABASE_URL + "/rest/v1";
-
-  const escapeHTML = (v="") => String(v)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-
-  function formatDate(v) {
-    if (!v) return "—";
-
-    const [y,m,d] = String(v)
-      .slice(0,10)
-      .split("-");
-
-    return y && m && d
-      ? `${d}/${m}/${y}`
-      : String(v);
+  function escapeHTML(value = "") {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
-  function generateId() {
-    return (
-      Math.floor(Date.now() / 1000) +
-      Math.floor(Math.random() * 1000)
-    );
+  function formatDate(dateValue) {
+    if (!dateValue) return "—";
+
+    const [y, m, d] = String(dateValue)
+      .slice(0, 10)
+      .split("-");
+
+    if (!y || !m || !d) return dateValue;
+
+    return `${d}/${m}/${y}`;
   }
 
   function getPageKey() {
-    return document.body?.dataset?.page || "";
+    return document.body.dataset.page || "";
   }
 
   function layout(title, subtitle, content) {
@@ -50,11 +43,7 @@ const App = (() => {
 
     document.title = `${title} | Sistema de Declarações`;
 
-    const root = document.getElementById("app");
-
-    if (!root) return;
-
-    root.innerHTML = `
+    document.getElementById("app").innerHTML = `
       <div class="app-shell">
 
         <aside class="sidebar" id="sidebar">
@@ -66,35 +55,25 @@ const App = (() => {
             </div>
 
             <div class="brand-text">
-
-              <strong>
-                Sistema de Declarações
-              </strong>
-
-              <span>
-                E.M. Profª Eunice Carneiro
-              </span>
-
+              <strong>Sistema de Declarações</strong>
+              <span>E.M. Profª Eunice Carneiro</span>
             </div>
 
           </div>
 
           <nav class="nav">
 
-            ${NAV.map(n => `
+            ${NAV.map(item => `
               <a
-                href="${n.href}"
-                class="${n.key === page ? "active" : ""}"
+                href="${item.href}"
+                class="${item.key === page ? "active" : ""}"
               >
-
                 <span class="nav-icon">
-                  ${n.icon}
+                  ${item.icon}
                 </span>
-
                 <span>
-                  ${n.label}
+                  ${item.label}
                 </span>
-
               </a>
             `).join("")}
 
@@ -183,10 +162,7 @@ const App = (() => {
     const root =
       document.getElementById("modalRoot");
 
-    if (!root) return;
-
     root.innerHTML = `
-
       <div
         class="modal-backdrop show"
         id="modalBackdrop"
@@ -206,8 +182,8 @@ const App = (() => {
 
             <button
               class="modal-close"
-              data-close-modal
               aria-label="Fechar"
+              data-close-modal
             >
               ×
             </button>
@@ -227,19 +203,16 @@ const App = (() => {
         </div>
 
       </div>
-
     `;
 
     root
       .querySelectorAll("[data-close-modal]")
-      .forEach(button => {
-
-        button.addEventListener(
+      .forEach(btn =>
+        btn.addEventListener(
           "click",
           closeModal
-        );
-
-      });
+        )
+      );
 
     root
       .querySelector("#modalBackdrop")
@@ -258,11 +231,9 @@ const App = (() => {
   }
 
   function escClose(e) {
-
     if (e.key === "Escape") {
       closeModal();
     }
-
   }
 
   function closeModal() {
@@ -285,21 +256,26 @@ const App = (() => {
     type = "success"
   ) {
 
+    const id = "toastRoot";
+
     let root =
-      document.getElementById("toastRoot");
+      document.getElementById(id);
 
     if (!root) {
 
       root =
         document.createElement("div");
 
-      root.id = "toastRoot";
+      root.id = id;
 
       root.style.cssText =
         "position:fixed;right:18px;bottom:18px;z-index:5000;display:flex;flex-direction:column;gap:10px";
 
       document.body.appendChild(root);
     }
+
+    const item =
+      document.createElement("div");
 
     const map = {
       success: "alert-success",
@@ -308,17 +284,14 @@ const App = (() => {
       info: "alert-info"
     };
 
-    const item =
-      document.createElement("div");
-
     item.className =
       `alert ${map[type] || map.info}`;
 
-    item.style.cssText =
+    item.style.cssText +=
       "box-shadow:0 12px 30px rgba(16,24,40,.14);max-width:360px;margin:0;";
 
-    item.textContent =
-      String(message);
+    item.innerHTML =
+      escapeHTML(message);
 
     root.appendChild(item);
 
@@ -328,37 +301,46 @@ const App = (() => {
     );
   }
 
+  const API =
+    SUPABASE_URL + "/rest/v1";
+
   async function api(
     path,
     options = {}
   ) {
 
-    const res = await fetch(
-      API + path,
-      {
-        ...options,
+    const headers = {
 
-        headers: {
-          apikey: SUPABASE_KEY,
+      apikey:
+        SUPABASE_KEY,
 
-          Authorization:
-            `Bearer ${SUPABASE_KEY}`,
+      Authorization:
+        `Bearer ${SUPABASE_KEY}`,
 
-          "Content-Type":
-            "application/json",
+      "Content-Type":
+        "application/json",
 
-          ...(options.headers || {})
+      ...(options.headers || {})
+
+    };
+
+    const res =
+      await fetch(
+        API + path,
+        {
+          ...options,
+          headers
         }
-      }
-    );
+      );
 
     if (!res.ok) {
 
-      const text =
+      const t =
         await res.text();
 
       throw new Error(
-        text || "Erro no Supabase"
+        t ||
+        "Erro no Supabase"
       );
     }
 
@@ -370,6 +352,18 @@ const App = (() => {
       : null;
   }
 
+  function generateId() {
+
+    return (
+      Math.floor(
+        Date.now() / 1000
+      ) +
+      Math.floor(
+        Math.random() * 1000
+      )
+    );
+  }
+
   function fromDB(
     store,
     x
@@ -377,7 +371,10 @@ const App = (() => {
 
     if (!x) return x;
 
-    if (store === "funcionarios") {
+    if (
+      store ===
+      "funcionarios"
+    ) {
 
       return {
 
@@ -398,10 +395,6 @@ const App = (() => {
           x.cargo ||
           "",
 
-        categoriaCargo:
-          x.categoria_cargo ||
-          "",
-
         setor:
           x.setor ||
           "",
@@ -409,26 +402,11 @@ const App = (() => {
         vinculo:
           x.tipo_vinculo ||
           x.vinculo ||
-          "Efetivo",
-
-        status:
-          x.status ||
-          "Ativo",
-
-        turno:
-          x.turno ||
-          "",
-
-        cargaHoraria:
-          x.carga_horaria ||
           "",
 
         dataAdmissao:
           x.data_admissao ||
-          "",
-
-        dataEntradaEscola:
-          x.data_entrada_escola ||
+          x.dataAdmissao ||
           "",
 
         cpf:
@@ -443,34 +421,28 @@ const App = (() => {
           x.email ||
           "",
 
-        endereco:
-          x.endereco ||
+        status:
+          x.status ||
+          "Ativo",
+
+        motivoInatividade:
+          x.motivo_inatividade ||
           "",
 
-        formacao:
-          x.formacao ||
-          "",
-
-        especializacao:
-          x.especializacao ||
-          "",
-
-        naturalidade:
-          x.naturalidade ||
-          "",
-
-        dataNascimento:
-          x.data_nascimento ||
+        dataInatividade:
+          x.data_inatividade ||
           "",
 
         observacoes:
           x.observacoes ||
           ""
-
       };
     }
 
-    if (store === "declaracoes") {
+    if (
+      store ===
+      "declaracoes"
+    ) {
 
       return {
 
@@ -478,7 +450,9 @@ const App = (() => {
           String(x.id),
 
         funcionarioId:
-          String(x.funcionario_id),
+          String(
+            x.funcionario_id
+          ),
 
         tipo:
           x.tipo,
@@ -506,11 +480,13 @@ const App = (() => {
 
         observacoes:
           x.observacoes
-
       };
     }
 
-    if (store === "faltas") {
+    if (
+      store ===
+      "faltas"
+    ) {
 
       return {
 
@@ -518,7 +494,9 @@ const App = (() => {
           String(x.id),
 
         funcionario_id:
-          String(x.funcionario_id),
+          String(
+            x.funcionario_id
+          ),
 
         data_falta:
           x.data_falta,
@@ -531,13 +509,13 @@ const App = (() => {
 
         createdAt:
           x.created_at
-
       };
     }
 
     return {
       ...x,
-      id: String(x.id)
+      id:
+        String(x.id)
     };
   }
 
@@ -546,9 +524,14 @@ const App = (() => {
     x
   ) {
 
-    if (store === "funcionarios") {
+    let payload = {};
 
-      return {
+    if (
+      store ===
+      "funcionarios"
+    ) {
+
+      payload = {
 
         id:
           x.id
@@ -556,79 +539,43 @@ const App = (() => {
             : generateId(),
 
         nome_completo:
-          x.nome ||
-          null,
+          x.nome,
 
         matricula:
-          x.matricula ||
-          null,
+          x.matricula,
 
         cargo_funcao:
-          x.cargo ||
-          null,
-
-        categoria_cargo:
-          x.categoriaCargo ||
-          null,
+          x.cargo,
 
         setor:
-          x.setor ||
-          null,
+          x.setor,
 
         tipo_vinculo:
-          x.vinculo ||
-          "Efetivo",
-
-        status:
-          x.status ||
-          "Ativo",
-
-        turno:
-          x.turno ||
-          null,
-
-        carga_horaria:
-          x.cargaHoraria ||
-          null,
+          x.vinculo,
 
         data_admissao:
           x.dataAdmissao ||
           null,
 
-        data_entrada_escola:
-          x.dataEntradaEscola ||
-          null,
-
         cpf:
-          x.cpf ||
-          null,
+          x.cpf,
 
         telefone:
-          x.telefone ||
-          null,
+          x.telefone,
 
         email:
-          x.email ||
+          x.email,
+
+        status:
+          x.status ||
+          "Ativo",
+
+        motivo_inatividade:
+          x.motivoInatividade ||
           null,
 
-        endereco:
-          x.endereco ||
-          null,
-
-        formacao:
-          x.formacao ||
-          null,
-
-        especializacao:
-          x.especializacao ||
-          null,
-
-        naturalidade:
-          x.naturalidade ||
-          null,
-
-        data_nascimento:
-          x.dataNascimento ||
+        data_inatividade:
+          x.dataInatividade ||
           null,
 
         observacoes:
@@ -637,9 +584,12 @@ const App = (() => {
       };
     }
 
-    if (store === "declaracoes") {
+    else if (
+      store ===
+      "declaracoes"
+    ) {
 
-      return {
+      payload = {
 
         id:
           x.id
@@ -647,7 +597,9 @@ const App = (() => {
             : generateId(),
 
         funcionario_id:
-          Number(x.funcionarioId),
+          Number(
+            x.funcionarioId
+          ),
 
         tipo:
           x.tipo,
@@ -686,9 +638,12 @@ const App = (() => {
       };
     }
 
-    if (store === "faltas") {
+    else if (
+      store ===
+      "faltas"
+    ) {
 
-      return {
+      payload = {
 
         id:
           x.id
@@ -714,12 +669,17 @@ const App = (() => {
       };
     }
 
-    const payload = {
-      ...x
-    };
+    else {
 
-    if (!payload.id) {
-      payload.id = generateId();
+      payload = {
+        ...x
+      };
+
+      if (!payload.id) {
+        payload.id =
+          generateId();
+      }
+
     }
 
     return payload;
@@ -730,14 +690,18 @@ const App = (() => {
     value
   ) {
 
-    const payload =
-      toDB(store, value);
+    const dataToSend =
+      toDB(
+        store,
+        value
+      );
 
     const r =
       await api(
         `/${store}`,
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             "Prefer":
@@ -745,7 +709,9 @@ const App = (() => {
           },
 
           body:
-            JSON.stringify(payload)
+            JSON.stringify(
+              dataToSend
+            )
         }
       );
 
@@ -756,7 +722,8 @@ const App = (() => {
 
     return fromDB(
       store,
-      item || payload
+      item ||
+      dataToSend
     );
   }
 
@@ -765,40 +732,48 @@ const App = (() => {
     value
   ) {
 
-    if (!value.id) {
-      return add(
+    if (value.id) {
+
+      const dataToSend =
+        toDB(
+          store,
+          value
+        );
+
+      const r =
+        await api(
+          `/${store}?id=eq.${encodeURIComponent(value.id)}`,
+          {
+            method:
+              "PATCH",
+
+            headers: {
+              "Prefer":
+                "return=representation"
+            },
+
+            body:
+              JSON.stringify(
+                dataToSend
+              )
+          }
+        );
+
+      const item =
+        Array.isArray(r)
+          ? r[0]
+          : r;
+
+      return fromDB(
         store,
+        item ||
         value
       );
     }
 
-    const payload =
-      toDB(store, value);
-
-    const r =
-      await api(
-        `/${store}?id=eq.${encodeURIComponent(value.id)}`,
-        {
-          method: "PATCH",
-
-          headers: {
-            "Prefer":
-              "return=representation"
-          },
-
-          body:
-            JSON.stringify(payload)
-        }
-      );
-
-    const item =
-      Array.isArray(r)
-        ? r[0]
-        : r;
-
-    return fromDB(
+    return add(
       store,
-      item || value
+      value
     );
   }
 
@@ -814,7 +789,8 @@ const App = (() => {
 
     return fromDB(
       store,
-      r?.[0] || null
+      r?.[0] ||
+      null
     );
   }
 
@@ -830,7 +806,11 @@ const App = (() => {
     return (
       r || []
     ).map(
-      x => fromDB(store, x)
+      x =>
+        fromDB(
+          store,
+          x
+        )
     );
   }
 
@@ -848,6 +828,10 @@ const App = (() => {
     );
 
     return true;
+  }
+
+  async function seedDemoData() {
+    return;
   }
 
   async function counts() {
@@ -872,12 +856,16 @@ const App = (() => {
 
       horas:
         declaracoes.filter(
-          d => d.tipo === "horas"
+          d =>
+            d.tipo ===
+            "horas"
         ).length,
 
       dias:
         declaracoes.filter(
-          d => d.tipo === "dias"
+          d =>
+            d.tipo ===
+            "dias"
         ).length,
 
       listaFuncionarios:
@@ -891,26 +879,37 @@ const App = (() => {
   return {
 
     escapeHTML,
+
     formatDate,
+
     getPageKey,
+
     layout,
+
     openModal,
+
     closeModal,
+
     toast,
 
     add,
+
     put,
+
     get,
+
     getAll,
+
     remove,
+
+    seedDemoData,
 
     counts,
 
-    seedDemoData:
-      async () => {},
-
     uid:
-      generateId
+      () =>
+        generateId()
+
   };
 
 })();
@@ -920,17 +919,16 @@ const DashboardPage = {
 
   async init() {
 
-    try {
+    await App.seedDemoData();
 
-      const stats =
-        await App.counts();
+    const stats =
+      await App.counts();
 
-      App.layout(
-        "Dashboard",
-        "Visão geral do sistema interno de declarações",
+    App.layout(
+      "Dashboard",
+      "Visão geral do sistema interno de declarações",
 
-        `
-
+      `
         <div class="page-header">
 
           <div>
@@ -970,25 +968,25 @@ const DashboardPage = {
 
         <div class="cards">
 
-          ${this.card(
+          ${this.statCard(
             "Funcionários",
             stats.funcionarios,
             "👥"
           )}
 
-          ${this.card(
+          ${this.statCard(
             "Declarações",
             stats.declaracoes,
             "📄"
           )}
 
-          ${this.card(
+          ${this.statCard(
             "Declarações de Horas",
             stats.horas,
             "◷"
           )}
 
-          ${this.card(
+          ${this.statCard(
             "Declarações de Dias",
             stats.dias,
             "▣"
@@ -1090,24 +1088,11 @@ const DashboardPage = {
           </section>
 
         </div>
-
-        `
-      );
-
-    } catch (err) {
-
-      console.error(err);
-
-      App.toast(
-        "Erro ao carregar o dashboard: " +
-        (err.message || err),
-        "danger"
-      );
-
-    }
+      `
+    );
   },
 
-  card(
+  statCard(
     label,
     value,
     icon
@@ -1144,7 +1129,6 @@ const DashboardPage = {
       </div>
 
     `;
-
   },
 
   recentTable(
@@ -1155,7 +1139,11 @@ const DashboardPage = {
     const map =
       Object.fromEntries(
         funcs.map(
-          f => [f.id, f]
+          f =>
+            [
+              f.id,
+              f
+            ]
         )
       );
 
@@ -1163,10 +1151,15 @@ const DashboardPage = {
       [...list]
         .sort(
           (a,b) =>
-            String(b.id || "")
-              .localeCompare(
-                String(a.id || "")
+            String(
+              b.id ||
+              ""
+            ).localeCompare(
+              String(
+                a.id ||
+                ""
               )
+            )
         )
         .slice(
           0,
@@ -1232,7 +1225,9 @@ const DashboardPage = {
               d => {
 
                 const f =
-                  map[d.funcionarioId];
+                  map[
+                    d.funcionarioId
+                  ];
 
                 return `
 
@@ -1241,10 +1236,12 @@ const DashboardPage = {
                     <td>
 
                       <strong>
+
                         ${App.escapeHTML(
                           f?.nome ||
                           "Funcionário removido"
                         )}
+
                       </strong>
 
                     </td>
@@ -1253,14 +1250,16 @@ const DashboardPage = {
 
                       <span
                         class="badge ${
-                          d.tipo === "horas"
+                          d.tipo ===
+                          "horas"
                             ? "badge-hours"
                             : "badge-days"
                         }"
                       >
 
                         ${
-                          d.tipo === "horas"
+                          d.tipo ===
+                          "horas"
                             ? "Horas"
                             : "Dias"
                         }
@@ -1281,11 +1280,18 @@ const DashboardPage = {
                     <td>
 
                       ${
-                        d.tipo === "horas"
+                        d.tipo ===
+                        "horas"
 
-                          ? `${d.quantidadeHoras || 0} h`
+                          ? `${
+                              d.quantidadeHoras ||
+                              0
+                            } h`
 
-                          : `${d.quantidadeDias || 0} dia(s)`
+                          : `${
+                              d.quantidadeDias ||
+                              0
+                            } dia(s)`
                       }
 
                     </td>
@@ -1295,6 +1301,7 @@ const DashboardPage = {
                 `;
 
               }
+
             ).join("")}
 
           </tbody>
