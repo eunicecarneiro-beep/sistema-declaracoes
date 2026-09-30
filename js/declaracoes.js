@@ -1,40 +1,54 @@
 /* =====================================================
    DECLARAÇÕES — VERSÃO SEGURA
 
-   Requer app.js com:
-   - SUPABASE_KEY
+   E.M. PROFª EUNICE CARNEIRO
+
+   REQUER:
+   - app.js com sistema de login
    - App.getAccessToken()
    - App.layout()
    - App.toast()
+   - SUPABASE_KEY já definida no app.js
 
    SEGURANÇA:
-   - bucket "declaracoes" PRIVADO;
-   - usa JWT do usuário logado;
-   - NÃO usa SUPABASE_KEY como token Bearer;
-   - anexos não possuem URL pública permanente;
-   - leitura, envio, alteração e exclusão exigem login.
+   - bucket "declaracoes" PRIVADO
+   - requisições usam JWT do usuário logado
+   - não utiliza SUPABASE_KEY como Bearer
+   - não cria URLs públicas permanentes
+   - anexos são carregados somente após autenticação
+===================================================== */
+
+
+/* =====================================================
+   CONFIGURAÇÃO
 ===================================================== */
 
 const DECL_REST_URL =
   "https://cujlebxqqposqomtfvdk.supabase.co/rest/v1";
 
+
 const DECL_STORAGE_URL =
   "https://cujlebxqqposqomtfvdk.supabase.co/storage/v1";
+
 
 const DECL_BUCKET =
   "declaracoes";
 
 
 /* =====================================================
-   AUTENTICAÇÃO
+   OBTER TOKEN DO USUÁRIO LOGADO
 ===================================================== */
 
 function obterTokenDeclaracoes() {
 
   const token =
+
     typeof App !== "undefined" &&
+
     typeof App.getAccessToken === "function"
+
       ? App.getAccessToken()
+
       : null;
 
 
@@ -53,10 +67,12 @@ function obterTokenDeclaracoes() {
 
 
 /* =====================================================
-   HEADERS DO BANCO
+   HEADERS PARA REST
 ===================================================== */
 
-function declaracoesHeaders(extra = {}) {
+function declaracoesHeaders(
+  extra = {}
+) {
 
   return {
 
@@ -77,10 +93,12 @@ function declaracoesHeaders(extra = {}) {
 
 
 /* =====================================================
-   HEADERS DO STORAGE
+   HEADERS PARA STORAGE
 ===================================================== */
 
-function declaracoesStorageHeaders(extra = {}) {
+function declaracoesStorageHeaders(
+  extra = {}
+) {
 
   return {
 
@@ -101,7 +119,9 @@ function declaracoesStorageHeaders(extra = {}) {
    ESCAPAR HTML
 ===================================================== */
 
-function escaparDeclaracao(valor = "") {
+function escaparDeclaracao(
+  valor = ""
+) {
 
   return String(valor)
 
@@ -137,7 +157,9 @@ function escaparDeclaracao(valor = "") {
    FORMATAR DATA
 ===================================================== */
 
-function formatarDataDeclaracao(data) {
+function formatarDataDeclaracao(
+  data
+) {
 
   if (!data) {
 
@@ -147,8 +169,14 @@ function formatarDataDeclaracao(data) {
 
 
   const partes =
+
     String(data)
-      .substring(0, 10)
+
+      .substring(
+        0,
+        10
+      )
+
       .split("-");
 
 
@@ -164,7 +192,9 @@ function formatarDataDeclaracao(data) {
   return (
 
     `${partes[2]}/` +
+
     `${partes[1]}/` +
+
     `${partes[0]}`
 
   );
@@ -175,9 +205,11 @@ function formatarDataDeclaracao(data) {
 /* =====================================================
    EXTRAIR CAMINHO DO ARQUIVO
 
-   Serve tanto para os NOVOS registros
-   quanto para os arquivos ANTIGOS que
-   possuíam URL pública.
+   Compatível com:
+   - URLs públicas antigas
+   - URLs autenticadas
+   - URLs assinadas
+   - caminhos novos salvos diretamente
 ===================================================== */
 
 function extrairCaminhoArquivoDeclaracao(
@@ -231,24 +263,33 @@ function extrairCaminhoArquivoDeclaracao(
     ) {
 
       let caminho =
+
         texto
+
           .substring(
+
             posicao +
+
             marcador.length
+
           )
+
           .split("?")[0];
 
 
       try {
 
         caminho =
+
           decodeURIComponent(
             caminho
           );
 
-      } catch (_) {
+      }
 
-        // mantém o caminho original
+      catch (_) {
+
+        // mantém o valor original
 
       }
 
@@ -260,15 +301,12 @@ function extrairCaminhoArquivoDeclaracao(
   }
 
 
-  /*
-    REGISTROS NOVOS:
+  /* ===============================================
+     NOVO FORMATO
 
-    arquivo_url não guarda mais
-    uma URL.
-
-    Guarda somente:
-    123456_nome-do-arquivo.pdf
-  */
+     arquivo_url passa a guardar somente:
+     123456789_arquivo.pdf
+  =============================================== */
 
   if (
     !texto.includes("://")
@@ -300,10 +338,13 @@ function caminhoStorageCodificado(
     .split("/")
 
     .map(
+
       parte =>
+
         encodeURIComponent(
           parte
         )
+
     )
 
     .join("/");
@@ -312,7 +353,7 @@ function caminhoStorageCodificado(
 
 
 /* =====================================================
-   UPLOAD DE ARQUIVO PRIVADO
+   UPLOAD DE ARQUIVO
 ===================================================== */
 
 async function uploadArquivoDeclaracao(
@@ -326,9 +367,9 @@ async function uploadArquivoDeclaracao(
   }
 
 
-  /* ===================================================
-     LIMITE DE 10 MB
-  =================================================== */
+  /* ===============================================
+     LIMITE
+  =============================================== */
 
   if (
     file.size >
@@ -342,9 +383,9 @@ async function uploadArquivoDeclaracao(
   }
 
 
-  /* ===================================================
-     FORMATOS PERMITIDOS
-  =================================================== */
+  /* ===============================================
+     TIPOS
+  =============================================== */
 
   const tiposPermitidos = [
 
@@ -374,11 +415,12 @@ async function uploadArquivoDeclaracao(
   }
 
 
-  /* ===================================================
+  /* ===============================================
      NOME SEGURO
-  =================================================== */
+  =============================================== */
 
   const nomeSeguro =
+
     file.name
 
       .normalize("NFD")
@@ -394,9 +436,9 @@ async function uploadArquivoDeclaracao(
       );
 
 
-  /* ===================================================
-     NOME ÚNICO
-  =================================================== */
+  /* ===============================================
+     CAMINHO ÚNICO
+  =============================================== */
 
   const caminho =
 
@@ -409,10 +451,6 @@ async function uploadArquivoDeclaracao(
     `${nomeSeguro}`;
 
 
-  /* ===================================================
-     URL DE UPLOAD
-  =================================================== */
-
   const urlUpload =
 
     `${DECL_STORAGE_URL}/object/` +
@@ -424,11 +462,12 @@ async function uploadArquivoDeclaracao(
     )}`;
 
 
-  /* ===================================================
-     ENVIO
-  =================================================== */
+  /* ===============================================
+     UPLOAD AUTENTICADO
+  =============================================== */
 
   const resposta =
+
     await fetch(
 
       urlUpload,
@@ -464,10 +503,6 @@ async function uploadArquivoDeclaracao(
     );
 
 
-  /* ===================================================
-     ERRO
-  =================================================== */
-
   if (
     !resposta.ok
   ) {
@@ -491,7 +526,7 @@ async function uploadArquivoDeclaracao(
     ) {
 
       throw new Error(
-        "Você não tem permissão para enviar o arquivo ou sua sessão expirou."
+        "Você não tem permissão para enviar arquivos ou sua sessão expirou."
       );
 
     }
@@ -508,13 +543,12 @@ async function uploadArquivoDeclaracao(
   }
 
 
-  /* ===================================================
-     IMPORTANTE:
+  /*
+    NÃO cria URL pública.
 
-     NÃO CRIA URL PÚBLICA.
-
-     Somente o caminho interno é salvo.
-  =================================================== */
+    arquivo_url guardará apenas
+    o caminho interno do arquivo.
+  */
 
   return {
 
@@ -539,15 +573,19 @@ async function uploadArquivoDeclaracao(
 
 
 /* =====================================================
-   ABRIR ARQUIVO PRIVADO
+   VISUALIZAR ARQUIVO PRIVADO
+
+   NÃO FAZ DOWNLOAD AUTOMÁTICO.
+
+   PDF -> visualizador do navegador
+   JPG/PNG -> visualização no navegador
 ===================================================== */
 
 async function abrirArquivoDeclaracao(
 
   valorArquivo,
 
-  nomeArquivo =
-    "declaracao"
+  nomeArquivo = "declaracao"
 
 ) {
 
@@ -567,164 +605,404 @@ async function abrirArquivoDeclaracao(
   }
 
 
-  /* ===================================================
-     ENDPOINT AUTENTICADO
-  =================================================== */
+  /*
+    Abre a aba imediatamente
+    para evitar bloqueador de pop-ups.
+  */
 
-  const urlDownload =
+  const novaAba =
 
-    `${DECL_STORAGE_URL}/object/authenticated/` +
-
-    `${DECL_BUCKET}/` +
-
-    `${caminhoStorageCodificado(
-      caminho
-    )}`;
-
-
-  const resposta =
-    await fetch(
-
-      urlDownload,
-
-      {
-
-        method:
-          "GET",
-
-        headers:
-          declaracoesStorageHeaders()
-
-      }
-
+    window.open(
+      "",
+      "_blank"
     );
 
 
-  /* ===================================================
-     ERRO
-  =================================================== */
+  if (!novaAba) {
 
-  if (
-    !resposta.ok
-  ) {
-
-    const erro =
-      await resposta.text();
-
-
-    console.error(
-      "Erro ao abrir anexo:",
-      erro
+    throw new Error(
+      "O navegador bloqueou a abertura do documento. Permita pop-ups para este site."
     );
+
+  }
+
+
+  /* ===============================================
+     TELA DE CARREGAMENTO
+  =============================================== */
+
+  novaAba.document.write(`
+
+    <!DOCTYPE html>
+
+    <html lang="pt-BR">
+
+    <head>
+
+      <meta charset="UTF-8">
+
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+      >
+
+      <title>
+        Carregando documento...
+      </title>
+
+
+      <style>
+
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: Arial, sans-serif;
+          background: #f3f4f6;
+          color: #1f2937;
+        }
+
+        .box {
+          text-align: center;
+          padding: 32px;
+        }
+
+        .titulo {
+          font-size: 18px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+
+        .texto {
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+      </style>
+
+    </head>
+
+
+    <body>
+
+      <div class="box">
+
+        <div class="titulo">
+          Carregando documento...
+        </div>
+
+        <div class="texto">
+          Aguarde alguns segundos.
+        </div>
+
+      </div>
+
+    </body>
+
+    </html>
+
+  `);
+
+
+  novaAba.document.close();
+
+
+  try {
+
+
+    /* =============================================
+       DOWNLOAD INTERNO AUTENTICADO
+
+       Apesar do endpoint carregar os bytes,
+       não haverá download automático.
+    ============================================= */
+
+    const urlArquivo =
+
+      `${DECL_STORAGE_URL}/object/authenticated/` +
+
+      `${DECL_BUCKET}/` +
+
+      `${caminhoStorageCodificado(
+        caminho
+      )}`;
+
+
+    const resposta =
+
+      await fetch(
+
+        urlArquivo,
+
+        {
+
+          method:
+            "GET",
+
+          headers:
+            declaracoesStorageHeaders()
+
+        }
+
+      );
 
 
     if (
-
-      resposta.status === 401 ||
-
-      resposta.status === 403
-
+      !resposta.ok
     ) {
 
+      const erro =
+        await resposta.text();
+
+
+      console.error(
+        "Erro ao abrir anexo:",
+        erro
+      );
+
+
+      try {
+
+        novaAba.close();
+
+      }
+
+      catch (_) {
+
+        // nada
+
+      }
+
+
+      if (
+
+        resposta.status === 401 ||
+
+        resposta.status === 403
+
+      ) {
+
+        throw new Error(
+          "Você não tem permissão para visualizar este anexo ou sua sessão expirou."
+        );
+
+      }
+
+
       throw new Error(
-        "Você não tem permissão para visualizar este anexo ou sua sessão expirou."
+        "Não foi possível abrir o anexo."
       );
 
     }
 
 
-    throw new Error(
-      "Não foi possível abrir o anexo."
-    );
+    /* =============================================
+       CARREGAR CONTEÚDO
+    ============================================= */
 
-  }
-
-
-  /* ===================================================
-     TRANSFORMA EM BLOB
-  =================================================== */
-
-  const blob =
-    await resposta.blob();
+    const arrayBuffer =
+      await resposta.arrayBuffer();
 
 
-  const blobUrl =
-    URL.createObjectURL(
-      blob
-    );
+    let tipoArquivo =
+
+      resposta.headers.get(
+        "content-type"
+      )
+
+      ||
+
+      "";
 
 
-  /* ===================================================
-     ABRIR
-  =================================================== */
+    const nomeMinusculo =
 
-  const novaAba =
+      String(
 
-    window.open(
+        nomeArquivo ||
 
-      blobUrl,
+        caminho
 
-      "_blank",
+      )
 
-      "noopener,noreferrer"
-
-    );
+        .toLowerCase();
 
 
-  /* ===================================================
-     CASO POPUP SEJA BLOQUEADO
-  =================================================== */
+    /* =============================================
+       CORRIGIR CONTENT-TYPE
 
-  if (!novaAba) {
+       Evita o navegador interpretar
+       como download genérico.
+    ============================================= */
 
-    const link =
-      document.createElement(
-        "a"
+    if (
+
+      !tipoArquivo ||
+
+      tipoArquivo.includes(
+        "application/octet-stream"
+      )
+
+    ) {
+
+
+      if (
+        nomeMinusculo.endsWith(
+          ".pdf"
+        )
+      ) {
+
+        tipoArquivo =
+          "application/pdf";
+
+      }
+
+
+      else if (
+
+        nomeMinusculo.endsWith(
+          ".jpg"
+        )
+
+        ||
+
+        nomeMinusculo.endsWith(
+          ".jpeg"
+        )
+
+      ) {
+
+        tipoArquivo =
+          "image/jpeg";
+
+      }
+
+
+      else if (
+        nomeMinusculo.endsWith(
+          ".png"
+        )
+      ) {
+
+        tipoArquivo =
+          "image/png";
+
+      }
+
+    }
+
+
+    /* =============================================
+       BLOB LOCAL TEMPORÁRIO
+    ============================================= */
+
+    const blob =
+
+      new Blob(
+
+        [
+          arrayBuffer
+        ],
+
+        {
+
+          type:
+            tipoArquivo
+
+        }
+
       );
 
 
-    link.href =
-      blobUrl;
+    const blobUrl =
+
+      URL.createObjectURL(
+        blob
+      );
 
 
-    link.download =
-      nomeArquivo ||
-      "declaracao";
+    /* =============================================
+       VISUALIZAÇÃO
 
+       NÃO usa download.
+       NÃO cria <a download>.
+    ============================================= */
 
-    document.body.appendChild(
-      link
+    novaAba.location.replace(
+      blobUrl
     );
 
 
-    link.click();
+    /*
+      Liberação tardia da URL
+      temporária da memória.
+    */
 
+    setTimeout(
 
-    link.remove();
+      () => {
+
+        try {
+
+          URL.revokeObjectURL(
+            blobUrl
+          );
+
+        }
+
+        catch (_) {
+
+          // nada
+
+        }
+
+      },
+
+      30 * 60 * 1000
+
+    );
+
 
   }
 
+  catch (erro) {
 
-  /* ===================================================
-     LIBERAR MEMÓRIA
-  =================================================== */
 
-  setTimeout(
+    try {
 
-    () =>
-      URL.revokeObjectURL(
-        blobUrl
-      ),
+      if (
+        novaAba &&
+        !novaAba.closed
+      ) {
 
-    60000
+        novaAba.close();
 
-  );
+      }
+
+    }
+
+    catch (_) {
+
+      // nada
+
+    }
+
+
+    throw erro;
+
+  }
 
 }
 
 
 /* =====================================================
-   EXCLUIR ARQUIVO PRIVADO
+   EXCLUIR ARQUIVO DO STORAGE
 ===================================================== */
 
 async function excluirArquivoDeclaracao(
@@ -764,6 +1042,7 @@ async function excluirArquivoDeclaracao(
 
 
   const resposta =
+
     await fetch(
 
       urlDelete,
@@ -785,12 +1064,21 @@ async function excluirArquivoDeclaracao(
     !resposta.ok
   ) {
 
+    const erro =
+      await resposta.text();
+
+
     console.warn(
 
-      "Não foi possível excluir o arquivo antigo:",
+      "Não foi possível excluir o arquivo:",
 
-      await resposta.text()
+      erro
 
+    );
+
+
+    throw new Error(
+      "Não foi possível excluir o arquivo anexado."
     );
 
   }
@@ -805,6 +1093,7 @@ async function excluirArquivoDeclaracao(
 async function buscarFuncionariosDeclaracao() {
 
   const resposta =
+
     await fetch(
 
       `${DECL_REST_URL}/funcionarios` +
@@ -840,12 +1129,13 @@ async function buscarFuncionariosDeclaracao() {
 
 
 /* =====================================================
-   BUSCAR TODAS AS DECLARAÇÕES
+   BUSCAR DECLARAÇÕES
 ===================================================== */
 
 async function buscarTodasDeclaracoes() {
 
   const resposta =
+
     await fetch(
 
       `${DECL_REST_URL}/declaracoes` +
@@ -881,7 +1171,7 @@ async function buscarTodasDeclaracoes() {
 
 
 /* =====================================================
-   BUSCAR DECLARAÇÃO PELO ID
+   BUSCAR UMA DECLARAÇÃO
 ===================================================== */
 
 async function buscarDeclaracaoPorId(
@@ -889,6 +1179,7 @@ async function buscarDeclaracaoPorId(
 ) {
 
   const resposta =
+
     await fetch(
 
       `${DECL_REST_URL}/declaracoes` +
@@ -937,7 +1228,7 @@ const DeclaracoesPage = {
 
 
   /* ===================================================
-     CARREGAR
+     INICIAR
   =================================================== */
 
   async init() {
@@ -961,7 +1252,7 @@ const DeclaracoesPage = {
 
 
       /* ===============================================
-         MAPA DE FUNCIONÁRIOS
+         MAPA DOS FUNCIONÁRIOS
       =============================================== */
 
       const mapaFuncionarios =
@@ -973,9 +1264,11 @@ const DeclaracoesPage = {
         funcionario => {
 
           mapaFuncionarios[
+
             String(
               funcionario.id
             )
+
           ] =
             funcionario;
 
@@ -997,6 +1290,7 @@ const DeclaracoesPage = {
         `
 
         <div class="page-header">
+
 
           <div>
 
@@ -1024,6 +1318,7 @@ const DeclaracoesPage = {
 
           </div>
 
+
         </div>
 
 
@@ -1035,6 +1330,7 @@ const DeclaracoesPage = {
             <h3>
               Registros
             </h3>
+
 
             <span
               class="badge badge-hours"
@@ -1078,6 +1374,7 @@ const DeclaracoesPage = {
 
                 <table>
 
+
                   <thead>
 
                     <tr>
@@ -1120,6 +1417,7 @@ const DeclaracoesPage = {
 
 
                   <tbody>
+
 
                     ${
 
@@ -1216,6 +1514,7 @@ const DeclaracoesPage = {
 
                             return `
 
+
                             <tr>
 
 
@@ -1300,6 +1599,7 @@ const DeclaracoesPage = {
 
                               <td>
 
+
                                 ${
 
                                   declaracao.arquivo_url
@@ -1352,6 +1652,7 @@ const DeclaracoesPage = {
 
                                 }
 
+
                               </td>
 
 
@@ -1375,13 +1676,9 @@ const DeclaracoesPage = {
 
                                 <a
 
-                                  href="
-                                    nova-declaracao.html?id=${
-                                      encodeURIComponent(
-                                        declaracao.id
-                                      )
-                                    }
-                                  "
+                                  href="nova-declaracao.html?id=${encodeURIComponent(
+                                    declaracao.id
+                                  )}"
 
                                   class="
                                     btn
@@ -1424,6 +1721,7 @@ const DeclaracoesPage = {
 
                             </tr>
 
+
                             `;
 
                           }
@@ -1434,15 +1732,19 @@ const DeclaracoesPage = {
 
                     }
 
+
                   </tbody>
 
+
                 </table>
+
 
               </div>
 
               `
 
           }
+
 
         </div>
 
@@ -1451,7 +1753,9 @@ const DeclaracoesPage = {
       );
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
 
 
       console.error(
@@ -1479,7 +1783,7 @@ const DeclaracoesPage = {
 
 
   /* ===================================================
-     VISUALIZAR ANEXO
+     VER ANEXO
   =================================================== */
 
   async verAnexo(
@@ -1529,7 +1833,9 @@ const DeclaracoesPage = {
       );
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
 
 
       console.error(
@@ -1592,7 +1898,7 @@ const DeclaracoesPage = {
 
 
       /* ===============================================
-         EXCLUI REGISTRO DO BANCO
+         PRIMEIRO EXCLUI O REGISTRO
       =============================================== */
 
       const resposta =
@@ -1630,7 +1936,7 @@ const DeclaracoesPage = {
 
 
       /* ===============================================
-         EXCLUI ANEXO DO STORAGE
+         DEPOIS REMOVE O ARQUIVO
       =============================================== */
 
       if (
@@ -1647,14 +1953,14 @@ const DeclaracoesPage = {
           );
 
 
-        } catch (
-          erroStorage
-        ) {
+        }
+
+        catch (erroStorage) {
 
 
           console.warn(
 
-            "O registro foi excluído, mas o anexo não pôde ser removido:",
+            "Registro excluído, mas houve erro ao excluir o anexo:",
 
             erroStorage
 
@@ -1673,7 +1979,9 @@ const DeclaracoesPage = {
       await this.init();
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
 
 
       console.error(
@@ -1702,7 +2010,7 @@ const DeclaracoesPage = {
 
 
 /* =====================================================
-   NOVA / EDITAR DECLARAÇÃO
+   NOVA DECLARAÇÃO / EDITAR
 ===================================================== */
 
 const NovaDeclaracaoPage = {
@@ -1812,6 +2120,7 @@ const NovaDeclaracaoPage = {
 
               <div class="field">
 
+
                 <label
                   for="funcionarioDeclaracao"
                 >
@@ -1859,7 +2168,9 @@ const NovaDeclaracaoPage = {
 
                             !Number.isInteger(
                               fid
-                            ) ||
+                            )
+
+                            ||
 
                             fid <= 0
 
@@ -1922,6 +2233,7 @@ const NovaDeclaracaoPage = {
 
 
                 </select>
+
 
               </div>
 
@@ -2039,9 +2351,7 @@ const NovaDeclaracaoPage = {
 
                 rows="3"
 
-                placeholder="
-                  Informações adicionais...
-                "
+                placeholder="Informações adicionais..."
 
               >${escaparDeclaracao(
 
@@ -2089,12 +2399,7 @@ const NovaDeclaracaoPage = {
 
                 class="input-file"
 
-                accept="
-                  .pdf,
-                  .jpg,
-                  .jpeg,
-                  .png
-                "
+                accept=".pdf,.jpg,.jpeg,.png"
 
               >
 
@@ -2227,7 +2532,9 @@ const NovaDeclaracaoPage = {
       );
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
 
 
       console.error(
@@ -2255,7 +2562,7 @@ const NovaDeclaracaoPage = {
 
 
   /* ===================================================
-     VISUALIZAR ANEXO ATUAL
+     VER ANEXO ATUAL
   =================================================== */
 
   async verAnexoAtual() {
@@ -2293,7 +2600,9 @@ const NovaDeclaracaoPage = {
       );
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
 
 
       console.error(
@@ -2340,312 +2649,326 @@ const NovaDeclaracaoPage = {
 
 
     /* ===============================================
-       RENDERIZAR CAMPOS
+       RENDERIZAR
     =============================================== */
 
-    const renderizar = () => {
+    const renderizar =
+      () => {
 
 
-      /* =============================================
-         HORAS
-      ============================================= */
+        /* =============================================
+           HORAS
+        ============================================= */
 
-      if (
-        tipo.value ===
-        "horas"
-      ) {
+        if (
+          tipo.value ===
+          "horas"
+        ) {
 
 
-        campos.innerHTML = `
+          campos.innerHTML = `
 
 
-          <div class="field">
+            <div class="field">
 
-            <label
-              for="dataDeclaracao"
-            >
 
-              Data *
+              <label
+                for="dataDeclaracao"
+              >
 
-            </label>
+                Data *
 
+              </label>
 
-            <input
 
-              type="date"
+              <input
 
-              id="dataDeclaracao"
+                type="date"
 
-              class="input"
+                id="dataDeclaracao"
 
-              value="${
-                declaracao?.data ||
-                ""
-              }"
+                class="input"
 
-              required
+                value="${
+                  declaracao?.data ||
+                  ""
+                }"
 
-            >
+                required
 
-          </div>
+              >
 
 
-          <div class="field">
+            </div>
 
-            <label
-              for="horaInicialDeclaracao"
-            >
 
-              Horário inicial
+            <div class="field">
 
-            </label>
 
+              <label
+                for="horaInicialDeclaracao"
+              >
 
-            <input
+                Horário inicial
 
-              type="time"
+              </label>
 
-              id="horaInicialDeclaracao"
 
-              class="input"
+              <input
 
-              value="${
-                declaracao?.hora_inicial ||
-                ""
-              }"
+                type="time"
 
-            >
+                id="horaInicialDeclaracao"
 
-          </div>
+                class="input"
 
+                value="${
+                  declaracao?.hora_inicial ||
+                  ""
+                }"
 
-          <div class="field">
+              >
 
-            <label
-              for="horaFinalDeclaracao"
-            >
 
-              Horário final
+            </div>
 
-            </label>
 
+            <div class="field">
 
-            <input
 
-              type="time"
+              <label
+                for="horaFinalDeclaracao"
+              >
 
-              id="horaFinalDeclaracao"
+                Horário final
 
-              class="input"
+              </label>
 
-              value="${
-                declaracao?.hora_final ||
-                ""
-              }"
 
-            >
+              <input
 
-          </div>
+                type="time"
 
+                id="horaFinalDeclaracao"
 
-          <div class="field">
+                class="input"
 
-            <label
-              for="quantidadeHorasDeclaracao"
-            >
+                value="${
+                  declaracao?.hora_final ||
+                  ""
+                }"
 
-              Quantidade de horas
+              >
 
-            </label>
 
+            </div>
 
-            <input
 
-              type="number"
+            <div class="field">
 
-              id="quantidadeHorasDeclaracao"
 
-              class="input"
+              <label
+                for="quantidadeHorasDeclaracao"
+              >
 
-              min="0"
+                Quantidade de horas
 
-              step="0.5"
+              </label>
 
-              value="${
-                declaracao?.quantidade_horas ??
-                ""
-              }"
 
-            >
+              <input
 
-          </div>
+                type="number"
 
+                id="quantidadeHorasDeclaracao"
 
-        `;
+                class="input"
 
+                min="0"
 
-      }
+                step="0.5"
 
+                value="${
+                  declaracao?.quantidade_horas ??
+                  ""
+                }"
 
-      /* =============================================
-         DIAS
-      ============================================= */
+              >
 
-      else {
 
+            </div>
 
-        campos.innerHTML = `
 
+          `;
 
-          <div class="field">
+        }
 
-            <label
-              for="dataInicialDeclaracao"
-            >
 
-              Data inicial *
+        /* =============================================
+           DIAS
+        ============================================= */
 
-            </label>
+        else {
 
 
-            <input
+          campos.innerHTML = `
 
-              type="date"
 
-              id="dataInicialDeclaracao"
+            <div class="field">
 
-              class="input"
 
-              value="${
+              <label
+                for="dataInicialDeclaracao"
+              >
 
-                declaracao?.data_inicio ||
+                Data inicial *
 
-                declaracao?.data_inicial ||
+              </label>
 
-                declaracao?.data ||
 
-                ""
+              <input
 
-              }"
+                type="date"
 
-              required
+                id="dataInicialDeclaracao"
 
-            >
+                class="input"
 
-          </div>
+                value="${
 
+                  declaracao?.data_inicio ||
 
-          <div class="field">
+                  declaracao?.data_inicial ||
 
-            <label
-              for="dataFinalDeclaracao"
-            >
+                  declaracao?.data ||
 
-              Data final
+                  ""
 
-            </label>
+                }"
 
+                required
 
-            <input
+              >
 
-              type="date"
 
-              id="dataFinalDeclaracao"
+            </div>
 
-              class="input"
 
-              value="${
+            <div class="field">
 
-                declaracao?.data_fim ||
 
-                declaracao?.data_final ||
+              <label
+                for="dataFinalDeclaracao"
+              >
 
-                ""
+                Data final
 
-              }"
+              </label>
 
-            >
 
-          </div>
+              <input
 
+                type="date"
 
-          <div class="field">
+                id="dataFinalDeclaracao"
 
-            <label
-              for="quantidadeDiasDeclaracao"
-            >
+                class="input"
 
-              Quantidade de dias
+                value="${
 
-            </label>
+                  declaracao?.data_fim ||
 
+                  declaracao?.data_final ||
 
-            <input
+                  ""
 
-              type="number"
+                }"
 
-              id="quantidadeDiasDeclaracao"
+              >
 
-              class="input"
 
-              min="1"
+            </div>
 
-              step="1"
 
-              value="${
-                declaracao?.quantidade_dias ??
-                ""
-              }"
+            <div class="field">
 
-            >
 
-          </div>
+              <label
+                for="quantidadeDiasDeclaracao"
+              >
 
+                Quantidade de dias
 
-        `;
+              </label>
 
-      }
 
+              <input
 
-      /* =============================================
-         DATA ATUAL AUTOMÁTICA
-      ============================================= */
+                type="number"
 
-      const campoData =
+                id="quantidadeDiasDeclaracao"
 
-        document.getElementById(
-          "dataDeclaracao"
-        )
+                class="input"
 
-        ||
+                min="1"
 
-        document.getElementById(
-          "dataInicialDeclaracao"
-        );
+                step="1"
 
+                value="${
+                  declaracao?.quantidade_dias ??
+                  ""
+                }"
 
-      if (
+              >
 
-        campoData &&
 
-        !campoData.value
+            </div>
 
-      ) {
 
-        campoData.value =
+          `;
 
-          new Date()
+        }
 
-            .toISOString()
 
-            .slice(
-              0,
-              10
-            );
+        /* =============================================
+           DATA PADRÃO
+        ============================================= */
 
-      }
+        const campoData =
 
-    };
+          document.getElementById(
+            "dataDeclaracao"
+          )
+
+          ||
+
+          document.getElementById(
+            "dataInicialDeclaracao"
+          );
+
+
+        if (
+
+          campoData &&
+
+          !campoData.value
+
+        ) {
+
+          campoData.value =
+
+            new Date()
+
+              .toISOString()
+
+              .slice(
+                0,
+                10
+              );
+
+        }
+
+      };
 
 
     tipo.addEventListener(
@@ -2750,20 +3073,12 @@ const NovaDeclaracaoPage = {
     }
 
 
-    /* ===============================================
-       TIPO
-    =============================================== */
-
     const tipo =
 
       document.getElementById(
         "tipoDeclaracao"
       ).value;
 
-
-    /* ===============================================
-       OBSERVAÇÕES
-    =============================================== */
 
     const observacoes =
 
@@ -2776,20 +3091,12 @@ const NovaDeclaracaoPage = {
       "";
 
 
-    /* ===============================================
-       ARQUIVO
-    =============================================== */
-
     const arquivoInput =
 
       document.getElementById(
         "arquivoDeclaracao"
       );
 
-
-    /* ===============================================
-       BOTÃO
-    =============================================== */
 
     const botao =
 
@@ -2808,12 +3115,6 @@ const NovaDeclaracaoPage = {
       true;
 
 
-    /*
-      Usado para apagar o novo arquivo
-      caso o upload funcione mas o banco
-      rejeite o registro.
-    */
-
     let novoArquivoEnviado =
       null;
 
@@ -2822,7 +3123,7 @@ const NovaDeclaracaoPage = {
 
 
       /* =============================================
-         DADOS DO ANEXO ANTIGO
+         ARQUIVO ANTIGO
       ============================================= */
 
       let arquivoUrl =
@@ -2921,7 +3222,7 @@ const NovaDeclaracaoPage = {
 
 
       /* =============================================
-         OBJETO PARA O BANCO
+         DADOS
       ============================================= */
 
       const dados = {
@@ -3129,7 +3430,7 @@ const NovaDeclaracaoPage = {
 
 
       /* =============================================
-         NOVA DECLARAÇÃO
+         CRIAR
       ============================================= */
 
       if (
@@ -3184,7 +3485,7 @@ const NovaDeclaracaoPage = {
 
 
       /* =============================================
-         EDITAR DECLARAÇÃO
+         EDITAR
       ============================================= */
 
       else {
@@ -3262,7 +3563,9 @@ const NovaDeclaracaoPage = {
             );
 
 
-          } catch (
+          }
+
+          catch (
             erroStorage
           ) {
 
@@ -3315,7 +3618,9 @@ const NovaDeclaracaoPage = {
       );
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
 
 
       console.error(
@@ -3328,11 +3633,8 @@ const NovaDeclaracaoPage = {
 
 
       /* =============================================
-         EVITA ARQUIVO ÓRFÃO
-
-         Se upload funcionou mas o banco
-         rejeitou o lançamento, remove
-         o arquivo recém-enviado.
+         SE O UPLOAD FUNCIONOU MAS
+         O BANCO FALHOU, REMOVE O ARQUIVO
       ============================================= */
 
       if (
@@ -3350,9 +3652,11 @@ const NovaDeclaracaoPage = {
           );
 
 
-        } catch (_) {
+        }
 
-          // não impede o tratamento principal
+        catch (_) {
+
+          // não interrompe o tratamento
 
         }
 
