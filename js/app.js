@@ -1,53 +1,343 @@
 const SUPABASE_URL = "https://cujlebxqqposqomtfvdk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx";
 
-const App = (() => {
+const AUTH_SESSION_KEY = "eunice_auth_session";
+const AUTH_PROFILE_KEY = "eunice_auth_profile";
+const AUTH_ACCESS_KEY = "eunice_access_id";
 
-  const NAV = [
-    { key: "dashboard", href: "index.html", icon: "⌂", label: "Dashboard" },
-    { key: "funcionarios", href: "funcionarios.html", icon: "👥", label: "Funcionários" },
-    { key: "declaracoes", href: "declaracoes.html", icon: "📄", label: "Declarações" },
-    { key: "nova-declaracao", href: "nova-declaracao.html", icon: "＋", label: "Nova Declaração" },
-    { key: "novo-funcionario", href: "novo-funcionario.html", icon: "＋", label: "Novo Funcionário" },
-    { key: "faltas", href: "faltas.html", icon: "📅", label: "Faltas" },
-    { key: "agenda", href: "agenda.html", icon: "🗓️", label: "Agenda" },
-    { key: "relatorios", href: "relatorios.html", icon: "▥", label: "Relatórios" }
-  ];
+function authGetSession() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(AUTH_SESSION_KEY) || "null"
+    );
+  } catch {
+    return null;
+  }
+}
+
+function authSetSession(session) {
+  if (session) {
+    localStorage.setItem(
+      AUTH_SESSION_KEY,
+      JSON.stringify(session)
+    );
+  } else {
+    localStorage.removeItem(AUTH_SESSION_KEY);
+  }
+}
+
+function authGetProfile() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(AUTH_PROFILE_KEY) || "null"
+    );
+  } catch {
+    return null;
+  }
+}
+
+function authSetProfile(profile) {
+  if (profile) {
+    localStorage.setItem(
+      AUTH_PROFILE_KEY,
+      JSON.stringify(profile)
+    );
+  } else {
+    localStorage.removeItem(AUTH_PROFILE_KEY);
+  }
+}
+
+function authGetAccessId() {
+  return localStorage.getItem(AUTH_ACCESS_KEY) || "";
+}
+
+function authSetAccessId(id) {
+  if (id) {
+    localStorage.setItem(
+      AUTH_ACCESS_KEY,
+      id
+    );
+  } else {
+    localStorage.removeItem(AUTH_ACCESS_KEY);
+  }
+}
+
+function authToken() {
+  return authGetSession()?.access_token || "";
+}
 
 
-  function escapeHTML(value = "") {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+/* =========================================================
+   PROTEÇÃO DAS PÁGINAS
+   ========================================================= */
+
+(function protegerPaginaAgora() {
+
+  const arquivo =
+    (
+      location.pathname
+        .split("/")
+        .pop()
+      ||
+      "index.html"
+    ).toLowerCase();
+
+
+  if (
+    arquivo ===
+    "login.html"
+  ) {
+    return;
   }
 
 
-  function formatDate(dateValue) {
+  const sessao =
+    authGetSession();
+
+
+  if (
+    !sessao?.access_token
+  ) {
+
+    const next =
+      encodeURIComponent(
+
+        (
+          location.pathname
+            .split("/")
+            .pop()
+          ||
+          "index.html"
+        )
+
+        +
+
+        location.search
+
+      );
+
+
+    location.replace(
+      `login.html?next=${next}`
+    );
+
+  }
+
+})();
+
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+const App = (() => {
+
+  const NAV = [
+
+    {
+      key: "dashboard",
+      href: "index.html",
+      icon: "⌂",
+      label: "Dashboard"
+    },
+
+    {
+      key: "funcionarios",
+      href: "funcionarios.html",
+      icon: "👥",
+      label: "Funcionários"
+    },
+
+    {
+      key: "declaracoes",
+      href: "declaracoes.html",
+      icon: "📄",
+      label: "Declarações"
+    },
+
+    {
+      key: "nova-declaracao",
+      href: "nova-declaracao.html",
+      icon: "＋",
+      label: "Nova Declaração"
+    },
+
+    {
+      key: "novo-funcionario",
+      href: "novo-funcionario.html",
+      icon: "＋",
+      label: "Novo Funcionário"
+    },
+
+    {
+      key: "faltas",
+      href: "faltas.html",
+      icon: "📅",
+      label: "Faltas"
+    },
+
+    {
+      key: "agenda",
+      href: "agenda.html",
+      icon: "🗓️",
+      label: "Agenda"
+    },
+
+    {
+      key: "relatorios",
+      href: "relatorios.html",
+      icon: "▥",
+      label: "Relatórios"
+    }
+
+  ];
+
+
+  function getNav() {
+
+    const nav =
+      [...NAV];
+
+
+    const perfil =
+      authGetProfile();
+
+
+    if (
+      perfil?.perfil ===
+      "administrador"
+    ) {
+
+      nav.push({
+
+        key: "usuarios",
+
+        href:
+          "usuarios.html",
+
+        icon:
+          "👤",
+
+        label:
+          "Usuários"
+
+      });
+
+
+      nav.push({
+
+        key:
+          "acessos",
+
+        href:
+          "acessos.html",
+
+        icon:
+          "🔐",
+
+        label:
+          "Acessos"
+
+      });
+
+    }
+
+
+    return nav;
+
+  }
+
+
+  function escapeHTML(
+    value = ""
+  ) {
+
+    return String(value)
+
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+
+      .replace(
+        /</g,
+        "&lt;"
+      )
+
+      .replace(
+        />/g,
+        "&gt;"
+      )
+
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+
+  }
+
+
+  function formatDate(
+    dateValue
+  ) {
 
     if (!dateValue) {
       return "—";
     }
 
-    const [y, m, d] =
+
+    const [
+      y,
+      m,
+      d
+    ] =
       String(dateValue)
-        .slice(0, 10)
+
+        .slice(
+          0,
+          10
+        )
+
         .split("-");
 
-    if (!y || !m || !d) {
+
+    if (
+      !y ||
+      !m ||
+      !d
+    ) {
+
       return dateValue;
+
     }
 
+
     return `${d}/${m}/${y}`;
+
   }
 
 
   function getPageKey() {
-    return document.body.dataset.page || "";
+
+    return (
+      document.body
+        .dataset
+        .page
+      ||
+      ""
+    );
+
   }
 
+
+  /* =======================================================
+     LAYOUT GERAL
+     ======================================================= */
 
   function layout(
     title,
@@ -58,12 +348,16 @@ const App = (() => {
     const page =
       getPageKey();
 
+
     document.title =
       `${title} | Sistema de Declarações`;
 
-    document.getElementById(
-      "app"
-    ).innerHTML = `
+
+    document
+      .getElementById(
+        "app"
+      )
+      .innerHTML = `
 
       <div class="app-shell">
 
@@ -77,6 +371,7 @@ const App = (() => {
             <div class="brand-mark">
               EC
             </div>
+
 
             <div class="brand-text">
 
@@ -95,33 +390,42 @@ const App = (() => {
 
           <nav class="nav">
 
-            ${NAV.map(item => `
+            ${getNav().map(
+              item => `
 
-              <a
-                href="${item.href}"
-                class="${
-                  item.key === page
-                    ? "active"
-                    : ""
-                }"
-              >
+                <a
 
-                <span class="nav-icon">
-                  ${item.icon}
-                </span>
+                  href="${item.href}"
 
-                <span>
-                  ${item.label}
-                </span>
+                  class="${
+                    item.key === page
+                      ? "active"
+                      : ""
+                  }"
 
-              </a>
+                >
 
-            `).join("")}
+                  <span
+                    class="nav-icon"
+                  >
+                    ${item.icon}
+                  </span>
+
+                  <span>
+                    ${item.label}
+                  </span>
+
+                </a>
+
+              `
+            ).join("")}
 
           </nav>
 
 
-          <div class="sidebar-footer">
+          <div
+            class="sidebar-footer"
+          >
             Banco de dados online • Supabase
           </div>
 
@@ -130,20 +434,26 @@ const App = (() => {
 
         <main class="main">
 
+
           <header class="topbar">
+
 
             <div
               style="
                 display:flex;
                 align-items:center;
-                gap:12px
+                gap:12px;
               "
             >
 
               <button
+
                 class="menu-toggle"
+
                 id="menuToggle"
+
                 aria-label="Abrir menu"
+
               >
                 ☰
               </button>
@@ -165,23 +475,79 @@ const App = (() => {
 
 
             <div
+
               class="no-print"
+
               style="
                 display:flex;
-                gap:8px
+                gap:8px;
+                align-items:center;
               "
+
             >
 
+              <span
+
+                style="
+                  font-size:13px;
+                  color:#667085;
+                "
+
+              >
+
+                👤 ${
+                  escapeHTML(
+
+                    authGetProfile()?.nome
+
+                    ||
+
+                    authGetProfile()?.username
+
+                    ||
+
+                    "Usuário"
+
+                  )
+                }
+
+              </span>
+
+
               <a
+
                 class="
                   btn
                   btn-secondary
                   btn-sm
                 "
+
                 href="nova-declaracao.html"
+
               >
+
                 ＋ Nova declaração
+
               </a>
+
+
+              <button
+
+                class="
+                  btn
+                  btn-secondary
+                  btn-sm
+                "
+
+                type="button"
+
+                id="btnSairSistema"
+
+              >
+
+                Sair
+
+              </button>
 
             </div>
 
@@ -189,7 +555,9 @@ const App = (() => {
 
 
           <section class="content">
+
             ${content}
+
           </section>
 
         </main>
@@ -203,11 +571,15 @@ const App = (() => {
 
 
     document
+
       .getElementById(
         "menuToggle"
       )
+
       ?.addEventListener(
+
         "click",
+
         () => {
 
           document
@@ -219,37 +591,72 @@ const App = (() => {
             );
 
         }
+
+      );
+
+
+    document
+
+      .getElementById(
+        "btnSairSistema"
+      )
+
+      ?.addEventListener(
+
+        "click",
+
+        () =>
+          logout()
+
       );
 
   }
 
 
+  /* =======================================================
+     MODAL
+     ======================================================= */
+
   function openModal({
+
     title,
+
     body,
+
     footer = ""
+
   }) {
 
     const root =
-      document.getElementById(
-        "modalRoot"
-      );
+      document
+        .getElementById(
+          "modalRoot"
+        );
+
 
     root.innerHTML = `
 
       <div
+
         class="
           modal-backdrop
           show
         "
+
         id="modalBackdrop"
+
       >
 
         <div
+
           class="modal"
+
           role="dialog"
+
           aria-modal="true"
+
         >
+
 
           <div class="modal-header">
 
@@ -257,10 +664,15 @@ const App = (() => {
               ${title}
             </h3>
 
+
             <button
+
               class="modal-close"
+
               aria-label="Fechar"
+
               data-close-modal
+
             >
               ×
             </button>
@@ -269,19 +681,28 @@ const App = (() => {
 
 
           <div class="modal-body">
+
             ${body}
+
           </div>
 
 
           ${
             footer
+
               ? `
+
                 <div class="modal-footer">
+
                   ${footer}
+
                 </div>
+
               `
+
               : ""
           }
+
 
         </div>
 
@@ -291,40 +712,60 @@ const App = (() => {
 
 
     root
+
       .querySelectorAll(
         "[data-close-modal]"
       )
+
       .forEach(
+
         btn =>
+
           btn.addEventListener(
+
             "click",
+
             closeModal
+
           )
+
       );
 
 
     root
+
       .querySelector(
         "#modalBackdrop"
       )
+
       ?.addEventListener(
+
         "click",
+
         e => {
 
           if (
+
             e.target.id ===
             "modalBackdrop"
+
           ) {
+
             closeModal();
+
           }
 
         }
+
       );
 
 
     document.addEventListener(
+
       "keydown",
+
       escClose
+
     );
 
   }
@@ -336,7 +777,9 @@ const App = (() => {
       e.key ===
       "Escape"
     ) {
+
       closeModal();
+
     }
 
   }
@@ -345,21 +788,34 @@ const App = (() => {
   function closeModal() {
 
     const root =
-      document.getElementById(
-        "modalRoot"
-      );
+      document
+        .getElementById(
+          "modalRoot"
+        );
+
 
     if (root) {
-      root.innerHTML = "";
+
+      root.innerHTML =
+        "";
+
     }
 
+
     document.removeEventListener(
+
       "keydown",
+
       escClose
+
     );
 
   }
 
+
+  /* =======================================================
+     TOAST
+     ======================================================= */
 
   function toast(
     message,
@@ -369,47 +825,67 @@ const App = (() => {
     const id =
       "toastRoot";
 
+
     let root =
-      document.getElementById(
-        id
-      );
+      document
+        .getElementById(
+          id
+        );
 
 
     if (!root) {
 
       root =
-        document.createElement(
-          "div"
-        );
+        document
+          .createElement(
+            "div"
+          );
 
-      root.id = id;
+
+      root.id =
+        id;
+
 
       root.style.cssText =
         "position:fixed;right:18px;bottom:18px;z-index:5000;display:flex;flex-direction:column;gap:10px";
 
-      document.body.appendChild(
-        root
-      );
+
+      document.body
+        .appendChild(
+          root
+        );
+
     }
 
 
     const item =
-      document.createElement(
-        "div"
-      );
+      document
+        .createElement(
+          "div"
+        );
 
 
     const map = {
-      success: "alert-success",
-      warning: "alert-warning",
-      danger: "alert-danger",
-      info: "alert-info"
+
+      success:
+        "alert-success",
+
+      warning:
+        "alert-warning",
+
+      danger:
+        "alert-danger",
+
+      info:
+        "alert-info"
+
     };
 
 
     item.className =
       `alert ${
-        map[type] || map.info
+        map[type] ||
+        map.info
       }`;
 
 
@@ -418,7 +894,9 @@ const App = (() => {
 
 
     item.innerHTML =
-      escapeHTML(message);
+      escapeHTML(
+        message
+      );
 
 
     root.appendChild(
@@ -427,8 +905,12 @@ const App = (() => {
 
 
     setTimeout(
-      () => item.remove(),
+
+      () =>
+        item.remove(),
+
       3200
+
     );
 
   }
@@ -439,10 +921,96 @@ const App = (() => {
     "/rest/v1";
 
 
+  /* =======================================================
+     RENOVAR SESSÃO
+     ======================================================= */
+
+  async function refreshSession() {
+
+    const atual =
+      authGetSession();
+
+
+    if (
+      !atual?.refresh_token
+    ) {
+
+      return null;
+
+    }
+
+
+    const res =
+      await fetch(
+
+        `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
+
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            apikey:
+              SUPABASE_KEY,
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              refresh_token:
+                atual.refresh_token
+
+            })
+
+        }
+
+      );
+
+
+    if (!res.ok) {
+
+      return null;
+
+    }
+
+
+    const nova =
+      await res.json();
+
+
+    authSetSession(
+      nova
+    );
+
+
+    return nova;
+
+  }
+
+
+  /* =======================================================
+     API SUPABASE
+     ======================================================= */
+
   async function api(
+
     path,
-    options = {}
+
+    options = {},
+
+    retry = true
+
   ) {
+
+    const token =
+      authToken();
+
 
     const headers = {
 
@@ -450,7 +1018,10 @@ const App = (() => {
         SUPABASE_KEY,
 
       Authorization:
-        `Bearer ${SUPABASE_KEY}`,
+        `Bearer ${
+          token ||
+          SUPABASE_KEY
+        }`,
 
       "Content-Type":
         "application/json",
@@ -462,12 +1033,56 @@ const App = (() => {
 
     const res =
       await fetch(
+
         API + path,
+
         {
+
           ...options,
+
           headers
+
         }
+
       );
+
+
+    if (
+      res.status ===
+      401
+
+      &&
+
+      retry
+    ) {
+
+      const nova =
+        await refreshSession();
+
+
+      if (
+        nova?.access_token
+      ) {
+
+        return api(
+          path,
+          options,
+          false
+        );
+
+      }
+
+
+      await logout(
+        false
+      );
+
+
+      throw new Error(
+        "Sessão expirada. Entre novamente."
+      );
+
+    }
 
 
     if (!res.ok) {
@@ -475,9 +1090,15 @@ const App = (() => {
       const t =
         await res.text();
 
+
       throw new Error(
-        t ||
+
+        t
+
+        ||
+
         "Erro no Supabase"
+
       );
 
     }
@@ -488,25 +1109,410 @@ const App = (() => {
 
 
     return text
+
       ? JSON.parse(text)
+
       : null;
 
   }
 
 
+  /* =======================================================
+     PERFIL DO USUÁRIO
+     ======================================================= */
+
+  async function carregarPerfilAtual() {
+
+    const sessao =
+      authGetSession();
+
+
+    if (
+      !sessao?.access_token
+    ) {
+
+      return null;
+
+    }
+
+
+    let uid =
+      sessao?.user?.id;
+
+
+    try {
+
+      let token =
+        authToken();
+
+
+      let userRes =
+        await fetch(
+
+          `${SUPABASE_URL}/auth/v1/user`,
+
+          {
+
+            headers: {
+
+              apikey:
+                SUPABASE_KEY,
+
+              Authorization:
+                `Bearer ${token}`
+
+            }
+
+          }
+
+        );
+
+
+      if (!userRes.ok) {
+
+        const nova =
+          await refreshSession();
+
+
+        if (
+          !nova?.access_token
+        ) {
+
+          return null;
+
+        }
+
+
+        token =
+          nova.access_token;
+
+
+        userRes =
+          await fetch(
+
+            `${SUPABASE_URL}/auth/v1/user`,
+
+            {
+
+              headers: {
+
+                apikey:
+                  SUPABASE_KEY,
+
+                Authorization:
+                  `Bearer ${token}`
+
+              }
+
+            }
+
+          );
+
+      }
+
+
+      if (!userRes.ok) {
+
+        return null;
+
+      }
+
+
+      const user =
+        await userRes.json();
+
+
+      uid =
+        user.id;
+
+
+      const atual =
+        authGetSession()
+        ||
+        {};
+
+
+      atual.user =
+        user;
+
+
+      authSetSession(
+        atual
+      );
+
+
+      const r =
+        await api(
+
+          `/usuarios_perfis?id=eq.${encodeURIComponent(uid)}&select=*`
+
+        );
+
+
+      const perfil =
+        r?.[0]
+        ||
+        null;
+
+
+      if (perfil) {
+
+        authSetProfile(
+          perfil
+        );
+
+      }
+
+
+      return perfil;
+
+
+    } catch {
+
+      return null;
+
+    }
+
+  }
+
+
+  /* =======================================================
+     ATIVIDADE / ONLINE
+     ======================================================= */
+
+  async function atualizarAtividade() {
+
+    const id =
+      authGetAccessId();
+
+
+    if (
+      !id ||
+      !authToken()
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      await api(
+
+        `/acessos?id=eq.${encodeURIComponent(id)}`,
+
+        {
+
+          method:
+            "PATCH",
+
+          headers: {
+
+            Prefer:
+              "return=minimal"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              ultima_atividade:
+                new Date()
+                  .toISOString(),
+
+              pagina_atual:
+                location.pathname
+                  .split("/")
+                  .pop()
+                ||
+                "index.html"
+
+            })
+
+        }
+
+      );
+
+
+      const perfil =
+        await carregarPerfilAtual();
+
+
+      if (
+        perfil &&
+        perfil.ativo === false
+      ) {
+
+        await logout(
+          false
+        );
+
+        location.replace(
+          "login.html"
+        );
+
+      }
+
+
+    } catch {
+
+      // Não interrompe o uso da página
+      // somente porque não conseguiu
+      // atualizar o status online.
+
+    }
+
+  }
+
+
+  /* =======================================================
+     LOGOUT
+     ======================================================= */
+
+  async function logout(
+    redirecionar = true
+  ) {
+
+    const accessId =
+      authGetAccessId();
+
+
+    const token =
+      authToken();
+
+
+    try {
+
+      if (
+        accessId &&
+        token
+      ) {
+
+        await api(
+
+          `/acessos?id=eq.${encodeURIComponent(accessId)}`,
+
+          {
+
+            method:
+              "PATCH",
+
+            headers: {
+
+              Prefer:
+                "return=minimal"
+
+            },
+
+            body:
+              JSON.stringify({
+
+                saiu_em:
+                  new Date()
+                    .toISOString(),
+
+                ultima_atividade:
+                  new Date()
+                    .toISOString()
+
+              })
+
+          },
+
+          false
+
+        );
+
+      }
+
+    } catch {}
+
+
+    try {
+
+      if (token) {
+
+        await fetch(
+
+          `${SUPABASE_URL}/auth/v1/logout`,
+
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              apikey:
+                SUPABASE_KEY,
+
+              Authorization:
+                `Bearer ${token}`
+
+            }
+
+          }
+
+        );
+
+      }
+
+    } catch {}
+
+
+    authSetSession(
+      null
+    );
+
+
+    authSetProfile(
+      null
+    );
+
+
+    authSetAccessId(
+      ""
+    );
+
+
+    if (redirecionar) {
+
+      location.replace(
+        "login.html"
+      );
+
+    }
+
+  }
+
+
+  /* =======================================================
+     GERAR ID
+     ======================================================= */
+
   function generateId() {
 
     return (
+
       Math.floor(
         Date.now() / 1000
-      ) +
+      )
+
+      +
+
       Math.floor(
         Math.random() * 1000
       )
+
     );
 
   }
 
+
+  /* =======================================================
+     BANCO -> SISTEMA
+     ======================================================= */
 
   function fromDB(
     store,
@@ -514,13 +1520,15 @@ const App = (() => {
   ) {
 
     if (!x) {
+
       return x;
+
     }
 
 
-    /* ================================================
+    /* =====================================================
        FUNCIONÁRIOS
-       ================================================ */
+       ===================================================== */
 
     if (
       store ===
@@ -530,97 +1538,146 @@ const App = (() => {
       return {
 
         id:
-          String(x.id),
+          String(
+            x.id
+          ),
+
 
         nome:
-          x.nome_completo ||
-          x.nome ||
+          x.nome_completo
+          ||
+          x.nome
+          ||
           "",
+
 
         matricula:
-          x.matricula ||
+          x.matricula
+          ||
           "",
+
 
         cargo:
-          x.cargo_funcao ||
-          x.cargo ||
+          x.cargo_funcao
+          ||
+          x.cargo
+          ||
           "",
+
 
         categoriaCargo:
-          x.categoria_cargo ||
+          x.categoria_cargo
+          ||
           "",
+
 
         setor:
-          x.setor ||
+          x.setor
+          ||
           "",
+
 
         vinculo:
-          x.tipo_vinculo ||
-          x.vinculo ||
+          x.tipo_vinculo
+          ||
+          x.vinculo
+          ||
           "",
+
 
         status:
-          x.status ||
+          x.status
+          ||
           "Ativo",
 
+
         turno:
-          x.turno ||
+          x.turno
+          ||
           "",
+
 
         cargaHoraria:
-          x.carga_horaria ||
+          x.carga_horaria
+          ||
           "",
+
 
         dataAdmissao:
-          x.data_admissao ||
+          x.data_admissao
+          ||
           "",
+
 
         dataEntradaEscola:
-          x.data_entrada_escola ||
+          x.data_entrada_escola
+          ||
           "",
+
 
         cpf:
-          x.cpf ||
+          x.cpf
+          ||
           "",
+
 
         telefone:
-          x.telefone ||
+          x.telefone
+          ||
           "",
+
 
         email:
-          x.email ||
+          x.email
+          ||
           "",
+
 
         endereco:
-          x.endereco ||
+          x.endereco
+          ||
           "",
+
 
         formacao:
-          x.formacao ||
+          x.formacao
+          ||
           "",
+
 
         especializacao:
-          x.especializacao ||
+          x.especializacao
+          ||
           "",
+
 
         naturalidade:
-          x.naturalidade ||
+          x.naturalidade
+          ||
           "",
+
 
         dataNascimento:
-          x.data_nascimento ||
+          x.data_nascimento
+          ||
           "",
+
 
         motivoInatividade:
-          x.motivo_inatividade ||
+          x.motivo_inatividade
+          ||
           "",
+
 
         dataInatividade:
-          x.data_inatividade ||
+          x.data_inatividade
+          ||
           "",
 
+
         observacoes:
-          x.observacoes ||
+          x.observacoes
+          ||
           ""
 
       };
@@ -628,9 +1685,9 @@ const App = (() => {
     }
 
 
-    /* ================================================
+    /* =====================================================
        DECLARAÇÕES
-       ================================================ */
+       ===================================================== */
 
     if (
       store ===
@@ -640,36 +1697,48 @@ const App = (() => {
       return {
 
         id:
-          String(x.id),
+          String(
+            x.id
+          ),
+
 
         funcionarioId:
           String(
             x.funcionario_id
           ),
 
+
         tipo:
           x.tipo,
+
 
         data:
           x.data,
 
+
         dataInicial:
           x.data_inicial,
+
 
         dataFinal:
           x.data_final,
 
+
         horaInicial:
           x.hora_inicial,
+
 
         horaFinal:
           x.hora_final,
 
+
         quantidadeHoras:
           x.quantidade_horas,
 
+
         quantidadeDias:
           x.quantidade_dias,
+
 
         observacoes:
           x.observacoes
@@ -679,9 +1748,9 @@ const App = (() => {
     }
 
 
-    /* ================================================
+    /* =====================================================
        FALTAS
-       ================================================ */
+       ===================================================== */
 
     if (
       store ===
@@ -691,21 +1760,28 @@ const App = (() => {
       return {
 
         id:
-          String(x.id),
+          String(
+            x.id
+          ),
+
 
         funcionario_id:
           String(
             x.funcionario_id
           ),
 
+
         data_falta:
           x.data_falta,
+
 
         motivo:
           x.motivo,
 
+
         justificativa:
           x.justificativa,
+
 
         createdAt:
           x.created_at
@@ -715,33 +1791,36 @@ const App = (() => {
     }
 
 
-    /* ================================================
-       OUTRAS TABELAS
-       ================================================ */
-
     return {
 
       ...x,
 
       id:
-        String(x.id)
+        String(
+          x.id
+        )
 
     };
 
   }
 
 
+  /* =======================================================
+     SISTEMA -> BANCO
+     ======================================================= */
+
   function toDB(
     store,
     x
   ) {
 
-    let payload = {};
+    let payload =
+      {};
 
 
-    /* ================================================
+    /* =====================================================
        FUNCIONÁRIOS
-       ================================================ */
+       ===================================================== */
 
     if (
       store ===
@@ -751,118 +1830,167 @@ const App = (() => {
       payload = {
 
         id:
+
           x.id
-            ? Number(x.id)
+
+            ? Number(
+                x.id
+              )
+
             : generateId(),
 
 
         nome_completo:
-          x.nome ||
+
+          x.nome
+          ||
           null,
 
 
         matricula:
-          x.matricula ||
+
+          x.matricula
+          ||
           null,
 
 
         cargo_funcao:
-          x.cargo ||
+
+          x.cargo
+          ||
           null,
 
 
         categoria_cargo:
-          x.categoriaCargo ||
+
+          x.categoriaCargo
+          ||
           null,
 
 
         setor:
-          x.setor ||
+
+          x.setor
+          ||
           null,
 
 
         tipo_vinculo:
-          x.vinculo ||
+
+          x.vinculo
+          ||
           null,
 
 
         status:
-          x.status ||
+
+          x.status
+          ||
           "Ativo",
 
 
         turno:
-          x.turno ||
+
+          x.turno
+          ||
           null,
 
 
         carga_horaria:
-          x.cargaHoraria ||
+
+          x.cargaHoraria
+          ||
           null,
 
 
         data_admissao:
-          x.dataAdmissao ||
+
+          x.dataAdmissao
+          ||
           null,
 
 
         data_entrada_escola:
-          x.dataEntradaEscola ||
+
+          x.dataEntradaEscola
+          ||
           null,
 
 
         cpf:
-          x.cpf ||
+
+          x.cpf
+          ||
           null,
 
 
         telefone:
-          x.telefone ||
+
+          x.telefone
+          ||
           null,
 
 
         email:
-          x.email ||
+
+          x.email
+          ||
           null,
 
 
         endereco:
-          x.endereco ||
+
+          x.endereco
+          ||
           null,
 
 
         formacao:
-          x.formacao ||
+
+          x.formacao
+          ||
           null,
 
 
         especializacao:
-          x.especializacao ||
+
+          x.especializacao
+          ||
           null,
 
 
         naturalidade:
-          x.naturalidade ||
+
+          x.naturalidade
+          ||
           null,
 
 
         data_nascimento:
-          x.dataNascimento ||
+
+          x.dataNascimento
+          ||
           null,
 
 
         motivo_inatividade:
-          x.motivoInatividade ||
+
+          x.motivoInatividade
+          ||
           null,
 
 
         data_inatividade:
-          x.dataInatividade ||
+
+          x.dataInatividade
+          ||
           null,
 
 
         observacoes:
-          x.observacoes ||
+
+          x.observacoes
+          ||
           null
 
       };
@@ -870,9 +1998,9 @@ const App = (() => {
     }
 
 
-    /* ================================================
+    /* =====================================================
        DECLARAÇÕES
-       ================================================ */
+       ===================================================== */
 
     else if (
       store ===
@@ -882,48 +2010,81 @@ const App = (() => {
       payload = {
 
         id:
+
           x.id
-            ? Number(x.id)
+
+            ? Number(
+                x.id
+              )
+
             : generateId(),
 
+
         funcionario_id:
+
           Number(
             x.funcionarioId
           ),
 
+
         tipo:
+
           x.tipo,
 
+
         data:
-          x.data ||
+
+          x.data
+          ||
           null,
+
 
         data_inicial:
-          x.dataInicial ||
+
+          x.dataInicial
+          ||
           null,
+
 
         data_final:
-          x.dataFinal ||
+
+          x.dataFinal
+          ||
           null,
+
 
         hora_inicial:
-          x.horaInicial ||
+
+          x.horaInicial
+          ||
           null,
+
 
         hora_final:
-          x.horaFinal ||
+
+          x.horaFinal
+          ||
           null,
 
+
         quantidade_horas:
-          x.quantidadeHoras ||
+
+          x.quantidadeHoras
+          ||
           0,
+
 
         quantidade_dias:
-          x.quantidadeDias ||
+
+          x.quantidadeDias
+          ||
           0,
 
+
         observacoes:
-          x.observacoes ||
+
+          x.observacoes
+          ||
           null
 
       };
@@ -931,9 +2092,9 @@ const App = (() => {
     }
 
 
-    /* ================================================
+    /* =====================================================
        FALTAS
-       ================================================ */
+       ===================================================== */
 
     else if (
       store ===
@@ -943,25 +2104,43 @@ const App = (() => {
       payload = {
 
         id:
+
           x.id
-            ? Number(x.id)
+
+            ? Number(
+                x.id
+              )
+
             : generateId(),
 
+
         funcionario_id:
-          x.funcionario_id ||
+
+          x.funcionario_id
+          ||
           x.funcionarioId,
 
+
         data_falta:
-          x.data_falta ||
+
+          x.data_falta
+          ||
           x.data,
 
+
         motivo:
-          x.motivo ||
-          x.tipo ||
+
+          x.motivo
+          ||
+          x.tipo
+          ||
           "Falta Injustificada",
 
+
         justificativa:
-          x.justificativa ||
+
+          x.justificativa
+          ||
           null
 
       };
@@ -969,9 +2148,9 @@ const App = (() => {
     }
 
 
-    /* ================================================
+    /* =====================================================
        AGENDA / OUTRAS TABELAS
-       ================================================ */
+       ===================================================== */
 
     else {
 
@@ -980,7 +2159,9 @@ const App = (() => {
       };
 
 
-      if (!payload.id) {
+      if (
+        !payload.id
+      ) {
 
         payload.id =
           generateId();
@@ -994,6 +2175,10 @@ const App = (() => {
 
   }
 
+
+  /* =======================================================
+     ADICIONAR
+     ======================================================= */
 
   async function add(
     store,
@@ -1009,15 +2194,19 @@ const App = (() => {
 
     const r =
       await api(
+
         `/${store}`,
+
         {
 
           method:
             "POST",
 
           headers: {
+
             "Prefer":
               "return=representation"
+
           },
 
           body:
@@ -1026,23 +2215,35 @@ const App = (() => {
             )
 
         }
+
       );
 
 
     const item =
+
       Array.isArray(r)
+
         ? r[0]
+
         : r;
 
 
     return fromDB(
+
       store,
-      item ||
+
+      item
+      ||
       dataToSend
+
     );
 
   }
 
+
+  /* =======================================================
+     ATUALIZAR
+     ======================================================= */
 
   async function put(
     store,
@@ -1075,8 +2276,10 @@ const App = (() => {
               "PATCH",
 
             headers: {
+
               "Prefer":
                 "return=representation"
+
             },
 
             body:
@@ -1090,15 +2293,22 @@ const App = (() => {
 
 
       const item =
+
         Array.isArray(r)
+
           ? r[0]
+
           : r;
 
 
       return fromDB(
+
         store,
-        item ||
+
+        item
+        ||
         value
+
       );
 
     }
@@ -1111,6 +2321,10 @@ const App = (() => {
 
   }
 
+
+  /* =======================================================
+     PEGAR UM REGISTRO
+     ======================================================= */
 
   async function get(
     store,
@@ -1130,13 +2344,21 @@ const App = (() => {
 
 
     return fromDB(
+
       store,
-      r?.[0] ||
+
+      r?.[0]
+      ||
       null
+
     );
 
   }
 
+
+  /* =======================================================
+     PEGAR TODOS
+     ======================================================= */
 
   async function getAll(
     store
@@ -1144,23 +2366,34 @@ const App = (() => {
 
     const r =
       await api(
+
         `/${store}?select=*&order=id.asc`
+
       );
 
 
     return (
-      r ||
+
+      r
+      ||
       []
+
     ).map(
+
       x =>
         fromDB(
           store,
           x
         )
+
     );
 
   }
 
+
+  /* =======================================================
+     REMOVER
+     ======================================================= */
 
   async function remove(
     store,
@@ -1176,8 +2409,10 @@ const App = (() => {
       }`,
 
       {
+
         method:
           "DELETE"
+
       }
 
     );
@@ -1187,6 +2422,10 @@ const App = (() => {
 
   }
 
+
+  /* =======================================================
+     CONTADORES
+     ======================================================= */
 
   async function counts() {
 
@@ -1207,23 +2446,36 @@ const App = (() => {
       funcionarios:
         funcionarios.length,
 
+
       declaracoes:
         declaracoes.length,
 
+
       horas:
+
         declaracoes.filter(
+
           d =>
-            d.tipo === "horas"
+            d.tipo ===
+            "horas"
+
         ).length,
 
+
       dias:
+
         declaracoes.filter(
+
           d =>
-            d.tipo === "dias"
+            d.tipo ===
+            "dias"
+
         ).length,
+
 
       listaFuncionarios:
         funcionarios,
+
 
       listaDeclaracoes:
         declaracoes
@@ -1266,11 +2518,75 @@ const App = (() => {
 
     uid:
       () =>
-        generateId()
+        generateId(),
+
+    rest:
+      api,
+
+    getSession:
+      authGetSession,
+
+    getProfile:
+      authGetProfile,
+
+    getAccessToken:
+      authToken,
+
+    carregarPerfilAtual,
+
+    atualizarAtividade,
+
+    logout
 
   };
 
 })();
+
+
+/* =========================================================
+   VALIDAR SESSÃO / MANTER ONLINE
+   ========================================================= */
+
+document.addEventListener(
+
+  "DOMContentLoaded",
+
+  async () => {
+
+    const perfil =
+      await App
+        .carregarPerfilAtual();
+
+
+    if (
+      !perfil
+      ||
+      perfil.ativo === false
+    ) {
+
+      await App.logout();
+
+      return;
+
+    }
+
+
+    await App
+      .atualizarAtividade();
+
+
+    setInterval(
+
+      () =>
+        App.atualizarAtividade(),
+
+      60000
+
+    );
+
+  }
+
+);
 
 
 /* =========================================================
@@ -1297,6 +2613,7 @@ const DashboardPage = {
 
           <div class="page-header">
 
+
             <div>
 
               <h2>
@@ -1304,7 +2621,8 @@ const DashboardPage = {
               </h2>
 
               <p>
-                Acompanhe funcionários e documentos cadastrados.
+                Acompanhe funcionários
+                e documentos cadastrados.
               </p>
 
             </div>
@@ -1315,18 +2633,28 @@ const DashboardPage = {
             >
 
               <a
+
                 class="btn btn-primary"
+
                 href="nova-declaracao.html"
+
               >
+
                 ＋ Nova Declaração
+
               </a>
 
 
               <a
+
                 class="btn btn-secondary"
+
                 href="novo-funcionario.html"
+
               >
+
                 ＋ Novo Funcionário
+
               </a>
 
             </div>
@@ -1336,32 +2664,50 @@ const DashboardPage = {
 
           <div class="cards">
 
+
             ${this.statCard(
+
               "Funcionários",
+
               stats.funcionarios,
+
               "👥"
+
             )}
 
 
             ${this.statCard(
+
               "Declarações",
+
               stats.declaracoes,
+
               "📄"
+
             )}
 
 
             ${this.statCard(
+
               "Declarações de Horas",
+
               stats.horas,
+
               "◷"
+
             )}
 
 
             ${this.statCard(
+
               "Declarações de Dias",
+
               stats.dias,
+
               "▣"
+
             )}
+
 
           </div>
 
@@ -1373,6 +2719,7 @@ const DashboardPage = {
               class="card panel"
             >
 
+
               <div
                 class="panel-header"
               >
@@ -1383,23 +2730,32 @@ const DashboardPage = {
 
 
                 <a
+
                   href="declaracoes.html"
+
                   class="
                     btn
                     btn-secondary
                     btn-sm
                   "
+
                 >
+
                   Ver todas
+
                 </a>
 
               </div>
 
 
               ${this.recentTable(
+
                 stats.listaDeclaracoes,
+
                 stats.listaFuncionarios
+
               )}
+
 
             </section>
 
@@ -1407,6 +2763,7 @@ const DashboardPage = {
             <section
               class="card panel"
             >
+
 
               <div
                 class="panel-header"
@@ -1422,6 +2779,7 @@ const DashboardPage = {
               <div
                 class="quick-actions"
               >
+
 
                 <a
                   href="funcionarios.html"
@@ -1457,15 +2815,23 @@ const DashboardPage = {
                   ＋ Lançar documento
                 </a>
 
+
               </div>
 
 
               <div
+
                 style="margin-top:16px"
+
                 class="alert alert-warning"
+
               >
-                Dados salvos online no Supabase.
+
+                Dados salvos online
+                no Supabase.
+
               </div>
+
 
             </section>
 
@@ -1476,15 +2842,23 @@ const DashboardPage = {
 
       );
 
+
     } catch (err) {
 
-      console.error(err);
+      console.error(
+        err
+      );
+
 
       App.toast(
 
-        "Erro ao carregar o dashboard: " +
+        "Erro ao carregar o dashboard: "
+
+        +
+
         (
-          err.message ||
+          err.message
+          ||
           err
         ),
 
@@ -1514,16 +2888,20 @@ const DashboardPage = {
           <div
             class="stat-label"
           >
+
             ${App.escapeHTML(
               label
             )}
+
           </div>
 
 
           <div
             class="stat-value"
           >
+
             ${value}
+
           </div>
 
         </div>
@@ -1532,7 +2910,9 @@ const DashboardPage = {
         <div
           class="stat-icon"
         >
+
           ${icon}
+
         </div>
 
       </div>
@@ -1549,30 +2929,44 @@ const DashboardPage = {
 
     const map =
       Object.fromEntries(
+
         funcs.map(
-          f =>
-            [
-              f.id,
-              f
-            ]
+
+          f => [
+
+            f.id,
+
+            f
+
+          ]
+
         )
+
       );
 
 
     const rows =
       [...list]
+
         .sort(
+
           (a,b) =>
+
             String(
               b.id ||
               ""
-            ).localeCompare(
-              String(
-                a.id ||
-                ""
-              )
             )
+              .localeCompare(
+
+                String(
+                  a.id ||
+                  ""
+                )
+
+              )
+
         )
+
         .slice(
           0,
           8
@@ -1593,7 +2987,8 @@ const DashboardPage = {
             Nenhuma declaração
           </strong>
 
-          Cadastre a primeira declaração para começar.
+          Cadastre a primeira declaração
+          para começar.
 
         </div>
 
@@ -1604,11 +2999,10 @@ const DashboardPage = {
 
     return `
 
-      <div
-        class="table-wrap"
-      >
+      <div class="table-wrap">
 
         <table>
+
 
           <thead>
 
@@ -1637,7 +3031,9 @@ const DashboardPage = {
 
           <tbody>
 
+
             ${rows.map(
+
               d => {
 
                 const f =
@@ -1650,13 +3046,19 @@ const DashboardPage = {
 
                   <tr>
 
+
                     <td>
 
                       <strong>
 
                         ${App.escapeHTML(
-                          f?.nome ||
+
+                          f?.nome
+
+                          ||
+
                           "Funcionário removido"
+
                         )}
 
                       </strong>
@@ -1667,21 +3069,27 @@ const DashboardPage = {
                     <td>
 
                       <span
+
                         class="
                           badge
                           ${
                             d.tipo ===
                             "horas"
+
                               ? "badge-hours"
+
                               : "badge-days"
                           }
                         "
+
                       >
 
                         ${
                           d.tipo ===
                           "horas"
+
                             ? "Horas"
+
                             : "Dias"
                         }
 
@@ -1693,8 +3101,13 @@ const DashboardPage = {
                     <td>
 
                       ${App.formatDate(
-                        d.data ||
+
+                        d.data
+
+                        ||
+
                         d.dataInicial
+
                       )}
 
                     </td>
@@ -1707,17 +3120,20 @@ const DashboardPage = {
                         "horas"
 
                           ? `${
-                              d.quantidadeHoras ||
+                              d.quantidadeHoras
+                              ||
                               0
                             } h`
 
                           : `${
-                              d.quantidadeDias ||
+                              d.quantidadeDias
+                              ||
                               0
                             } dia(s)`
                       }
 
                     </td>
+
 
                   </tr>
 
@@ -1727,7 +3143,9 @@ const DashboardPage = {
 
             ).join("")}
 
+
           </tbody>
+
 
         </table>
 

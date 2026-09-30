@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Acesso ao Sistema de Declarações da E.M. Profª Eunice Carneiro">
+  <title>Login | Sistema de Declarações</title>
+  <link rel="stylesheet" href="css/style.css?v=700">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#eef4ff,#f8fafc);font-family:Arial,sans-serif;color:#101828}
+    .login-page{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr}
+    .login-brand{background:#153764;color:white;display:flex;align-items:center;justify-content:center;padding:48px}
+    .login-brand-inner{max-width:520px}
+    .login-logo{width:76px;height:76px;border-radius:20px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:28px;font-weight:800;margin-bottom:22px}
+    .login-brand h1{font-size:36px;line-height:1.15;margin:0 0 12px}
+    .login-brand p{font-size:17px;line-height:1.6;color:#dbeafe;margin:0}
+    .login-form-side{display:flex;align-items:center;justify-content:center;padding:32px}
+    .login-card{width:100%;max-width:460px;background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:34px;box-shadow:0 24px 60px rgba(16,24,40,.10)}
+    .login-card h2{font-size:27px;margin:0 0 7px}
+    .login-sub{color:#667085;margin:0 0 25px}
+    .login-field{display:flex;flex-direction:column;gap:7px;margin-bottom:17px}
+    .login-field label{font-size:14px;font-weight:700}
+    .login-field input{height:48px;padding:0 14px;border:1px solid #d0d5dd;border-radius:10px;font-size:15px;outline:none}
+    .login-field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    .password-wrap{position:relative}
+    .password-wrap input{width:100%;padding-right:52px}
+    .password-toggle{position:absolute;right:9px;top:7px;height:34px;border:0;background:transparent;cursor:pointer;color:#475467}
+    .login-btn{width:100%;height:48px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px}
+    .login-btn:disabled{opacity:.65;cursor:not-allowed}
+    .login-msg{display:none;padding:11px 12px;border-radius:9px;margin-bottom:16px;font-size:14px}
+    .login-msg.show{display:block}
+    .login-msg.error{background:#fef3f2;color:#b42318;border:1px solid #fecdca}
+    .login-msg.info{background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}
+    .login-footer{margin-top:22px;padding-top:18px;border-top:1px solid #eaecf0;color:#667085;font-size:12px;line-height:1.5;text-align:center}
+    @media(max-width:850px){.login-page{grid-template-columns:1fr}.login-brand{display:none}.login-form-side{min-height:100vh;padding:20px}.login-card{padding:26px}}
+  </style>
+</head>
+<body>
+  <main class="login-page">
+    <section class="login-brand">
+      <div class="login-brand-inner">
+        <div class="login-logo">EC</div>
+        <h1>Sistema de Declarações</h1>
+        <p>E.M. Profª Eunice Carneiro</p>
+        <p style="margin-top:22px">Acesso restrito aos usuários autorizados da unidade escolar.</p>
+      </div>
+    </section>
+
+    <section class="login-form-side">
+      <div class="login-card">
+        <h2>Entrar no sistema</h2>
+        <p class="login-sub">Informe seu usuário e sua senha pessoal.</p>
+
+        <div id="loginMsg" class="login-msg"></div>
+
+        <form id="loginForm">
+          <div class="login-field">
+            <label for="usuario">Usuário</label>
+            <input id="usuario" name="usuario" type="text" autocomplete="username" required placeholder="Ex.: roger">
+          </div>
+
+          <div class="login-field">
+            <label for="senha">Senha</label>
+            <div class="password-wrap">
+              <input id="senha" name="senha" type="password" autocomplete="current-password" required placeholder="Digite sua senha">
+              <button class="password-toggle" id="toggleSenha" type="button" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+          </div>
+
+          <button id="btnEntrar" class="login-btn" type="submit">Entrar no sistema</button>
+        </form>
+
+        <div class="login-footer">
+          Seu acesso é individual. Não compartilhe sua senha.<br>
+          Sistema interno • E.M. Profª Eunice Carneiro
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/login.js?v=700"></script>
+</body>
+</html>
