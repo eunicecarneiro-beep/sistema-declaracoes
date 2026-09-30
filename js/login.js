@@ -4,7 +4,6 @@ const LOGIN_SUPABASE_URL =
 const LOGIN_SUPABASE_KEY =
   "sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx";
 
-
 const LOGIN_SESSION_KEY =
   "eunice_auth_session";
 
@@ -14,33 +13,30 @@ const LOGIN_PROFILE_KEY =
 const LOGIN_ACCESS_KEY =
   "eunice_access_id";
 
-
 const LOGIN_DOMAIN =
   "eunicecarneiro.local";
 
+
+/* =========================================================
+   NORMALIZAR USUÁRIO
+   ========================================================= */
 
 function normalizarUsuario(valor) {
 
   return String(
     valor || ""
   )
-
     .normalize("NFD")
-
     .replace(
       /[\u0300-\u036f]/g,
       ""
     )
-
     .toLowerCase()
-
     .trim()
-
     .replace(
       /\s+/g,
       "."
     )
-
     .replace(
       /[^a-z0-9._-]/g,
       ""
@@ -49,16 +45,54 @@ function normalizarUsuario(valor) {
 }
 
 
-function emailInterno(usuario) {
+/* =========================================================
+   DESCOBRIR E-MAIL DE LOGIN
+
+   Permite:
+   admin
+
+   OU:
+
+   e.eunicecarneiro@edu.montesclaros.mg.gov.br
+   ========================================================= */
+
+function obterEmailLogin(valor) {
+
+  const texto =
+    String(
+      valor || ""
+    )
+      .trim()
+      .toLowerCase();
+
+
+  if (
+    texto.includes("@")
+  ) {
+
+    return texto;
+
+  }
+
+
+  const usuario =
+    normalizarUsuario(
+      texto
+    );
+
 
   return (
-    normalizarUsuario(usuario) +
+    usuario +
     "@" +
     LOGIN_DOMAIN
   );
 
 }
 
+
+/* =========================================================
+   MENSAGENS
+   ========================================================= */
 
 function mensagem(
   texto,
@@ -70,8 +104,15 @@ function mensagem(
       "loginMsg"
     );
 
+
+  if (!el) {
+    return;
+  }
+
+
   el.textContent =
     texto;
+
 
   el.className =
     `login-msg show ${tipo}`;
@@ -86,14 +127,25 @@ function limparMensagem() {
       "loginMsg"
     );
 
+
+  if (!el) {
+    return;
+  }
+
+
   el.className =
     "login-msg";
+
 
   el.textContent =
     "";
 
 }
 
+
+/* =========================================================
+   LOGOUT AUXILIAR
+   ========================================================= */
 
 async function authLogout(
   token
@@ -129,25 +181,55 @@ async function authLogout(
 }
 
 
+/* =========================================================
+   ENTRAR
+   ========================================================= */
+
 async function entrar(
-  usuario,
+  usuarioOuEmail,
   senha
 ) {
 
-  const username =
-    normalizarUsuario(
-      usuario
-    );
+  const identificacao =
+    String(
+      usuarioOuEmail ||
+      ""
+    ).trim();
 
 
-  if (!username) {
+  if (!identificacao) {
 
     throw new Error(
-      "Informe um usuário válido."
+      "Informe seu usuário ou e-mail."
     );
 
   }
 
+
+  if (!senha) {
+
+    throw new Error(
+      "Informe sua senha."
+    );
+
+  }
+
+
+  const email =
+    obterEmailLogin(
+      identificacao
+    );
+
+
+  console.log(
+    "Tentativa de login:",
+    email
+  );
+
+
+  /* =======================================================
+     LOGIN SUPABASE AUTH
+     ======================================================= */
 
   const resposta =
     await fetch(
@@ -173,9 +255,7 @@ async function entrar(
           JSON.stringify({
 
             email:
-              emailInterno(
-                username
-              ),
+              email,
 
             password:
               senha
@@ -189,8 +269,25 @@ async function entrar(
 
   if (!resposta.ok) {
 
+    let detalhe =
+      "";
+
+
+    try {
+
+      detalhe =
+        await resposta.text();
+
+      console.error(
+        "Erro Supabase Auth:",
+        detalhe
+      );
+
+    } catch {}
+
+
     throw new Error(
-      "Usuário ou senha incorretos."
+      "Usuário/e-mail ou senha incorretos."
     );
 
   }
@@ -220,6 +317,10 @@ async function entrar(
   }
 
 
+  /* =======================================================
+     BUSCAR PERFIL
+     ======================================================= */
+
   const perfilResp =
     await fetch(
 
@@ -246,12 +347,18 @@ async function entrar(
 
   if (!perfilResp.ok) {
 
+    console.error(
+      await perfilResp.text()
+    );
+
+
     await authLogout(
       token
     );
 
+
     throw new Error(
-      "Seu perfil de acesso não foi encontrado."
+      "Seu login existe, mas o perfil de acesso ainda não foi configurado."
     );
 
   }
@@ -271,12 +378,17 @@ async function entrar(
       token
     );
 
+
     throw new Error(
-      "Seu perfil de acesso não foi encontrado."
+      "Seu login existe, mas o perfil de acesso ainda não foi cadastrado."
     );
 
   }
 
+
+  /* =======================================================
+     USUÁRIO INATIVO
+     ======================================================= */
 
   if (
     perfil.ativo ===
@@ -287,12 +399,17 @@ async function entrar(
       token
     );
 
+
     throw new Error(
       "Este usuário está inativo. Procure o administrador do sistema."
     );
 
   }
 
+
+  /* =======================================================
+     REGISTRAR ACESSO
+     ======================================================= */
 
   const acessoResp =
     await fetch(
@@ -363,8 +480,22 @@ async function entrar(
       dadosAcesso?.[0]?.id ||
       "";
 
+  } else {
+
+    console.warn(
+
+      "Não foi possível registrar o acesso:",
+
+      await acessoResp.text()
+
+    );
+
   }
 
+
+  /* =======================================================
+     SALVAR SESSÃO
+     ======================================================= */
 
   localStorage.setItem(
 
@@ -391,12 +522,25 @@ async function entrar(
   if (acessoId) {
 
     localStorage.setItem(
+
       LOGIN_ACCESS_KEY,
+
       acessoId
+
+    );
+
+  } else {
+
+    localStorage.removeItem(
+      LOGIN_ACCESS_KEY
     );
 
   }
 
+
+  /* =======================================================
+     REDIRECIONAR
+     ======================================================= */
 
   const parametros =
     new URLSearchParams(
@@ -410,21 +554,31 @@ async function entrar(
     );
 
 
-  location.replace(
-
+  if (
     next &&
     !next.includes(
       "login.html"
     )
+  ) {
 
-      ? next
+    location.replace(
+      next
+    );
 
-      : "index.html"
+  } else {
 
-  );
+    location.replace(
+      "index.html"
+    );
+
+  }
 
 }
 
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
 
 document.addEventListener(
 
@@ -433,6 +587,10 @@ document.addEventListener(
   () => {
 
 
+    /* =====================================================
+       JÁ ESTÁ LOGADO
+       ===================================================== */
+
     try {
 
       const sessao =
@@ -440,7 +598,10 @@ document.addEventListener(
 
           localStorage.getItem(
             LOGIN_SESSION_KEY
-          ) ||
+          )
+
+          ||
+
           "null"
 
         );
@@ -454,6 +615,7 @@ document.addEventListener(
           "index.html"
         );
 
+
         return;
 
       }
@@ -461,12 +623,18 @@ document.addEventListener(
     } catch {}
 
 
+    /* =====================================================
+       MOSTRAR / OCULTAR SENHA
+       ===================================================== */
+
     document
       .getElementById(
         "toggleSenha"
       )
       ?.addEventListener(
+
         "click",
+
         () => {
 
           const senha =
@@ -481,26 +649,46 @@ document.addEventListener(
             );
 
 
+          if (
+            !senha ||
+            !botao
+          ) {
+
+            return;
+
+          }
+
+
           const mostrar =
             senha.type ===
             "password";
 
 
           senha.type =
+
             mostrar
+
               ? "text"
+
               : "password";
 
 
           botao.textContent =
+
             mostrar
+
               ? "Ocultar"
+
               : "Mostrar";
 
         }
 
       );
 
+
+    /* =====================================================
+       FORMULÁRIO
+       ===================================================== */
 
     document
       .getElementById(
@@ -525,15 +713,19 @@ document.addEventListener(
 
 
           const usuario =
-            document.getElementById(
-              "usuario"
-            ).value;
+            document
+              .getElementById(
+                "usuario"
+              )
+              .value;
 
 
           const senha =
-            document.getElementById(
-              "senha"
-            ).value;
+            document
+              .getElementById(
+                "senha"
+              )
+              .value;
 
 
           btn.disabled =
@@ -553,9 +745,17 @@ document.addEventListener(
 
           } catch (erro) {
 
+            console.error(
+              erro
+            );
+
+
             mensagem(
 
-              erro.message ||
+              erro.message
+
+              ||
+
               "Não foi possível entrar no sistema."
 
             );
