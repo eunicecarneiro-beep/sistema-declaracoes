@@ -1,6 +1,18 @@
 /* =====================================================
-   CONFIGURAÇÃO ESPECÍFICA DAS DECLARAÇÕES
-   O app.js já possui SUPABASE_URL e SUPABASE_KEY.
+   DECLARAÇÕES — VERSÃO SEGURA
+
+   Requer app.js com:
+   - SUPABASE_KEY
+   - App.getAccessToken()
+   - App.layout()
+   - App.toast()
+
+   SEGURANÇA:
+   - bucket "declaracoes" PRIVADO;
+   - usa JWT do usuário logado;
+   - NÃO usa SUPABASE_KEY como token Bearer;
+   - anexos não possuem URL pública permanente;
+   - leitura, envio, alteração e exclusão exigem login.
 ===================================================== */
 
 const DECL_REST_URL =
@@ -14,362 +26,73 @@ const DECL_BUCKET =
 
 
 /* =====================================================
-   HEADERS
+   AUTENTICAÇÃO
+===================================================== */
+
+function obterTokenDeclaracoes() {
+
+  const token =
+    typeof App !== "undefined" &&
+    typeof App.getAccessToken === "function"
+      ? App.getAccessToken()
+      : null;
+
+
+  if (!token) {
+
+    throw new Error(
+      "Sua sessão expirou. Entre novamente no sistema."
+    );
+
+  }
+
+
+  return token;
+
+}
+
+
+/* =====================================================
+   HEADERS DO BANCO
 ===================================================== */
 
 function declaracoesHeaders(extra = {}) {
 
   return {
-    apikey: SUPABASE_KEY,
+
+    apikey:
+      SUPABASE_KEY,
 
     Authorization:
-      `Bearer ${SUPABASE_KEY}`,
+      `Bearer ${obterTokenDeclaracoes()}`,
 
     "Content-Type":
       "application/json",
 
     ...extra
+
   };
 
 }
 
 
 /* =====================================================
-   UPLOAD DE PDF / JPG / JPEG / PNG
+   HEADERS DO STORAGE
 ===================================================== */
 
-async function uploadArquivoDeclaracao(file) {
-
-  if (!file) {
-    return null;
-  }
-
-
-  if (file.size > 10 * 1024 * 1024) {
-
-    throw new Error(
-      "O arquivo deve ter no máximo 10MB."
-    );
-
-  }
-
-
-  const tiposPermitidos = [
-    "application/pdf",
-    "image/jpeg",
-    "image/png"
-  ];
-
-
-  if (
-    file.type &&
-    !tiposPermitidos.includes(file.type)
-  ) {
-
-    throw new Error(
-      "Formato não permitido. Use PDF, JPG, JPEG ou PNG."
-    );
-
-  }
-
-
-  const nomeSeguro = file.name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9._-]/g, "_");
-
-
-  const caminho =
-    `${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 9)}_${nomeSeguro}`;
-
-
-  const urlUpload =
-    `${DECL_STORAGE_URL}/object/` +
-    `${DECL_BUCKET}/${caminho}`;
-
-
-  const resposta = await fetch(
-    urlUpload,
-    {
-      method: "POST",
-
-      headers: {
-        apikey:
-          SUPABASE_KEY,
-
-        Authorization:
-          `Bearer ${SUPABASE_KEY}`,
-
-        "Content-Type":
-          file.type ||
-          "application/octet-stream",
-
-        "x-upsert":
-          "false"
-      },
-
-      body: file
-    }
-  );
-
-
-  if (!resposta.ok) {
-
-    const erro =
-      await resposta.text();
-
-    console.error(
-      "Erro no upload:",
-      erro
-    );
-
-    throw new Error(
-      "Não foi possível enviar o arquivo: " +
-      erro
-    );
-
-  }
-
-
-  const urlPublica =
-    `${DECL_STORAGE_URL}/object/public/` +
-    `${DECL_BUCKET}/${caminho}`;
-
+function declaracoesStorageHeaders(extra = {}) {
 
   return {
 
-    url:
-      urlPublica,
+    apikey:
+      SUPABASE_KEY,
 
-    nome:
-      file.name,
+    Authorization:
+      `Bearer ${obterTokenDeclaracoes()}`,
 
-    tipo:
-      file.type,
+    ...extra
 
-    tamanho:
-      file.size,
-
-    caminho:
-      caminho
   };
-
-}
-
-
-/* =====================================================
-   EXCLUIR ARQUIVO DO STORAGE
-===================================================== */
-
-async function excluirArquivoDeclaracao(
-  urlArquivo
-) {
-
-  if (!urlArquivo) {
-    return;
-  }
-
-
-  try {
-
-    const marcador =
-      `/object/public/${DECL_BUCKET}/`;
-
-
-    const posicao =
-      urlArquivo.indexOf(
-        marcador
-      );
-
-
-    if (posicao === -1) {
-      return;
-    }
-
-
-    const caminho =
-      urlArquivo.substring(
-        posicao + marcador.length
-      );
-
-
-    const urlDelete =
-      `${DECL_STORAGE_URL}/object/` +
-      `${DECL_BUCKET}/${caminho}`;
-
-
-    const resposta =
-      await fetch(
-        urlDelete,
-        {
-          method:
-            "DELETE",
-
-          headers: {
-            apikey:
-              SUPABASE_KEY,
-
-            Authorization:
-              `Bearer ${SUPABASE_KEY}`
-          }
-        }
-      );
-
-
-    if (!resposta.ok) {
-
-      console.warn(
-        "Não foi possível excluir o arquivo antigo.",
-        await resposta.text()
-      );
-
-    }
-
-  } catch (erro) {
-
-    console.warn(
-      "Erro ao excluir arquivo:",
-      erro
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   PEGAR FUNCIONÁRIOS DIRETAMENTE DO SUPABASE
-===================================================== */
-
-async function buscarFuncionariosDeclaracao() {
-
-  const resposta =
-    await fetch(
-      `${DECL_REST_URL}/funcionarios` +
-      `?select=id,nome_completo,matricula` +
-      `&order=nome_completo.asc`,
-      {
-        headers:
-          declaracoesHeaders()
-      }
-    );
-
-
-  if (!resposta.ok) {
-
-    throw new Error(
-      await resposta.text()
-    );
-
-  }
-
-
-  return await resposta.json();
-
-}
-
-
-/* =====================================================
-   BUSCAR DECLARAÇÕES
-   ORDEM POR DATA/PERÍODO
-   MAIS RECENTES PRIMEIRO
-===================================================== */
-
-async function buscarTodasDeclaracoes() {
-
-  const resposta =
-    await fetch(
-      `${DECL_REST_URL}/declaracoes` +
-      `?select=*` +
-      `&order=data.desc.nullslast`,
-      {
-        headers:
-          declaracoesHeaders()
-      }
-    );
-
-
-  if (!resposta.ok) {
-
-    throw new Error(
-      await resposta.text()
-    );
-
-  }
-
-
-  return await resposta.json();
-
-}
-
-
-/* =====================================================
-   BUSCAR UMA DECLARAÇÃO
-===================================================== */
-
-async function buscarDeclaracaoPorId(id) {
-
-  const resposta =
-    await fetch(
-      `${DECL_REST_URL}/declaracoes` +
-      `?id=eq.${encodeURIComponent(id)}` +
-      `&select=*`,
-      {
-        headers:
-          declaracoesHeaders()
-      }
-    );
-
-
-  if (!resposta.ok) {
-
-    throw new Error(
-      await resposta.text()
-    );
-
-  }
-
-
-  const dados =
-    await resposta.json();
-
-
-  return dados[0] || null;
-
-}
-
-
-/* =====================================================
-   FORMATAR DATA
-===================================================== */
-
-function formatarDataDeclaracao(data) {
-
-  if (!data) {
-    return "—";
-  }
-
-
-  const partes =
-    String(data)
-      .substring(0, 10)
-      .split("-");
-
-
-  if (
-    partes.length !== 3
-  ) {
-    return data;
-  }
-
-
-  return (
-    `${partes[2]}/` +
-    `${partes[1]}/` +
-    `${partes[0]}`
-  );
 
 }
 
@@ -411,18 +134,823 @@ function escaparDeclaracao(valor = "") {
 
 
 /* =====================================================
+   FORMATAR DATA
+===================================================== */
+
+function formatarDataDeclaracao(data) {
+
+  if (!data) {
+
+    return "—";
+
+  }
+
+
+  const partes =
+    String(data)
+      .substring(0, 10)
+      .split("-");
+
+
+  if (
+    partes.length !== 3
+  ) {
+
+    return data;
+
+  }
+
+
+  return (
+
+    `${partes[2]}/` +
+    `${partes[1]}/` +
+    `${partes[0]}`
+
+  );
+
+}
+
+
+/* =====================================================
+   EXTRAIR CAMINHO DO ARQUIVO
+
+   Serve tanto para os NOVOS registros
+   quanto para os arquivos ANTIGOS que
+   possuíam URL pública.
+===================================================== */
+
+function extrairCaminhoArquivoDeclaracao(
+  valor
+) {
+
+  if (!valor) {
+
+    return null;
+
+  }
+
+
+  const texto =
+    String(valor).trim();
+
+
+  if (!texto) {
+
+    return null;
+
+  }
+
+
+  const marcadores = [
+
+    `/object/public/${DECL_BUCKET}/`,
+
+    `/object/authenticated/${DECL_BUCKET}/`,
+
+    `/object/sign/${DECL_BUCKET}/`,
+
+    `/object/${DECL_BUCKET}/`
+
+  ];
+
+
+  for (
+    const marcador
+    of marcadores
+  ) {
+
+    const posicao =
+      texto.indexOf(
+        marcador
+      );
+
+
+    if (
+      posicao !== -1
+    ) {
+
+      let caminho =
+        texto
+          .substring(
+            posicao +
+            marcador.length
+          )
+          .split("?")[0];
+
+
+      try {
+
+        caminho =
+          decodeURIComponent(
+            caminho
+          );
+
+      } catch (_) {
+
+        // mantém o caminho original
+
+      }
+
+
+      return caminho;
+
+    }
+
+  }
+
+
+  /*
+    REGISTROS NOVOS:
+
+    arquivo_url não guarda mais
+    uma URL.
+
+    Guarda somente:
+    123456_nome-do-arquivo.pdf
+  */
+
+  if (
+    !texto.includes("://")
+  ) {
+
+    return texto.replace(
+      /^\/+/,
+      ""
+    );
+
+  }
+
+
+  return null;
+
+}
+
+
+/* =====================================================
+   CODIFICAR CAMINHO DO STORAGE
+===================================================== */
+
+function caminhoStorageCodificado(
+  caminho
+) {
+
+  return String(caminho)
+
+    .split("/")
+
+    .map(
+      parte =>
+        encodeURIComponent(
+          parte
+        )
+    )
+
+    .join("/");
+
+}
+
+
+/* =====================================================
+   UPLOAD DE ARQUIVO PRIVADO
+===================================================== */
+
+async function uploadArquivoDeclaracao(
+  file
+) {
+
+  if (!file) {
+
+    return null;
+
+  }
+
+
+  /* ===================================================
+     LIMITE DE 10 MB
+  =================================================== */
+
+  if (
+    file.size >
+    10 * 1024 * 1024
+  ) {
+
+    throw new Error(
+      "O arquivo deve ter no máximo 10MB."
+    );
+
+  }
+
+
+  /* ===================================================
+     FORMATOS PERMITIDOS
+  =================================================== */
+
+  const tiposPermitidos = [
+
+    "application/pdf",
+
+    "image/jpeg",
+
+    "image/png"
+
+  ];
+
+
+  if (
+
+    file.type &&
+
+    !tiposPermitidos.includes(
+      file.type
+    )
+
+  ) {
+
+    throw new Error(
+      "Formato não permitido. Use PDF, JPG, JPEG ou PNG."
+    );
+
+  }
+
+
+  /* ===================================================
+     NOME SEGURO
+  =================================================== */
+
+  const nomeSeguro =
+    file.name
+
+      .normalize("NFD")
+
+      .replace(
+        /[\u0300-\u036f]/g,
+        ""
+      )
+
+      .replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_"
+      );
+
+
+  /* ===================================================
+     NOME ÚNICO
+  =================================================== */
+
+  const caminho =
+
+    `${Date.now()}_` +
+
+    `${Math.random()
+      .toString(36)
+      .substring(2, 9)}_` +
+
+    `${nomeSeguro}`;
+
+
+  /* ===================================================
+     URL DE UPLOAD
+  =================================================== */
+
+  const urlUpload =
+
+    `${DECL_STORAGE_URL}/object/` +
+
+    `${DECL_BUCKET}/` +
+
+    `${caminhoStorageCodificado(
+      caminho
+    )}`;
+
+
+  /* ===================================================
+     ENVIO
+  =================================================== */
+
+  const resposta =
+    await fetch(
+
+      urlUpload,
+
+      {
+
+        method:
+          "POST",
+
+
+        headers:
+
+          declaracoesStorageHeaders({
+
+            "Content-Type":
+
+              file.type ||
+
+              "application/octet-stream",
+
+
+            "x-upsert":
+              "false"
+
+          }),
+
+
+        body:
+          file
+
+      }
+
+    );
+
+
+  /* ===================================================
+     ERRO
+  =================================================== */
+
+  if (
+    !resposta.ok
+  ) {
+
+    const erro =
+      await resposta.text();
+
+
+    console.error(
+      "Erro no upload:",
+      erro
+    );
+
+
+    if (
+
+      resposta.status === 401 ||
+
+      resposta.status === 403
+
+    ) {
+
+      throw new Error(
+        "Você não tem permissão para enviar o arquivo ou sua sessão expirou."
+      );
+
+    }
+
+
+    throw new Error(
+
+      "Não foi possível enviar o arquivo: " +
+
+      erro
+
+    );
+
+  }
+
+
+  /* ===================================================
+     IMPORTANTE:
+
+     NÃO CRIA URL PÚBLICA.
+
+     Somente o caminho interno é salvo.
+  =================================================== */
+
+  return {
+
+    url:
+      caminho,
+
+    nome:
+      file.name,
+
+    tipo:
+      file.type,
+
+    tamanho:
+      file.size,
+
+    caminho:
+      caminho
+
+  };
+
+}
+
+
+/* =====================================================
+   ABRIR ARQUIVO PRIVADO
+===================================================== */
+
+async function abrirArquivoDeclaracao(
+
+  valorArquivo,
+
+  nomeArquivo =
+    "declaracao"
+
+) {
+
+  const caminho =
+
+    extrairCaminhoArquivoDeclaracao(
+      valorArquivo
+    );
+
+
+  if (!caminho) {
+
+    throw new Error(
+      "Anexo não encontrado."
+    );
+
+  }
+
+
+  /* ===================================================
+     ENDPOINT AUTENTICADO
+  =================================================== */
+
+  const urlDownload =
+
+    `${DECL_STORAGE_URL}/object/authenticated/` +
+
+    `${DECL_BUCKET}/` +
+
+    `${caminhoStorageCodificado(
+      caminho
+    )}`;
+
+
+  const resposta =
+    await fetch(
+
+      urlDownload,
+
+      {
+
+        method:
+          "GET",
+
+        headers:
+          declaracoesStorageHeaders()
+
+      }
+
+    );
+
+
+  /* ===================================================
+     ERRO
+  =================================================== */
+
+  if (
+    !resposta.ok
+  ) {
+
+    const erro =
+      await resposta.text();
+
+
+    console.error(
+      "Erro ao abrir anexo:",
+      erro
+    );
+
+
+    if (
+
+      resposta.status === 401 ||
+
+      resposta.status === 403
+
+    ) {
+
+      throw new Error(
+        "Você não tem permissão para visualizar este anexo ou sua sessão expirou."
+      );
+
+    }
+
+
+    throw new Error(
+      "Não foi possível abrir o anexo."
+    );
+
+  }
+
+
+  /* ===================================================
+     TRANSFORMA EM BLOB
+  =================================================== */
+
+  const blob =
+    await resposta.blob();
+
+
+  const blobUrl =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  /* ===================================================
+     ABRIR
+  =================================================== */
+
+  const novaAba =
+
+    window.open(
+
+      blobUrl,
+
+      "_blank",
+
+      "noopener,noreferrer"
+
+    );
+
+
+  /* ===================================================
+     CASO POPUP SEJA BLOQUEADO
+  =================================================== */
+
+  if (!novaAba) {
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.href =
+      blobUrl;
+
+
+    link.download =
+      nomeArquivo ||
+      "declaracao";
+
+
+    document.body.appendChild(
+      link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+  }
+
+
+  /* ===================================================
+     LIBERAR MEMÓRIA
+  =================================================== */
+
+  setTimeout(
+
+    () =>
+      URL.revokeObjectURL(
+        blobUrl
+      ),
+
+    60000
+
+  );
+
+}
+
+
+/* =====================================================
+   EXCLUIR ARQUIVO PRIVADO
+===================================================== */
+
+async function excluirArquivoDeclaracao(
+  valorArquivo
+) {
+
+  if (!valorArquivo) {
+
+    return;
+
+  }
+
+
+  const caminho =
+
+    extrairCaminhoArquivoDeclaracao(
+      valorArquivo
+    );
+
+
+  if (!caminho) {
+
+    return;
+
+  }
+
+
+  const urlDelete =
+
+    `${DECL_STORAGE_URL}/object/` +
+
+    `${DECL_BUCKET}/` +
+
+    `${caminhoStorageCodificado(
+      caminho
+    )}`;
+
+
+  const resposta =
+    await fetch(
+
+      urlDelete,
+
+      {
+
+        method:
+          "DELETE",
+
+        headers:
+          declaracoesStorageHeaders()
+
+      }
+
+    );
+
+
+  if (
+    !resposta.ok
+  ) {
+
+    console.warn(
+
+      "Não foi possível excluir o arquivo antigo:",
+
+      await resposta.text()
+
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   BUSCAR FUNCIONÁRIOS
+===================================================== */
+
+async function buscarFuncionariosDeclaracao() {
+
+  const resposta =
+    await fetch(
+
+      `${DECL_REST_URL}/funcionarios` +
+
+      `?select=id,nome_completo,matricula` +
+
+      `&order=nome_completo.asc`,
+
+      {
+
+        headers:
+          declaracoesHeaders()
+
+      }
+
+    );
+
+
+  if (
+    !resposta.ok
+  ) {
+
+    throw new Error(
+      await resposta.text()
+    );
+
+  }
+
+
+  return await resposta.json();
+
+}
+
+
+/* =====================================================
+   BUSCAR TODAS AS DECLARAÇÕES
+===================================================== */
+
+async function buscarTodasDeclaracoes() {
+
+  const resposta =
+    await fetch(
+
+      `${DECL_REST_URL}/declaracoes` +
+
+      `?select=*` +
+
+      `&order=data.desc.nullslast`,
+
+      {
+
+        headers:
+          declaracoesHeaders()
+
+      }
+
+    );
+
+
+  if (
+    !resposta.ok
+  ) {
+
+    throw new Error(
+      await resposta.text()
+    );
+
+  }
+
+
+  return await resposta.json();
+
+}
+
+
+/* =====================================================
+   BUSCAR DECLARAÇÃO PELO ID
+===================================================== */
+
+async function buscarDeclaracaoPorId(
+  id
+) {
+
+  const resposta =
+    await fetch(
+
+      `${DECL_REST_URL}/declaracoes` +
+
+      `?id=eq.${encodeURIComponent(
+        id
+      )}` +
+
+      `&select=*`,
+
+      {
+
+        headers:
+          declaracoesHeaders()
+
+      }
+
+    );
+
+
+  if (
+    !resposta.ok
+  ) {
+
+    throw new Error(
+      await resposta.text()
+    );
+
+  }
+
+
+  const dados =
+    await resposta.json();
+
+
+  return dados[0] || null;
+
+}
+
+
+/* =====================================================
    PÁGINA DECLARAÇÕES
 ===================================================== */
 
 const DeclaracoesPage = {
 
+
+  /* ===================================================
+     CARREGAR
+  =================================================== */
+
   async init() {
 
     try {
 
+
       const [
+
         declaracoes,
+
         funcionarios
+
       ] = await Promise.all([
 
         buscarTodasDeclaracoes(),
@@ -432,11 +960,16 @@ const DeclaracoesPage = {
       ]);
 
 
+      /* ===============================================
+         MAPA DE FUNCIONÁRIOS
+      =============================================== */
+
       const mapaFuncionarios =
         {};
 
 
       funcionarios.forEach(
+
         funcionario => {
 
           mapaFuncionarios[
@@ -447,8 +980,13 @@ const DeclaracoesPage = {
             funcionario;
 
         }
+
       );
 
+
+      /* ===============================================
+         LAYOUT
+      =============================================== */
 
       App.layout(
 
@@ -479,7 +1017,9 @@ const DeclaracoesPage = {
               href="nova-declaracao.html"
               class="btn btn-primary"
             >
+
               ＋ Nova Declaração
+
             </a>
 
           </div>
@@ -489,21 +1029,27 @@ const DeclaracoesPage = {
 
         <div class="card panel">
 
+
           <div class="panel-header">
 
             <h3>
               Registros
             </h3>
 
-            <span class="badge badge-hours">
+            <span
+              class="badge badge-hours"
+            >
+
               ${declaracoes.length}
               no total
+
             </span>
 
           </div>
 
 
           ${
+
             declaracoes.length === 0
 
               ?
@@ -536,21 +1082,37 @@ const DeclaracoesPage = {
 
                     <tr>
 
-                      <th>ID</th>
+                      <th>
+                        ID
+                      </th>
 
-                      <th>Funcionário</th>
+                      <th>
+                        Funcionário
+                      </th>
 
-                      <th>Tipo</th>
+                      <th>
+                        Tipo
+                      </th>
 
-                      <th>Data / Período</th>
+                      <th>
+                        Data / Período
+                      </th>
 
-                      <th>Qtd.</th>
+                      <th>
+                        Qtd.
+                      </th>
 
-                      <th>Anexo</th>
+                      <th>
+                        Anexo
+                      </th>
 
-                      <th>Observações</th>
+                      <th>
+                        Observações
+                      </th>
 
-                      <th>Ações</th>
+                      <th>
+                        Ações
+                      </th>
 
                     </tr>
 
@@ -559,223 +1121,318 @@ const DeclaracoesPage = {
 
                   <tbody>
 
-                    ${declaracoes.map(
-                      declaracao => {
+                    ${
 
-                        const funcionario =
-                          mapaFuncionarios[
-                            String(
-                              declaracao.funcionario_id
-                            )
-                          ];
+                      declaracoes
+
+                        .map(
+
+                          declaracao => {
 
 
-                        const horas =
-                          declaracao.tipo ===
-                          "horas";
+                            const funcionario =
+
+                              mapaFuncionarios[
+
+                                String(
+                                  declaracao.funcionario_id
+                                )
+
+                              ];
 
 
-                        const dataInicial =
+                            const horas =
 
-                          declaracao.data_inicio ||
-
-                          declaracao.data_inicial ||
-
-                          declaracao.data;
+                              declaracao.tipo ===
+                              "horas";
 
 
-                        const dataFinal =
+                            const dataInicial =
 
-                          declaracao.data_fim ||
+                              declaracao.data_inicio ||
 
-                          declaracao.data_final ||
+                              declaracao.data_inicial ||
 
-                          declaracao.data;
-
-
-                        const periodo =
-
-                          horas
-
-                            ?
-
-                            formatarDataDeclaracao(
-                              declaracao.data
-                            )
-
-                            :
-
-                            `${formatarDataDeclaracao(
-                              dataInicial
-                            )} até ${formatarDataDeclaracao(
-                              dataFinal
-                            )}`;
+                              declaracao.data;
 
 
-                        const quantidade =
+                            const dataFinal =
 
-                          horas
+                              declaracao.data_fim ||
 
-                            ?
+                              declaracao.data_final ||
 
-                            `${Number(
-                              declaracao.quantidade_horas ||
-                              0
-                            )}h`
-
-                            :
-
-                            `${Number(
-                              declaracao.quantidade_dias ||
-                              0
-                            )} dia(s)`;
+                              declaracao.data;
 
 
-                        return `
+                            const periodo =
 
-                          <tr>
+                              horas
 
-                            <td>
-                              #${declaracao.id}
-                            </td>
+                                ?
+
+                                formatarDataDeclaracao(
+                                  declaracao.data
+                                )
+
+                                :
+
+                                `${formatarDataDeclaracao(
+                                  dataInicial
+                                )} até ${formatarDataDeclaracao(
+                                  dataFinal
+                                )}`;
 
 
-                            <td>
+                            const quantidade =
 
-                              <strong>
+                              horas
 
-                                ${escaparDeclaracao(
-                                  funcionario?.nome_completo ||
-                                  "Funcionário não encontrado"
+                                ?
+
+                                `${Number(
+                                  declaracao.quantidade_horas ||
+                                  0
+                                )}h`
+
+                                :
+
+                                `${Number(
+                                  declaracao.quantidade_dias ||
+                                  0
+                                )} dia(s)`;
+
+
+                            const idCodificado =
+
+                              encodeURIComponent(
+
+                                String(
+                                  declaracao.id
+                                )
+
+                              );
+
+
+                            return `
+
+                            <tr>
+
+
+                              <td>
+
+                                #${escaparDeclaracao(
+                                  declaracao.id
                                 )}
 
-                              </strong>
-
-                            </td>
+                              </td>
 
 
-                            <td>
+                              <td>
 
-                              <span
-                                class="badge ${
-                                  horas
-                                    ? "badge-hours"
-                                    : "badge-days"
-                                }"
-                              >
+                                <strong>
+
+                                  ${escaparDeclaracao(
+
+                                    funcionario?.nome_completo ||
+
+                                    "Funcionário não encontrado"
+
+                                  )}
+
+                                </strong>
+
+                              </td>
+
+
+                              <td>
+
+                                <span
+
+                                  class="badge ${
+
+                                    horas
+
+                                      ?
+
+                                      "badge-hours"
+
+                                      :
+
+                                      "badge-days"
+
+                                  }"
+
+                                >
+
+                                  ${
+
+                                    horas
+
+                                      ?
+
+                                      "Horas"
+
+                                      :
+
+                                      "Dias"
+
+                                  }
+
+                                </span>
+
+                              </td>
+
+
+                              <td>
+
+                                ${periodo}
+
+                              </td>
+
+
+                              <td>
+
+                                ${quantidade}
+
+                              </td>
+
+
+                              <td>
 
                                 ${
-                                  horas
-                                    ? "Horas"
-                                    : "Dias"
+
+                                  declaracao.arquivo_url
+
+                                    ?
+
+                                    `
+
+                                    <button
+
+                                      type="button"
+
+                                      class="
+                                        badge
+                                        badge-hours
+                                      "
+
+                                      style="
+                                        border:none;
+                                        cursor:pointer;
+                                      "
+
+                                      onclick="
+                                        DeclaracoesPage.verAnexo(
+                                          '${idCodificado}'
+                                        )
+                                      "
+
+                                    >
+
+                                      📎 Ver Anexo
+
+                                    </button>
+
+                                    `
+
+                                    :
+
+                                    `
+
+                                    <span
+                                      style="color:#888;"
+                                    >
+
+                                      Sem anexo
+
+                                    </span>
+
+                                    `
+
                                 }
 
-                              </span>
-
-                            </td>
+                              </td>
 
 
-                            <td>
-                              ${periodo}
-                            </td>
+                              <td>
+
+                                ${escaparDeclaracao(
+
+                                  declaracao.observacoes ||
+
+                                  declaracao.descricao ||
+
+                                  "—"
+
+                                )}
+
+                              </td>
 
 
-                            <td>
-                              ${quantidade}
-                            </td>
+                              <td>
 
 
-                            <td>
+                                <a
 
-                              ${
-                                declaracao.arquivo_url
+                                  href="
+                                    nova-declaracao.html?id=${
+                                      encodeURIComponent(
+                                        declaracao.id
+                                      )
+                                    }
+                                  "
 
-                                  ?
+                                  class="
+                                    btn
+                                    btn-secondary
+                                    btn-sm
+                                  "
 
-                                  `
+                                >
 
-                                  <a
-                                    href="${declaracao.arquivo_url}"
-                                    target="_blank"
-                                    class="badge badge-hours"
-                                    style="text-decoration:none;"
-                                  >
+                                  Editar
 
-                                    📎 Ver Anexo
-
-                                  </a>
-
-                                  `
-
-                                  :
-
-                                  `
-
-                                  <span
-                                    style="color:#888;"
-                                  >
-                                    Sem anexo
-                                  </span>
-
-                                  `
-
-                              }
-
-                            </td>
+                                </a>
 
 
-                            <td>
+                                <button
 
-                              ${escaparDeclaracao(
-                                declaracao.observacoes ||
-                                declaracao.descricao ||
-                                "—"
-                              )}
+                                  type="button"
 
-                            </td>
+                                  class="
+                                    btn
+                                    btn-danger
+                                    btn-sm
+                                  "
 
+                                  onclick="
+                                    DeclaracoesPage.excluir(
+                                      '${idCodificado}'
+                                    )
+                                  "
 
-                            <td>
+                                >
 
-                              <a
-                                href="
-                                  nova-declaracao.html?id=${
-                                    declaracao.id
-                                  }
-                                "
-                                class="
-                                  btn
-                                  btn-secondary
-                                  btn-sm
-                                "
-                              >
-                                Editar
-                              </a>
+                                  Excluir
+
+                                </button>
 
 
-                              <button
-                                class="
-                                  btn
-                                  btn-danger
-                                  btn-sm
-                                "
-                                onclick="
-                                  DeclaracoesPage.excluir(
-                                    '${declaracao.id}'
-                                  )
-                                "
-                              >
-                                Excluir
-                              </button>
+                              </td>
 
-                            </td>
 
-                          </tr>
+                            </tr>
 
-                        `;
+                            `;
 
-                      }
-                    ).join("")}
+                          }
+
+                        )
+
+                        .join("")
+
+                    }
 
                   </tbody>
 
@@ -784,6 +1441,7 @@ const DeclaracoesPage = {
               </div>
 
               `
+
           }
 
         </div>
@@ -792,16 +1450,27 @@ const DeclaracoesPage = {
 
       );
 
+
     } catch (erro) {
 
+
       console.error(
+
         "Erro ao carregar declarações:",
+
         erro
+
       );
 
+
       App.toast(
+
+        erro.message ||
+
         "Erro ao carregar as declarações.",
+
         "danger"
+
       );
 
     }
@@ -809,12 +1478,102 @@ const DeclaracoesPage = {
   },
 
 
-  async excluir(id) {
+  /* ===================================================
+     VISUALIZAR ANEXO
+  =================================================== */
+
+  async verAnexo(
+    idCodificado
+  ) {
+
+    try {
+
+
+      const id =
+
+        decodeURIComponent(
+          idCodificado
+        );
+
+
+      const declaracao =
+
+        await buscarDeclaracaoPorId(
+          id
+        );
+
+
+      if (
+
+        !declaracao ||
+
+        !declaracao.arquivo_url
+
+      ) {
+
+        throw new Error(
+          "Anexo não encontrado."
+        );
+
+      }
+
+
+      await abrirArquivoDeclaracao(
+
+        declaracao.arquivo_url,
+
+        declaracao.arquivo_nome ||
+
+        "declaracao"
+
+      );
+
+
+    } catch (erro) {
+
+
+      console.error(
+        erro
+      );
+
+
+      App.toast(
+
+        erro.message ||
+
+        "Erro ao abrir o anexo.",
+
+        "danger"
+
+      );
+
+    }
+
+  },
+
+
+  /* ===================================================
+     EXCLUIR DECLARAÇÃO
+  =================================================== */
+
+  async excluir(
+    idCodificado
+  ) {
+
+
+    const id =
+
+      decodeURIComponent(
+        idCodificado
+      );
+
 
     if (
+
       !confirm(
         "Tem certeza que deseja excluir esta declaração?"
       )
+
     ) {
 
       return;
@@ -824,28 +1583,27 @@ const DeclaracoesPage = {
 
     try {
 
+
       const declaracao =
+
         await buscarDeclaracaoPorId(
           id
         );
 
 
-      if (
-        declaracao?.arquivo_url
-      ) {
-
-        await excluirArquivoDeclaracao(
-          declaracao.arquivo_url
-        );
-
-      }
-
+      /* ===============================================
+         EXCLUI REGISTRO DO BANCO
+      =============================================== */
 
       const resposta =
+
         await fetch(
 
           `${DECL_REST_URL}/declaracoes` +
-          `?id=eq.${encodeURIComponent(id)}`,
+
+          `?id=eq.${encodeURIComponent(
+            id
+          )}`,
 
           {
 
@@ -854,6 +1612,7 @@ const DeclaracoesPage = {
 
             headers:
               declaracoesHeaders()
+
           }
 
         );
@@ -870,6 +1629,42 @@ const DeclaracoesPage = {
       }
 
 
+      /* ===============================================
+         EXCLUI ANEXO DO STORAGE
+      =============================================== */
+
+      if (
+        declaracao?.arquivo_url
+      ) {
+
+        try {
+
+
+          await excluirArquivoDeclaracao(
+
+            declaracao.arquivo_url
+
+          );
+
+
+        } catch (
+          erroStorage
+        ) {
+
+
+          console.warn(
+
+            "O registro foi excluído, mas o anexo não pôde ser removido:",
+
+            erroStorage
+
+          );
+
+        }
+
+      }
+
+
       App.toast(
         "Declaração excluída com sucesso!"
       );
@@ -877,16 +1672,26 @@ const DeclaracoesPage = {
 
       await this.init();
 
+
     } catch (erro) {
+
 
       console.error(
         erro
       );
 
+
       App.toast(
+
         "Erro ao excluir: " +
-        erro.message,
+
+        (
+          erro.message ||
+          erro
+        ),
+
         "danger"
+
       );
 
     }
@@ -897,23 +1702,36 @@ const DeclaracoesPage = {
 
 
 /* =====================================================
-   NOVA DECLARAÇÃO
+   NOVA / EDITAR DECLARAÇÃO
 ===================================================== */
 
 const NovaDeclaracaoPage = {
 
-  funcionarios: [],
 
+  funcionarios:
+    [],
+
+
+  declaracaoAtual:
+    null,
+
+
+  /* ===================================================
+     INICIAR
+  =================================================== */
 
   async init() {
 
+
     const parametros =
+
       new URLSearchParams(
         window.location.search
       );
 
 
     const id =
+
       parametros.get(
         "id"
       );
@@ -921,7 +1739,9 @@ const NovaDeclaracaoPage = {
 
     try {
 
+
       this.funcionarios =
+
         await buscarFuncionariosDeclaracao();
 
 
@@ -932,6 +1752,7 @@ const NovaDeclaracaoPage = {
       if (id) {
 
         declaracao =
+
           await buscarDeclaracaoPorId(
             id
           );
@@ -939,23 +1760,46 @@ const NovaDeclaracaoPage = {
       }
 
 
+      this.declaracaoAtual =
+        declaracao;
+
+
       const editando =
         !!declaracao;
 
 
+      /* ===============================================
+         LAYOUT
+      =============================================== */
+
       App.layout(
 
         editando
-          ? "Editar Declaração"
-          : "Nova Declaração",
+
+          ?
+
+          "Editar Declaração"
+
+          :
+
+          "Nova Declaração",
+
 
         editando
-          ? "Atualização dos dados da declaração"
-          : "Lançamento e anexação do documento",
+
+          ?
+
+          "Atualização dos dados da declaração"
+
+          :
+
+          "Lançamento e anexação do documento",
+
 
         `
 
         <div class="card panel">
+
 
           <form
             id="formDeclaracao"
@@ -971,77 +1815,111 @@ const NovaDeclaracaoPage = {
                 <label
                   for="funcionarioDeclaracao"
                 >
+
                   Funcionário *
+
                 </label>
 
 
                 <select
+
                   id="funcionarioDeclaracao"
+
                   class="input"
+
                   required
+
                 >
 
+
                   <option value="">
+
                     Selecione um funcionário...
+
                   </option>
 
 
-                  ${this.funcionarios.map(
-                    funcionario => {
+                  ${
 
-                      const fid =
-                        Number(
-                          funcionario.id
-                        );
+                    this.funcionarios
 
+                      .map(
 
-                      if (
-                        !Number.isInteger(fid) ||
-                        fid <= 0
-                      ) {
-
-                        return "";
-
-                      }
+                        funcionario => {
 
 
-                      const selecionado =
+                          const fid =
 
-                        editando &&
-
-                        Number(
-                          declaracao.funcionario_id
-                        ) === fid
-
-                          ? "selected"
-
-                          : "";
+                            Number(
+                              funcionario.id
+                            );
 
 
-                      return `
+                          if (
 
-                        <option
-                          value="${fid}"
-                          ${selecionado}
-                        >
+                            !Number.isInteger(
+                              fid
+                            ) ||
 
-                          ${escaparDeclaracao(
-                            funcionario.nome_completo
-                          )}
+                            fid <= 0
 
-                          —
+                          ) {
 
-                          ${escaparDeclaracao(
-                            funcionario.matricula ||
-                            ""
-                          )}
+                            return "";
 
-                        </option>
+                          }
 
-                      `;
 
-                    }
-                  ).join("")}
+                          const selecionado =
+
+                            editando &&
+
+                            Number(
+                              declaracao.funcionario_id
+                            ) === fid
+
+                              ?
+
+                              "selected"
+
+                              :
+
+                              "";
+
+
+                          return `
+
+                          <option
+
+                            value="${fid}"
+
+                            ${selecionado}
+
+                          >
+
+                            ${escaparDeclaracao(
+                              funcionario.nome_completo
+                            )}
+
+                            —
+
+                            ${escaparDeclaracao(
+                              funcionario.matricula ||
+                              ""
+                            )}
+
+                          </option>
+
+                          `;
+
+                        }
+
+                      )
+
+                      .join("")
+
+                  }
+
 
                 </select>
 
@@ -1050,100 +1928,185 @@ const NovaDeclaracaoPage = {
 
               <div class="field">
 
-                <label for="tipoDeclaracao">
+
+                <label
+                  for="tipoDeclaracao"
+                >
+
                   Tipo de declaração *
+
                 </label>
 
 
                 <select
+
                   id="tipoDeclaracao"
+
                   class="input"
+
                   required
+
                 >
 
+
                   <option
+
                     value="horas"
+
                     ${
+
                       editando &&
-                      declaracao.tipo === "horas"
-                        ? "selected"
-                        : ""
+
+                      declaracao.tipo ===
+                      "horas"
+
+                        ?
+
+                        "selected"
+
+                        :
+
+                        ""
+
                     }
+
                   >
+
                     Declaração de Horas
+
                   </option>
 
 
                   <option
+
                     value="dias"
+
                     ${
+
                       editando &&
-                      declaracao.tipo === "dias"
-                        ? "selected"
-                        : ""
+
+                      declaracao.tipo ===
+                      "dias"
+
+                        ?
+
+                        "selected"
+
+                        :
+
+                        ""
+
                     }
+
                   >
+
                     Declaração de Dias
+
                   </option>
+
 
                 </select>
 
+
               </div>
+
 
             </div>
 
 
-            <div id="camposDeclaracao"></div>
+            <div
+              id="camposDeclaracao"
+            ></div>
 
 
             <div class="field">
 
-              <label for="observacoesDeclaracao">
+
+              <label
+                for="observacoesDeclaracao"
+              >
+
                 Observações
+
               </label>
 
 
               <textarea
+
                 id="observacoesDeclaracao"
+
                 class="input"
+
                 rows="3"
-                placeholder="Informações adicionais..."
+
+                placeholder="
+                  Informações adicionais...
+                "
+
               >${escaparDeclaracao(
+
                 declaracao?.observacoes ||
+
                 declaracao?.descricao ||
+
                 ""
+
               )}</textarea>
+
 
             </div>
 
 
             <div class="field">
 
-              <label for="arquivoDeclaracao">
+
+              <label
+                for="arquivoDeclaracao"
+              >
 
                 ${
+
                   editando
-                    ? "Substituir declaração (opcional)"
-                    : "Anexar declaração"
+
+                    ?
+
+                    "Substituir declaração (opcional)"
+
+                    :
+
+                    "Anexar declaração"
+
                 }
 
               </label>
 
 
               <input
+
                 type="file"
+
                 id="arquivoDeclaracao"
+
                 class="input-file"
-                accept=".pdf,.jpg,.jpeg,.png"
+
+                accept="
+                  .pdf,
+                  .jpg,
+                  .jpeg,
+                  .png
+                "
+
               >
 
 
               <small
+
                 style="
                   display:block;
                   margin-top:6px;
                   color:#666;
                 "
+
               >
 
                 Formatos aceitos:
@@ -1154,6 +2117,7 @@ const NovaDeclaracaoPage = {
 
 
               ${
+
                 declaracao?.arquivo_url
 
                   ?
@@ -1161,19 +2125,34 @@ const NovaDeclaracaoPage = {
                   `
 
                   <p
-                    style="margin-top:10px;"
+                    style="
+                      margin-top:10px;
+                    "
                   >
 
-                    <a
-                      href="${declaracao.arquivo_url}"
-                      target="_blank"
-                      class="badge badge-hours"
-                      style="text-decoration:none;"
+                    <button
+
+                      type="button"
+
+                      class="
+                        badge
+                        badge-hours
+                      "
+
+                      style="
+                        border:none;
+                        cursor:pointer;
+                      "
+
+                      onclick="
+                        NovaDeclaracaoPage.verAnexoAtual()
+                      "
+
                     >
 
                       📎 Visualizar Anexo Atual
 
-                    </a>
+                    </button>
 
                   </p>
 
@@ -1185,40 +2164,61 @@ const NovaDeclaracaoPage = {
 
               }
 
+
             </div>
 
 
             <div class="form-actions">
 
+
               <a
+
                 href="declaracoes.html"
+
                 class="btn btn-secondary"
+
               >
+
                 Cancelar
+
               </a>
 
 
               <button
+
                 type="submit"
+
                 class="btn btn-primary"
+
               >
 
                 ${
+
                   editando
-                    ? "Salvar Alterações"
-                    : "Salvar declaração"
+
+                    ?
+
+                    "Salvar Alterações"
+
+                    :
+
+                    "Salvar declaração"
+
                 }
 
               </button>
+
 
             </div>
 
 
           </form>
 
+
         </div>
 
         `
+
       );
 
 
@@ -1229,14 +2229,24 @@ const NovaDeclaracaoPage = {
 
     } catch (erro) {
 
+
       console.error(
+
         "Erro ao carregar formulário:",
+
         erro
+
       );
 
+
       App.toast(
+
+        erro.message ||
+
         "Erro ao carregar o formulário.",
+
         "danger"
+
       );
 
     }
@@ -1244,231 +2254,436 @@ const NovaDeclaracaoPage = {
   },
 
 
+  /* ===================================================
+     VISUALIZAR ANEXO ATUAL
+  =================================================== */
+
+  async verAnexoAtual() {
+
+    try {
+
+
+      const declaracao =
+        this.declaracaoAtual;
+
+
+      if (
+
+        !declaracao ||
+
+        !declaracao.arquivo_url
+
+      ) {
+
+        throw new Error(
+          "Anexo não encontrado."
+        );
+
+      }
+
+
+      await abrirArquivoDeclaracao(
+
+        declaracao.arquivo_url,
+
+        declaracao.arquivo_nome ||
+
+        "declaracao"
+
+      );
+
+
+    } catch (erro) {
+
+
+      console.error(
+        erro
+      );
+
+
+      App.toast(
+
+        erro.message ||
+
+        "Erro ao abrir o anexo.",
+
+        "danger"
+
+      );
+
+    }
+
+  },
+
+
+  /* ===================================================
+     CONFIGURAR FORMULÁRIO
+  =================================================== */
+
   configurarFormulario(
     declaracao
   ) {
 
+
     const tipo =
+
       document.getElementById(
         "tipoDeclaracao"
       );
 
 
     const campos =
+
       document.getElementById(
         "camposDeclaracao"
       );
 
 
-    const renderizar =
-      () => {
+    /* ===============================================
+       RENDERIZAR CAMPOS
+    =============================================== */
+
+    const renderizar = () => {
 
 
-        if (
-          tipo.value === "horas"
-        ) {
+      /* =============================================
+         HORAS
+      ============================================= */
 
-          campos.innerHTML = `
-
-            <div class="field">
-
-              <label for="dataDeclaracao">
-                Data *
-              </label>
-
-              <input
-                type="date"
-                id="dataDeclaracao"
-                class="input"
-                value="${
-                  declaracao?.data ||
-                  ""
-                }"
-                required
-              >
-
-            </div>
+      if (
+        tipo.value ===
+        "horas"
+      ) {
 
 
-            <div class="field">
-
-              <label for="horaInicialDeclaracao">
-                Horário inicial
-              </label>
-
-              <input
-                type="time"
-                id="horaInicialDeclaracao"
-                class="input"
-                value="${
-                  declaracao?.hora_inicial ||
-                  ""
-                }"
-              >
-
-            </div>
+        campos.innerHTML = `
 
 
-            <div class="field">
+          <div class="field">
 
-              <label for="horaFinalDeclaracao">
-                Horário final
-              </label>
+            <label
+              for="dataDeclaracao"
+            >
 
-              <input
-                type="time"
-                id="horaFinalDeclaracao"
-                class="input"
-                value="${
-                  declaracao?.hora_final ||
-                  ""
-                }"
-              >
+              Data *
 
-            </div>
+            </label>
 
 
-            <div class="field">
+            <input
 
-              <label for="quantidadeHorasDeclaracao">
-                Quantidade de horas
-              </label>
+              type="date"
 
-              <input
-                type="number"
-                id="quantidadeHorasDeclaracao"
-                class="input"
-                min="0"
-                step="0.5"
-                value="${
-                  declaracao?.quantidade_horas ??
-                  ""
-                }"
-              >
+              id="dataDeclaracao"
 
-            </div>
+              class="input"
 
-          `;
+              value="${
+                declaracao?.data ||
+                ""
+              }"
 
-        } else {
+              required
 
-          campos.innerHTML = `
+            >
 
-            <div class="field">
-
-              <label for="dataInicialDeclaracao">
-                Data inicial *
-              </label>
-
-              <input
-                type="date"
-                id="dataInicialDeclaracao"
-                class="input"
-                value="${
-                  declaracao?.data_inicio ||
-                  declaracao?.data_inicial ||
-                  declaracao?.data ||
-                  ""
-                }"
-                required
-              >
-
-            </div>
+          </div>
 
 
-            <div class="field">
+          <div class="field">
 
-              <label for="dataFinalDeclaracao">
-                Data final
-              </label>
+            <label
+              for="horaInicialDeclaracao"
+            >
 
-              <input
-                type="date"
-                id="dataFinalDeclaracao"
-                class="input"
-                value="${
-                  declaracao?.data_fim ||
-                  declaracao?.data_final ||
-                  ""
-                }"
-              >
+              Horário inicial
 
-            </div>
+            </label>
 
 
-            <div class="field">
+            <input
 
-              <label for="quantidadeDiasDeclaracao">
-                Quantidade de dias
-              </label>
+              type="time"
 
-              <input
-                type="number"
-                id="quantidadeDiasDeclaracao"
-                class="input"
-                min="1"
-                step="1"
-                value="${
-                  declaracao?.quantidade_dias ??
-                  ""
-                }"
-              >
+              id="horaInicialDeclaracao"
 
-            </div>
+              class="input"
 
-          `;
+              value="${
+                declaracao?.hora_inicial ||
+                ""
+              }"
 
-        }
+            >
+
+          </div>
 
 
-        const campoData =
+          <div class="field">
 
-          document.getElementById(
-            "dataDeclaracao"
-          )
+            <label
+              for="horaFinalDeclaracao"
+            >
 
-          ||
+              Horário final
 
-          document.getElementById(
-            "dataInicialDeclaracao"
-          );
+            </label>
 
 
-        if (
-          campoData &&
-          !campoData.value
-        ) {
+            <input
 
-          campoData.value =
-            new Date()
-              .toISOString()
-              .slice(0, 10);
+              type="time"
 
-        }
+              id="horaFinalDeclaracao"
 
-      };
+              class="input"
+
+              value="${
+                declaracao?.hora_final ||
+                ""
+              }"
+
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label
+              for="quantidadeHorasDeclaracao"
+            >
+
+              Quantidade de horas
+
+            </label>
+
+
+            <input
+
+              type="number"
+
+              id="quantidadeHorasDeclaracao"
+
+              class="input"
+
+              min="0"
+
+              step="0.5"
+
+              value="${
+                declaracao?.quantidade_horas ??
+                ""
+              }"
+
+            >
+
+          </div>
+
+
+        `;
+
+
+      }
+
+
+      /* =============================================
+         DIAS
+      ============================================= */
+
+      else {
+
+
+        campos.innerHTML = `
+
+
+          <div class="field">
+
+            <label
+              for="dataInicialDeclaracao"
+            >
+
+              Data inicial *
+
+            </label>
+
+
+            <input
+
+              type="date"
+
+              id="dataInicialDeclaracao"
+
+              class="input"
+
+              value="${
+
+                declaracao?.data_inicio ||
+
+                declaracao?.data_inicial ||
+
+                declaracao?.data ||
+
+                ""
+
+              }"
+
+              required
+
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label
+              for="dataFinalDeclaracao"
+            >
+
+              Data final
+
+            </label>
+
+
+            <input
+
+              type="date"
+
+              id="dataFinalDeclaracao"
+
+              class="input"
+
+              value="${
+
+                declaracao?.data_fim ||
+
+                declaracao?.data_final ||
+
+                ""
+
+              }"
+
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label
+              for="quantidadeDiasDeclaracao"
+            >
+
+              Quantidade de dias
+
+            </label>
+
+
+            <input
+
+              type="number"
+
+              id="quantidadeDiasDeclaracao"
+
+              class="input"
+
+              min="1"
+
+              step="1"
+
+              value="${
+                declaracao?.quantidade_dias ??
+                ""
+              }"
+
+            >
+
+          </div>
+
+
+        `;
+
+      }
+
+
+      /* =============================================
+         DATA ATUAL AUTOMÁTICA
+      ============================================= */
+
+      const campoData =
+
+        document.getElementById(
+          "dataDeclaracao"
+        )
+
+        ||
+
+        document.getElementById(
+          "dataInicialDeclaracao"
+        );
+
+
+      if (
+
+        campoData &&
+
+        !campoData.value
+
+      ) {
+
+        campoData.value =
+
+          new Date()
+
+            .toISOString()
+
+            .slice(
+              0,
+              10
+            );
+
+      }
+
+    };
 
 
     tipo.addEventListener(
+
       "change",
+
       renderizar
+
     );
 
 
     renderizar();
 
 
+    /* ===============================================
+       SUBMIT
+    =============================================== */
+
     document
+
       .getElementById(
         "formDeclaracao"
       )
+
       .addEventListener(
+
         "submit",
+
         evento =>
+
           this.salvar(
+
             evento,
+
             declaracao
+
           )
+
       );
 
   },
@@ -1479,74 +2694,109 @@ const NovaDeclaracaoPage = {
   =================================================== */
 
   async salvar(
+
     evento,
+
     declaracaoAntiga
+
   ) {
+
 
     evento.preventDefault();
 
 
     const select =
+
       document.getElementById(
         "funcionarioDeclaracao"
       );
 
 
-    /*
-      CORREÇÃO PRINCIPAL:
-      pega DIRETAMENTE o ID numérico
-      da tabela funcionarios.
-    */
-
     const funcionarioId =
+
       Number(
         select.value
       );
 
 
+    /* ===============================================
+       VALIDAR FUNCIONÁRIO
+    =============================================== */
+
     if (
+
       !Number.isInteger(
         funcionarioId
-      ) ||
+      )
+
+      ||
+
       funcionarioId <= 0
+
     ) {
 
+
       App.toast(
+
         "Selecione um funcionário válido.",
+
         "danger"
+
       );
 
-      console.error(
-        "ID do funcionário:",
-        select.value
-      );
 
       return;
 
     }
 
 
+    /* ===============================================
+       TIPO
+    =============================================== */
+
     const tipo =
+
       document.getElementById(
         "tipoDeclaracao"
       ).value;
 
 
+    /* ===============================================
+       OBSERVAÇÕES
+    =============================================== */
+
     const observacoes =
+
       document.getElementById(
         "observacoesDeclaracao"
-      ).value || "";
+      ).value
 
+      ||
+
+      "";
+
+
+    /* ===============================================
+       ARQUIVO
+    =============================================== */
 
     const arquivoInput =
+
       document.getElementById(
         "arquivoDeclaracao"
       );
 
 
+    /* ===============================================
+       BOTÃO
+    =============================================== */
+
     const botao =
+
       evento.target.querySelector(
+
         'button[type="submit"]'
+
       );
 
 
@@ -1558,43 +2808,75 @@ const NovaDeclaracaoPage = {
       true;
 
 
+    /*
+      Usado para apagar o novo arquivo
+      caso o upload funcione mas o banco
+      rejeite o registro.
+    */
+
+    let novoArquivoEnviado =
+      null;
+
+
     try {
 
 
-      /*
-        Mantém os dados do anexo antigo.
-      */
+      /* =============================================
+         DADOS DO ANEXO ANTIGO
+      ============================================= */
 
       let arquivoUrl =
-        declaracaoAntiga?.arquivo_url ||
+
+        declaracaoAntiga?.arquivo_url
+
+        ||
+
         null;
 
 
       let arquivoNome =
-        declaracaoAntiga?.arquivo_nome ||
+
+        declaracaoAntiga?.arquivo_nome
+
+        ||
+
         null;
 
 
       let tipoArquivo =
-        declaracaoAntiga?.tipo_arquivo ||
+
+        declaracaoAntiga?.tipo_arquivo
+
+        ||
+
         null;
 
 
       let tamanhoArquivo =
+
         Number(
-          declaracaoAntiga?.tamanho_arquivo ||
+
+          declaracaoAntiga?.tamanho_arquivo
+
+          ||
+
           0
+
         );
 
 
       const arquivoAntigo =
-        declaracaoAntiga?.arquivo_url ||
+
+        declaracaoAntiga?.arquivo_url
+
+        ||
+
         null;
 
 
-      /*
-        UPLOAD DO NOVO ARQUIVO
-      */
+      /* =============================================
+         NOVO ARQUIVO
+      ============================================= */
 
       if (
 
@@ -1606,11 +2888,13 @@ const NovaDeclaracaoPage = {
 
       ) {
 
+
         botao.textContent =
           "Enviando arquivo...";
 
 
-        const resultado =
+        novoArquivoEnviado =
+
           await uploadArquivoDeclaracao(
 
             arquivoInput.files[0]
@@ -1619,76 +2903,103 @@ const NovaDeclaracaoPage = {
 
 
         arquivoUrl =
-          resultado.url;
+          novoArquivoEnviado.url;
 
 
         arquivoNome =
-          resultado.nome;
+          novoArquivoEnviado.nome;
 
 
         tipoArquivo =
-          resultado.tipo;
+          novoArquivoEnviado.tipo;
 
 
         tamanhoArquivo =
-          resultado.tamanho;
+          novoArquivoEnviado.tamanho;
 
       }
 
 
-      /*
-        OBJETO FINAL PARA O SUPABASE
-      */
+      /* =============================================
+         OBJETO PARA O BANCO
+      ============================================= */
 
       const dados = {
+
 
         funcionario_id:
           funcionarioId,
 
+
         tipo:
           tipo,
+
 
         data:
           null,
 
+
         data_inicio:
           null,
+
 
         data_fim:
           null,
 
+
         data_inicial:
           null,
+
 
         data_final:
           null,
 
+
         hora_inicial:
           null,
+
 
         hora_final:
           null,
 
+
         quantidade_horas:
           0,
+
 
         quantidade_dias:
           0,
 
+
         observacoes:
-          observacoes || null,
+
+          observacoes
+
+          ||
+
+          null,
+
 
         descricao:
-          observacoes || null,
+
+          observacoes
+
+          ||
+
+          null,
+
 
         arquivo_url:
           arquivoUrl,
 
+
         arquivo_nome:
           arquivoNome,
 
+
         tipo_arquivo:
           tipoArquivo,
+
 
         tamanho_arquivo:
           tamanhoArquivo
@@ -1696,60 +3007,83 @@ const NovaDeclaracaoPage = {
       };
 
 
-      /*
-        DECLARAÇÃO DE HORAS
-      */
+      /* =============================================
+         HORAS
+      ============================================= */
 
       if (
         tipo === "horas"
       ) {
 
+
         dados.data =
+
           document.getElementById(
             "dataDeclaracao"
           ).value;
 
 
         dados.hora_inicial =
+
           document.getElementById(
             "horaInicialDeclaracao"
-          ).value ||
+          ).value
+
+          ||
+
           null;
 
 
         dados.hora_final =
+
           document.getElementById(
             "horaFinalDeclaracao"
-          ).value ||
+          ).value
+
+          ||
+
           null;
 
 
         dados.quantidade_horas =
+
           Number(
+
             document.getElementById(
               "quantidadeHorasDeclaracao"
             ).value
-          ) || 0;
+
+          )
+
+          ||
+
+          0;
 
       }
 
 
-      /*
-        DECLARAÇÃO DE DIAS
-      */
+      /* =============================================
+         DIAS
+      ============================================= */
 
       else {
 
+
         const dataInicial =
+
           document.getElementById(
             "dataInicialDeclaracao"
           ).value;
 
 
         const dataFinal =
+
           document.getElementById(
             "dataFinalDeclaracao"
-          ).value ||
+          ).value
+
+          ||
+
           dataInicial;
 
 
@@ -1774,34 +3108,37 @@ const NovaDeclaracaoPage = {
 
 
         dados.quantidade_dias =
+
           Number(
+
             document.getElementById(
               "quantidadeDiasDeclaracao"
             ).value
-          ) || 1;
+
+          )
+
+          ||
+
+          1;
 
       }
-
-
-      console.log(
-        "DADOS DA DECLARAÇÃO:",
-        dados
-      );
 
 
       botao.textContent =
         "Salvando...";
 
 
-      /*
-        CRIAR
-      */
+      /* =============================================
+         NOVA DECLARAÇÃO
+      ============================================= */
 
       if (
         !declaracaoAntiga
       ) {
 
+
         const resposta =
+
           await fetch(
 
             `${DECL_REST_URL}/declaracoes`,
@@ -1811,7 +3148,9 @@ const NovaDeclaracaoPage = {
               method:
                 "POST",
 
+
               headers:
+
                 declaracoesHeaders({
 
                   Prefer:
@@ -1819,7 +3158,9 @@ const NovaDeclaracaoPage = {
 
                 }),
 
+
               body:
+
                 JSON.stringify(
                   dados
                 )
@@ -1832,23 +3173,6 @@ const NovaDeclaracaoPage = {
         if (
           !resposta.ok
         ) {
-
-          /*
-            Se o banco rejeitar,
-            excluímos o arquivo que
-            acabou de ser enviado.
-          */
-
-          if (
-            arquivoUrl
-          ) {
-
-            await excluirArquivoDeclaracao(
-              arquivoUrl
-            );
-
-          }
-
 
           throw new Error(
             await resposta.text()
@@ -1859,16 +3183,19 @@ const NovaDeclaracaoPage = {
       }
 
 
-      /*
-        EDITAR
-      */
+      /* =============================================
+         EDITAR DECLARAÇÃO
+      ============================================= */
 
       else {
 
+
         const resposta =
+
           await fetch(
 
             `${DECL_REST_URL}/declaracoes` +
+
             `?id=eq.${encodeURIComponent(
               declaracaoAntiga.id
             )}`,
@@ -1878,7 +3205,9 @@ const NovaDeclaracaoPage = {
               method:
                 "PATCH",
 
+
               headers:
+
                 declaracoesHeaders({
 
                   Prefer:
@@ -1886,7 +3215,9 @@ const NovaDeclaracaoPage = {
 
                 }),
 
+
               body:
+
                 JSON.stringify(
                   dados
                 )
@@ -1907,10 +3238,9 @@ const NovaDeclaracaoPage = {
         }
 
 
-        /*
-          Se trocou o arquivo,
-          apaga o arquivo antigo.
-        */
+        /* ===========================================
+           REMOVE ARQUIVO ANTIGO
+        =========================================== */
 
         if (
 
@@ -1921,9 +3251,108 @@ const NovaDeclaracaoPage = {
 
         ) {
 
+
+          try {
+
+
+            await excluirArquivoDeclaracao(
+
+              arquivoAntigo
+
+            );
+
+
+          } catch (
+            erroStorage
+          ) {
+
+
+            console.warn(
+
+              "A declaração foi atualizada, mas o arquivo antigo não pôde ser removido:",
+
+              erroStorage
+
+            );
+
+          }
+
+        }
+
+      }
+
+
+      /* =============================================
+         SUCESSO
+      ============================================= */
+
+      App.toast(
+
+        declaracaoAntiga
+
+          ?
+
+          "Declaração atualizada com sucesso!"
+
+          :
+
+          "Declaração cadastrada com sucesso!"
+
+      );
+
+
+      setTimeout(
+
+        () => {
+
+          window.location.href =
+            "declaracoes.html";
+
+        },
+
+        800
+
+      );
+
+
+    } catch (erro) {
+
+
+      console.error(
+
+        "ERRO AO SALVAR DECLARAÇÃO:",
+
+        erro
+
+      );
+
+
+      /* =============================================
+         EVITA ARQUIVO ÓRFÃO
+
+         Se upload funcionou mas o banco
+         rejeitou o lançamento, remove
+         o arquivo recém-enviado.
+      ============================================= */
+
+      if (
+        novoArquivoEnviado?.url
+      ) {
+
+
+        try {
+
+
           await excluirArquivoDeclaracao(
-            arquivoAntigo
+
+            novoArquivoEnviado.url
+
           );
+
+
+        } catch (_) {
+
+          // não impede o tratamento principal
 
         }
 
@@ -1932,43 +3361,15 @@ const NovaDeclaracaoPage = {
 
       App.toast(
 
-        declaracaoAntiga
-
-          ? "Declaração atualizada com sucesso!"
-
-          : "Declaração cadastrada com sucesso!"
-
-      );
-
-
-      setTimeout(
-        () => {
-
-          window.location.href =
-            "declaracoes.html";
-
-        },
-        800
-      );
-
-
-    } catch (erro) {
-
-      console.error(
-        "ERRO AO SALVAR DECLARAÇÃO:",
-        erro
-      );
-
-
-      App.toast(
-
         "Erro ao salvar: " +
+
         (
           erro.message ||
           erro
         ),
 
         "danger"
+
       );
 
 
