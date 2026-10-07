@@ -68,8 +68,8 @@ function authToken() {
 
 
 /* =========================================================
-   PROTEÇÃO DAS PÁGINAS
-   ========================================================= */
+   PROTEÇÃO IMEDIATA DAS PÁGINAS
+========================================================= */
 
 (function protegerPaginaAgora() {
 
@@ -84,8 +84,7 @@ function authToken() {
 
 
   if (
-    arquivo ===
-    "login.html"
+    arquivo === "login.html"
   ) {
     return;
   }
@@ -128,9 +127,14 @@ function authToken() {
 
 /* =========================================================
    APP
-   ========================================================= */
+========================================================= */
 
 const App = (() => {
+
+
+  /* =======================================================
+     MENU
+  ======================================================= */
 
   const NAV = [
 
@@ -212,31 +216,24 @@ const App = (() => {
 
         key: "usuarios",
 
-        href:
-          "usuarios.html",
+        href: "usuarios.html",
 
-        icon:
-          "👤",
+        icon: "👤",
 
-        label:
-          "Usuários"
+        label: "Usuários"
 
       });
 
 
       nav.push({
 
-        key:
-          "acessos",
+        key: "acessos",
 
-        href:
-          "acessos.html",
+        href: "acessos.html",
 
-        icon:
-          "🔐",
+        icon: "🔐",
 
-        label:
-          "Acessos"
+        label: "Acessos"
 
       });
 
@@ -247,6 +244,10 @@ const App = (() => {
 
   }
 
+
+  /* =======================================================
+     UTILITÁRIOS
+  ======================================================= */
 
   function escapeHTML(
     value = ""
@@ -325,11 +326,15 @@ const App = (() => {
   function getPageKey() {
 
     return (
+
       document.body
         .dataset
         .page
+
       ||
+
       ""
+
     );
 
   }
@@ -337,7 +342,7 @@ const App = (() => {
 
   /* =======================================================
      LAYOUT GERAL
-     ======================================================= */
+  ======================================================= */
 
   function layout(
     title,
@@ -359,75 +364,109 @@ const App = (() => {
       )
       .innerHTML = `
 
+
       <div class="app-shell">
+
 
         <aside
           class="sidebar"
           id="sidebar"
         >
 
+
           <div class="brand">
 
+
             <div class="brand-mark">
+
               EC
+
             </div>
 
 
             <div class="brand-text">
 
               <strong>
+
                 Sistema de Declarações
+
               </strong>
 
+
               <span>
+
                 E.M. Profª Eunice Carneiro
+
               </span>
 
             </div>
+
 
           </div>
 
 
           <nav class="nav">
 
-            ${getNav().map(
-              item => `
 
-                <a
+            ${
 
-                  href="${item.href}"
+              getNav()
 
-                  class="${
-                    item.key === page
-                      ? "active"
-                      : ""
-                  }"
+                .map(
 
-                >
+                  item => `
 
-                  <span
-                    class="nav-icon"
-                  >
-                    ${item.icon}
-                  </span>
 
-                  <span>
-                    ${item.label}
-                  </span>
+                    <a
 
-                </a>
+                      href="${item.href}"
 
-              `
-            ).join("")}
+                      class="${
+                        item.key === page
+                          ? "active"
+                          : ""
+                      }"
+
+                    >
+
+
+                      <span
+                        class="nav-icon"
+                      >
+
+                        ${item.icon}
+
+                      </span>
+
+
+                      <span>
+
+                        ${item.label}
+
+                      </span>
+
+
+                    </a>
+
+
+                  `
+
+                )
+
+                .join("")
+
+            }
+
 
           </nav>
 
 
-          <div
-            class="sidebar-footer"
-          >
+          <div class="sidebar-footer">
+
             Banco de dados online • Supabase
+
           </div>
+
 
         </aside>
 
@@ -439,12 +478,15 @@ const App = (() => {
 
 
             <div
+
               style="
                 display:flex;
                 align-items:center;
                 gap:12px;
               "
+
             >
+
 
               <button
 
@@ -455,23 +497,39 @@ const App = (() => {
                 aria-label="Abrir menu"
 
               >
+
                 ☰
+
               </button>
 
 
               <div class="topbar-title">
 
+
                 <h1>
+
                   ${escapeHTML(title)}
+
                 </h1>
 
+
                 <p>
+
                   ${escapeHTML(subtitle)}
+
                 </p>
+
 
               </div>
 
+
             </div>
+
+
+            <!-- =========================================
+                 TOPO DIREITO
+                 AGORA SOMENTE USUÁRIO + SAIR
+            ========================================== -->
 
 
             <div
@@ -486,6 +544,7 @@ const App = (() => {
 
             >
 
+
               <span
 
                 style="
@@ -496,6 +555,7 @@ const App = (() => {
               >
 
                 👤 ${
+
                   escapeHTML(
 
                     authGetProfile()?.nome
@@ -509,26 +569,10 @@ const App = (() => {
                     "Usuário"
 
                   )
+
                 }
 
               </span>
-
-
-              <a
-
-                class="
-                  btn
-                  btn-secondary
-                  btn-sm
-                "
-
-                href="nova-declaracao.html"
-
-              >
-
-                ＋ Nova declaração
-
-              </a>
 
 
               <button
@@ -549,7 +593,9 @@ const App = (() => {
 
               </button>
 
+
             </div>
+
 
           </header>
 
@@ -560,15 +606,22 @@ const App = (() => {
 
           </section>
 
+
         </main>
+
 
       </div>
 
 
       <div id="modalRoot"></div>
 
+
     `;
 
+
+    /* ===================================================
+       MENU MOBILE
+    =================================================== */
 
     document
 
@@ -583,9 +636,11 @@ const App = (() => {
         () => {
 
           document
+
             .getElementById(
               "sidebar"
             )
+
             ?.classList.toggle(
               "open"
             );
@@ -594,6 +649,10 @@ const App = (() => {
 
       );
 
+
+    /* ===================================================
+       SAIR
+    =================================================== */
 
     document
 
@@ -615,7 +674,7 @@ const App = (() => {
 
   /* =======================================================
      MODAL
-     ======================================================= */
+  ======================================================= */
 
   function openModal({
 
@@ -627,14 +686,15 @@ const App = (() => {
 
   }) {
 
+
     const root =
-      document
-        .getElementById(
-          "modalRoot"
-        );
+      document.getElementById(
+        "modalRoot"
+      );
 
 
     root.innerHTML = `
+
 
       <div
 
@@ -646,6 +706,7 @@ const App = (() => {
         id="modalBackdrop"
 
       >
+
 
         <div
 
@@ -660,8 +721,11 @@ const App = (() => {
 
           <div class="modal-header">
 
+
             <h3>
+
               ${title}
+
             </h3>
 
 
@@ -674,8 +738,11 @@ const App = (() => {
               data-close-modal
 
             >
+
               ×
+
             </button>
+
 
           </div>
 
@@ -688,9 +755,12 @@ const App = (() => {
 
 
           ${
+
             footer
 
-              ? `
+              ?
+
+              `
 
                 <div class="modal-footer">
 
@@ -700,13 +770,18 @@ const App = (() => {
 
               `
 
-              : ""
+              :
+
+              ""
+
           }
 
 
         </div>
 
+
       </div>
+
 
     `;
 
@@ -719,7 +794,7 @@ const App = (() => {
 
       .forEach(
 
-        btn =>
+        btn => {
 
           btn.addEventListener(
 
@@ -727,7 +802,9 @@ const App = (() => {
 
             closeModal
 
-          )
+          );
+
+        }
 
       );
 
@@ -742,11 +819,11 @@ const App = (() => {
 
         "click",
 
-        e => {
+        evento => {
 
           if (
 
-            e.target.id ===
+            evento.target.id ===
             "modalBackdrop"
 
           ) {
@@ -771,10 +848,12 @@ const App = (() => {
   }
 
 
-  function escClose(e) {
+  function escClose(
+    evento
+  ) {
 
     if (
-      e.key ===
+      evento.key ===
       "Escape"
     ) {
 
@@ -788,10 +867,9 @@ const App = (() => {
   function closeModal() {
 
     const root =
-      document
-        .getElementById(
-          "modalRoot"
-        );
+      document.getElementById(
+        "modalRoot"
+      );
 
 
     if (root) {
@@ -814,32 +892,31 @@ const App = (() => {
 
 
   /* =======================================================
-     TOAST
-     ======================================================= */
+     MENSAGENS / TOAST
+  ======================================================= */
 
   function toast(
     message,
     type = "success"
   ) {
 
+
     const id =
       "toastRoot";
 
 
     let root =
-      document
-        .getElementById(
-          id
-        );
+      document.getElementById(
+        id
+      );
 
 
     if (!root) {
 
       root =
-        document
-          .createElement(
-            "div"
-          );
+        document.createElement(
+          "div"
+        );
 
 
       root.id =
@@ -859,10 +936,9 @@ const App = (() => {
 
 
     const item =
-      document
-        .createElement(
-          "div"
-        );
+      document.createElement(
+        "div"
+      );
 
 
     const map = {
@@ -884,7 +960,8 @@ const App = (() => {
 
     item.className =
       `alert ${
-        map[type] ||
+        map[type]
+        ||
         map.info
       }`;
 
@@ -916,6 +993,10 @@ const App = (() => {
   }
 
 
+  /* =======================================================
+     API
+  ======================================================= */
+
   const API =
     SUPABASE_URL +
     "/rest/v1";
@@ -923,9 +1004,10 @@ const App = (() => {
 
   /* =======================================================
      RENOVAR SESSÃO
-     ======================================================= */
+  ======================================================= */
 
   async function refreshSession() {
+
 
     const atual =
       authGetSession();
@@ -950,6 +1032,7 @@ const App = (() => {
           method:
             "POST",
 
+
           headers: {
 
             apikey:
@@ -960,7 +1043,9 @@ const App = (() => {
 
           },
 
+
           body:
+
             JSON.stringify({
 
               refresh_token:
@@ -973,7 +1058,9 @@ const App = (() => {
       );
 
 
-    if (!res.ok) {
+    if (
+      !res.ok
+    ) {
 
       return null;
 
@@ -995,8 +1082,8 @@ const App = (() => {
 
 
   /* =======================================================
-     API SUPABASE
-     ======================================================= */
+     REQUISIÇÕES SUPABASE
+  ======================================================= */
 
   async function api(
 
@@ -1008,6 +1095,7 @@ const App = (() => {
 
   ) {
 
+
     const token =
       authToken();
 
@@ -1017,16 +1105,24 @@ const App = (() => {
       apikey:
         SUPABASE_KEY,
 
+
       Authorization:
         `Bearer ${
-          token ||
+          token
+          ||
           SUPABASE_KEY
         }`,
+
 
       "Content-Type":
         "application/json",
 
-      ...(options.headers || {})
+
+      ...(
+        options.headers
+        ||
+        {}
+      )
 
     };
 
@@ -1047,14 +1143,21 @@ const App = (() => {
       );
 
 
+    /* ===================================================
+       RENOVA TOKEN SE EXPIRAR
+    =================================================== */
+
     if (
+
       res.status ===
       401
 
       &&
 
       retry
+
     ) {
+
 
       const nova =
         await refreshSession();
@@ -1065,9 +1168,13 @@ const App = (() => {
       ) {
 
         return api(
+
           path,
+
           options,
+
           false
+
         );
 
       }
@@ -1079,21 +1186,26 @@ const App = (() => {
 
 
       throw new Error(
+
         "Sessão expirada. Entre novamente."
+
       );
 
     }
 
 
-    if (!res.ok) {
+    if (
+      !res.ok
+    ) {
 
-      const t =
+
+      const texto =
         await res.text();
 
 
       throw new Error(
 
-        t
+        texto
 
         ||
 
@@ -1104,24 +1216,31 @@ const App = (() => {
     }
 
 
-    const text =
+    const texto =
       await res.text();
 
 
-    return text
+    return texto
 
-      ? JSON.parse(text)
+      ?
 
-      : null;
+      JSON.parse(
+        texto
+      )
+
+      :
+
+      null;
 
   }
 
 
   /* =======================================================
-     PERFIL DO USUÁRIO
-     ======================================================= */
+     CARREGAR PERFIL ATUAL
+  ======================================================= */
 
   async function carregarPerfilAtual() {
+
 
     const sessao =
       authGetSession();
@@ -1141,6 +1260,7 @@ const App = (() => {
 
 
     try {
+
 
       let token =
         authToken();
@@ -1168,7 +1288,14 @@ const App = (() => {
         );
 
 
-      if (!userRes.ok) {
+      /* =================================================
+         TENTA RENOVAR SE NECESSÁRIO
+      ================================================= */
+
+      if (
+        !userRes.ok
+      ) {
+
 
         const nova =
           await refreshSession();
@@ -1211,7 +1338,9 @@ const App = (() => {
       }
 
 
-      if (!userRes.ok) {
+      if (
+        !userRes.ok
+      ) {
 
         return null;
 
@@ -1241,16 +1370,18 @@ const App = (() => {
       );
 
 
-      const r =
+      const resposta =
         await api(
 
-          `/usuarios_perfis?id=eq.${encodeURIComponent(uid)}&select=*`
+          `/usuarios_perfis?id=eq.${encodeURIComponent(
+            uid
+          )}&select=*`
 
         );
 
 
       const perfil =
-        r?.[0]
+        resposta?.[0]
         ||
         null;
 
@@ -1277,18 +1408,24 @@ const App = (() => {
 
 
   /* =======================================================
-     ATIVIDADE / ONLINE
-     ======================================================= */
+     ATUALIZAR ATIVIDADE / ONLINE
+  ======================================================= */
 
   async function atualizarAtividade() {
+
 
     const id =
       authGetAccessId();
 
 
     if (
-      !id ||
+
+      !id
+
+      ||
+
       !authToken()
+
     ) {
 
       return;
@@ -1298,14 +1435,18 @@ const App = (() => {
 
     try {
 
+
       await api(
 
-        `/acessos?id=eq.${encodeURIComponent(id)}`,
+        `/acessos?id=eq.${encodeURIComponent(
+          id
+        )}`,
 
         {
 
           method:
             "PATCH",
+
 
           headers: {
 
@@ -1314,18 +1455,24 @@ const App = (() => {
 
           },
 
+
           body:
+
             JSON.stringify({
 
               ultima_atividade:
                 new Date()
                   .toISOString(),
 
+
               pagina_atual:
+
                 location.pathname
                   .split("/")
                   .pop()
+
                 ||
+
                 "index.html"
 
             })
@@ -1335,18 +1482,29 @@ const App = (() => {
       );
 
 
+      /* =================================================
+         CONFERE SE USUÁRIO AINDA ESTÁ ATIVO
+      ================================================= */
+
       const perfil =
         await carregarPerfilAtual();
 
 
       if (
-        perfil &&
+
+        perfil
+
+        &&
+
         perfil.ativo === false
+
       ) {
+
 
         await logout(
           false
         );
+
 
         location.replace(
           "login.html"
@@ -1357,9 +1515,11 @@ const App = (() => {
 
     } catch {
 
-      // Não interrompe o uso da página
-      // somente porque não conseguiu
-      // atualizar o status online.
+      /*
+        Não interrompe o uso da página
+        somente porque não conseguiu
+        atualizar o status online.
+      */
 
     }
 
@@ -1368,11 +1528,12 @@ const App = (() => {
 
   /* =======================================================
      LOGOUT
-     ======================================================= */
+  ======================================================= */
 
   async function logout(
     redirecionar = true
   ) {
+
 
     const accessId =
       authGetAccessId();
@@ -1382,21 +1543,35 @@ const App = (() => {
       authToken();
 
 
+    /* ===================================================
+       MARCA SAÍDA
+    =================================================== */
+
     try {
 
+
       if (
-        accessId &&
+
+        accessId
+
+        &&
+
         token
+
       ) {
+
 
         await api(
 
-          `/acessos?id=eq.${encodeURIComponent(accessId)}`,
+          `/acessos?id=eq.${encodeURIComponent(
+            accessId
+          )}`,
 
           {
 
             method:
               "PATCH",
+
 
             headers: {
 
@@ -1405,12 +1580,15 @@ const App = (() => {
 
             },
 
+
             body:
+
               JSON.stringify({
 
                 saiu_em:
                   new Date()
                     .toISOString(),
+
 
                 ultima_atividade:
                   new Date()
@@ -1426,12 +1604,19 @@ const App = (() => {
 
       }
 
+
     } catch {}
 
 
+    /* ===================================================
+       LOGOUT SUPABASE
+    =================================================== */
+
     try {
 
+
       if (token) {
+
 
         await fetch(
 
@@ -1441,6 +1626,7 @@ const App = (() => {
 
             method:
               "POST",
+
 
             headers: {
 
@@ -1458,8 +1644,13 @@ const App = (() => {
 
       }
 
+
     } catch {}
 
+
+    /* ===================================================
+       LIMPA DADOS LOCAIS
+    =================================================== */
 
     authSetSession(
       null
@@ -1476,7 +1667,9 @@ const App = (() => {
     );
 
 
-    if (redirecionar) {
+    if (
+      redirecionar
+    ) {
 
       location.replace(
         "login.html"
@@ -1489,7 +1682,7 @@ const App = (() => {
 
   /* =======================================================
      GERAR ID
-     ======================================================= */
+  ======================================================= */
 
   function generateId() {
 
@@ -1512,12 +1705,13 @@ const App = (() => {
 
   /* =======================================================
      BANCO -> SISTEMA
-     ======================================================= */
+  ======================================================= */
 
   function fromDB(
     store,
     x
   ) {
+
 
     if (!x) {
 
@@ -1528,14 +1722,16 @@ const App = (() => {
 
     /* =====================================================
        FUNCIONÁRIOS
-       ===================================================== */
+    ===================================================== */
 
     if (
       store ===
       "funcionarios"
     ) {
 
+
       return {
+
 
         id:
           String(
@@ -1544,10 +1740,15 @@ const App = (() => {
 
 
         nome:
+
           x.nome_completo
+
           ||
+
           x.nome
+
           ||
+
           "",
 
 
@@ -1558,10 +1759,15 @@ const App = (() => {
 
 
         cargo:
+
           x.cargo_funcao
+
           ||
+
           x.cargo
+
           ||
+
           "",
 
 
@@ -1578,16 +1784,24 @@ const App = (() => {
 
 
         vinculo:
+
           x.tipo_vinculo
+
           ||
+
           x.vinculo
+
           ||
+
           "",
 
 
         status:
+
           x.status
+
           ||
+
           "Ativo",
 
 
@@ -1680,6 +1894,7 @@ const App = (() => {
           ||
           ""
 
+
       };
 
     }
@@ -1687,14 +1902,16 @@ const App = (() => {
 
     /* =====================================================
        DECLARAÇÕES
-       ===================================================== */
+    ===================================================== */
 
     if (
       store ===
       "declaracoes"
     ) {
 
+
       return {
+
 
         id:
           String(
@@ -1703,6 +1920,7 @@ const App = (() => {
 
 
         funcionarioId:
+
           String(
             x.funcionario_id
           ),
@@ -1743,6 +1961,7 @@ const App = (() => {
         observacoes:
           x.observacoes
 
+
       };
 
     }
@@ -1750,14 +1969,16 @@ const App = (() => {
 
     /* =====================================================
        FALTAS
-       ===================================================== */
+    ===================================================== */
 
     if (
       store ===
       "faltas"
     ) {
 
+
       return {
+
 
         id:
           String(
@@ -1766,6 +1987,7 @@ const App = (() => {
 
 
         funcionario_id:
+
           String(
             x.funcionario_id
           ),
@@ -1786,16 +2008,23 @@ const App = (() => {
         createdAt:
           x.created_at
 
+
       };
 
     }
 
 
+    /* =====================================================
+       AGENDA / DEMAIS
+    ===================================================== */
+
     return {
 
       ...x,
 
+
       id:
+
         String(
           x.id
         )
@@ -1807,191 +2036,239 @@ const App = (() => {
 
   /* =======================================================
      SISTEMA -> BANCO
-     ======================================================= */
+  ======================================================= */
 
   function toDB(
     store,
     x
   ) {
 
-    let payload =
-      {};
-
 
     /* =====================================================
        FUNCIONÁRIOS
-       ===================================================== */
+    ===================================================== */
 
     if (
       store ===
       "funcionarios"
     ) {
 
-      payload = {
+
+      return {
+
 
         id:
 
           x.id
 
-            ? Number(
-                x.id
-              )
+            ?
 
-            : generateId(),
+            Number(
+              x.id
+            )
+
+            :
+
+            generateId(),
 
 
         nome_completo:
 
           x.nome
+
           ||
+
           null,
 
 
         matricula:
 
           x.matricula
+
           ||
+
           null,
 
 
         cargo_funcao:
 
           x.cargo
+
           ||
+
           null,
 
 
         categoria_cargo:
 
           x.categoriaCargo
+
           ||
+
           null,
 
 
         setor:
 
           x.setor
+
           ||
+
           null,
 
 
         tipo_vinculo:
 
           x.vinculo
+
           ||
+
           null,
 
 
         status:
 
           x.status
+
           ||
+
           "Ativo",
 
 
         turno:
 
           x.turno
+
           ||
+
           null,
 
 
         carga_horaria:
 
           x.cargaHoraria
+
           ||
+
           null,
 
 
         data_admissao:
 
           x.dataAdmissao
+
           ||
+
           null,
 
 
         data_entrada_escola:
 
           x.dataEntradaEscola
+
           ||
+
           null,
 
 
         cpf:
 
           x.cpf
+
           ||
+
           null,
 
 
         telefone:
 
           x.telefone
+
           ||
+
           null,
 
 
         email:
 
           x.email
+
           ||
+
           null,
 
 
         endereco:
 
           x.endereco
+
           ||
+
           null,
 
 
         formacao:
 
           x.formacao
+
           ||
+
           null,
 
 
         especializacao:
 
           x.especializacao
+
           ||
+
           null,
 
 
         naturalidade:
 
           x.naturalidade
+
           ||
+
           null,
 
 
         data_nascimento:
 
           x.dataNascimento
+
           ||
+
           null,
 
 
         motivo_inatividade:
 
           x.motivoInatividade
+
           ||
+
           null,
 
 
         data_inatividade:
 
           x.dataInatividade
+
           ||
+
           null,
 
 
         observacoes:
 
           x.observacoes
+
           ||
+
           null
+
 
       };
 
@@ -2000,24 +2277,30 @@ const App = (() => {
 
     /* =====================================================
        DECLARAÇÕES
-       ===================================================== */
+    ===================================================== */
 
-    else if (
+    if (
       store ===
       "declaracoes"
     ) {
 
-      payload = {
+
+      return {
+
 
         id:
 
           x.id
 
-            ? Number(
-                x.id
-              )
+            ?
 
-            : generateId(),
+            Number(
+              x.id
+            )
+
+            :
+
+            generateId(),
 
 
         funcionario_id:
@@ -2028,64 +2311,80 @@ const App = (() => {
 
 
         tipo:
-
           x.tipo,
 
 
         data:
 
           x.data
+
           ||
+
           null,
 
 
         data_inicial:
 
           x.dataInicial
+
           ||
+
           null,
 
 
         data_final:
 
           x.dataFinal
+
           ||
+
           null,
 
 
         hora_inicial:
 
           x.horaInicial
+
           ||
+
           null,
 
 
         hora_final:
 
           x.horaFinal
+
           ||
+
           null,
 
 
         quantidade_horas:
 
           x.quantidadeHoras
+
           ||
+
           0,
 
 
         quantidade_dias:
 
           x.quantidadeDias
+
           ||
+
           0,
 
 
         observacoes:
 
           x.observacoes
+
           ||
+
           null
+
 
       };
 
@@ -2094,54 +2393,71 @@ const App = (() => {
 
     /* =====================================================
        FALTAS
-       ===================================================== */
+    ===================================================== */
 
-    else if (
+    if (
       store ===
       "faltas"
     ) {
 
-      payload = {
+
+      return {
+
 
         id:
 
           x.id
 
-            ? Number(
-                x.id
-              )
+            ?
 
-            : generateId(),
+            Number(
+              x.id
+            )
+
+            :
+
+            generateId(),
 
 
         funcionario_id:
 
           x.funcionario_id
+
           ||
+
           x.funcionarioId,
 
 
         data_falta:
 
           x.data_falta
+
           ||
+
           x.data,
 
 
         motivo:
 
           x.motivo
+
           ||
+
           x.tipo
+
           ||
+
           "Falta Injustificada",
 
 
         justificativa:
 
           x.justificativa
+
           ||
+
           null
+
 
       };
 
@@ -2149,24 +2465,22 @@ const App = (() => {
 
 
     /* =====================================================
-       AGENDA / OUTRAS TABELAS
-       ===================================================== */
+       AGENDA / DEMAIS
+    ===================================================== */
 
-    else {
+    const payload = {
 
-      payload = {
-        ...x
-      };
+      ...x
+
+    };
 
 
-      if (
-        !payload.id
-      ) {
+    if (
+      !payload.id
+    ) {
 
-        payload.id =
-          generateId();
-
-      }
+      payload.id =
+        generateId();
 
     }
 
@@ -2178,12 +2492,13 @@ const App = (() => {
 
   /* =======================================================
      ADICIONAR
-     ======================================================= */
+  ======================================================= */
 
   async function add(
     store,
     value
   ) {
+
 
     const dataToSend =
       toDB(
@@ -2192,7 +2507,7 @@ const App = (() => {
       );
 
 
-    const r =
+    const resposta =
       await api(
 
         `/${store}`,
@@ -2202,14 +2517,17 @@ const App = (() => {
           method:
             "POST",
 
+
           headers: {
 
-            "Prefer":
+            Prefer:
               "return=representation"
 
           },
 
+
           body:
+
             JSON.stringify(
               dataToSend
             )
@@ -2221,11 +2539,17 @@ const App = (() => {
 
     const item =
 
-      Array.isArray(r)
+      Array.isArray(
+        resposta
+      )
 
-        ? r[0]
+        ?
 
-        : r;
+        resposta[0]
+
+        :
+
+        resposta;
 
 
     return fromDB(
@@ -2233,7 +2557,9 @@ const App = (() => {
       store,
 
       item
+
       ||
+
       dataToSend
 
     );
@@ -2243,102 +2569,111 @@ const App = (() => {
 
   /* =======================================================
      ATUALIZAR
-     ======================================================= */
+  ======================================================= */
 
   async function put(
     store,
     value
   ) {
 
+
     if (
-      value.id
+      !value.id
     ) {
 
-      const dataToSend =
-        toDB(
-          store,
-          value
-        );
-
-
-      const r =
-        await api(
-
-          `/${store}?id=eq.${
-            encodeURIComponent(
-              value.id
-            )
-          }`,
-
-          {
-
-            method:
-              "PATCH",
-
-            headers: {
-
-              "Prefer":
-                "return=representation"
-
-            },
-
-            body:
-              JSON.stringify(
-                dataToSend
-              )
-
-          }
-
-        );
-
-
-      const item =
-
-        Array.isArray(r)
-
-          ? r[0]
-
-          : r;
-
-
-      return fromDB(
-
+      return add(
         store,
-
-        item
-        ||
         value
-
       );
 
     }
 
 
-    return add(
+    const dataToSend =
+      toDB(
+        store,
+        value
+      );
+
+
+    const resposta =
+      await api(
+
+        `/${store}?id=eq.${encodeURIComponent(
+          value.id
+        )}`,
+
+        {
+
+          method:
+            "PATCH",
+
+
+          headers: {
+
+            Prefer:
+              "return=representation"
+
+          },
+
+
+          body:
+
+            JSON.stringify(
+              dataToSend
+            )
+
+        }
+
+      );
+
+
+    const item =
+
+      Array.isArray(
+        resposta
+      )
+
+        ?
+
+        resposta[0]
+
+        :
+
+        resposta;
+
+
+    return fromDB(
+
       store,
+
+      item
+
+      ||
+
       value
+
     );
 
   }
 
 
   /* =======================================================
-     PEGAR UM REGISTRO
-     ======================================================= */
+     PEGAR UM
+  ======================================================= */
 
   async function get(
     store,
     key
   ) {
 
-    const r =
+
+    const resposta =
       await api(
 
-        `/${store}?id=eq.${
-          encodeURIComponent(
-            key
-          )
-        }&select=*`
+        `/${store}?id=eq.${encodeURIComponent(
+          key
+        )}&select=*`
 
       );
 
@@ -2347,8 +2682,10 @@ const App = (() => {
 
       store,
 
-      r?.[0]
+      resposta?.[0]
+
       ||
+
       null
 
     );
@@ -2358,13 +2695,14 @@ const App = (() => {
 
   /* =======================================================
      PEGAR TODOS
-     ======================================================= */
+  ======================================================= */
 
   async function getAll(
     store
   ) {
 
-    const r =
+
+    const resposta =
       await api(
 
         `/${store}?select=*&order=id.asc`
@@ -2374,16 +2712,18 @@ const App = (() => {
 
     return (
 
-      r
+      resposta
+
       ||
+
       []
 
     ).map(
 
-      x =>
+      item =>
         fromDB(
           store,
-          x
+          item
         )
 
     );
@@ -2393,20 +2733,19 @@ const App = (() => {
 
   /* =======================================================
      REMOVER
-     ======================================================= */
+  ======================================================= */
 
   async function remove(
     store,
     key
   ) {
 
+
     await api(
 
-      `/${store}?id=eq.${
-        encodeURIComponent(
-          key
-        )
-      }`,
+      `/${store}?id=eq.${encodeURIComponent(
+        key
+      )}`,
 
       {
 
@@ -2425,9 +2764,10 @@ const App = (() => {
 
   /* =======================================================
      CONTADORES
-     ======================================================= */
+  ======================================================= */
 
   async function counts() {
+
 
     const funcionarios =
       await getAll(
@@ -2443,6 +2783,7 @@ const App = (() => {
 
     return {
 
+
       funcionarios:
         funcionarios.length,
 
@@ -2455,8 +2796,8 @@ const App = (() => {
 
         declaracoes.filter(
 
-          d =>
-            d.tipo ===
+          item =>
+            item.tipo ===
             "horas"
 
         ).length,
@@ -2466,8 +2807,8 @@ const App = (() => {
 
         declaracoes.filter(
 
-          d =>
-            d.tipo ===
+          item =>
+            item.tipo ===
             "dias"
 
         ).length,
@@ -2480,72 +2821,103 @@ const App = (() => {
       listaDeclaracoes:
         declaracoes
 
+
     };
 
   }
 
 
+  /* =======================================================
+     EXPORTAR FUNÇÕES
+  ======================================================= */
+
   return {
+
 
     escapeHTML,
 
+
     formatDate,
+
 
     getPageKey,
 
+
     layout,
+
 
     openModal,
 
+
     closeModal,
+
 
     toast,
 
+
     add,
+
 
     put,
 
+
     get,
+
 
     getAll,
 
+
     remove,
+
 
     counts,
 
+
     seedDemoData:
+
       async () => {},
 
+
     uid:
+
       () =>
         generateId(),
+
 
     rest:
       api,
 
+
     getSession:
       authGetSession,
+
 
     getProfile:
       authGetProfile,
 
+
     getAccessToken:
       authToken,
 
+
     carregarPerfilAtual,
+
 
     atualizarAtividade,
 
+
     logout
 
+
   };
+
 
 })();
 
 
 /* =========================================================
    VALIDAR SESSÃO / MANTER ONLINE
-   ========================================================= */
+========================================================= */
 
 document.addEventListener(
 
@@ -2553,18 +2925,25 @@ document.addEventListener(
 
   async () => {
 
+
     const perfil =
       await App
         .carregarPerfilAtual();
 
 
     if (
+
       !perfil
+
       ||
+
       perfil.ativo === false
+
     ) {
 
+
       await App.logout();
+
 
       return;
 
@@ -2584,57 +2963,547 @@ document.addEventListener(
 
     );
 
+
   }
 
 );
 
 
 /* =========================================================
-   DASHBOARD
-   ========================================================= */
+   DASHBOARD NOVO
+========================================================= */
 
 const DashboardPage = {
 
+
+  /* =====================================================
+     CARREGAR DASHBOARD
+  ===================================================== */
+
   async init() {
+
 
     try {
 
-      const stats =
-        await App.counts();
+
+      const [
+
+        funcionarios,
+
+        declaracoes,
+
+        faltas,
+
+        agenda
+
+      ] = await Promise.all([
+
+
+        App.getAll(
+          "funcionarios"
+        ),
+
+
+        App.getAll(
+          "declaracoes"
+        ),
+
+
+        App.getAll(
+          "faltas"
+        ),
+
+
+        App.getAll(
+          "agenda"
+        )
+
+
+      ]);
+
+
+      /* =================================================
+         FUNCIONÁRIOS ATIVOS
+
+         Somente os ativos entram no total mostrado
+         no Dashboard.
+      ================================================= */
+
+
+      const funcionariosAtivos =
+
+        funcionarios.filter(
+
+          funcionario =>
+
+            String(
+
+              funcionario.status
+
+              ||
+
+              "Ativo"
+
+            )
+
+              .trim()
+
+              .toLowerCase()
+
+            ===
+
+            "ativo"
+
+        );
+
+
+      /* =================================================
+         MAPA DE FUNCIONÁRIOS
+
+         Mantém todos no mapa para que declarações
+         e faltas históricas continuem mostrando
+         o nome corretamente.
+      ================================================= */
+
+
+      const mapaFuncionarios =
+
+        Object.fromEntries(
+
+          funcionarios.map(
+
+            funcionario => [
+
+              String(
+                funcionario.id
+              ),
+
+              funcionario
+
+            ]
+
+          )
+
+        );
+
+
+      /* =================================================
+         DATA DE HOJE
+      ================================================= */
+
+
+      const hoje =
+        this.dataHojeLocal();
+
+
+      /* =================================================
+         PRÓXIMOS EVENTOS
+      ================================================= */
+
+
+      const proximosEventos =
+
+        agenda
+
+          .filter(
+
+            evento => {
+
+
+              const data =
+
+                String(
+
+                  evento.data
+
+                  ||
+
+                  ""
+
+                )
+
+                  .slice(
+                    0,
+                    10
+                  );
+
+
+              return (
+
+                data
+
+                &&
+
+                data >= hoje
+
+              );
+
+            }
+
+          )
+
+          .sort(
+
+            (a, b) =>
+
+              this.chaveAgenda(a)
+
+                .localeCompare(
+
+                  this.chaveAgenda(b)
+
+                )
+
+          );
+
+
+      /* =================================================
+         LAYOUT
+      ================================================= */
 
 
       App.layout(
 
+
         "Dashboard",
+
 
         "Visão geral do sistema interno de declarações",
 
+
         `
+
+
+          <style>
+
+
+            /* ===========================================
+               CARDS DE RESUMO
+            =========================================== */
+
+
+            .dashboard-resumo {
+
+              display:grid;
+
+              grid-template-columns:
+                repeat(
+                  4,
+                  minmax(0,1fr)
+                );
+
+              gap:16px;
+
+              margin-bottom:22px;
+
+            }
+
+
+            /* ===========================================
+               ÁREA PRINCIPAL
+            =========================================== */
+
+
+            .dashboard-conteudo {
+
+              display:grid;
+
+              grid-template-columns:
+                repeat(
+                  2,
+                  minmax(0,1fr)
+                );
+
+              gap:18px;
+
+            }
+
+
+            .dashboard-card {
+
+              min-width:0;
+
+            }
+
+
+            .dashboard-card-agenda {
+
+              grid-column:
+                1 / -1;
+
+            }
+
+
+            /* ===========================================
+               CABEÇALHO DOS QUADROS
+            =========================================== */
+
+
+            .dashboard-panel-header {
+
+              display:flex;
+
+              align-items:center;
+
+              justify-content:
+                space-between;
+
+              gap:12px;
+
+              margin-bottom:16px;
+
+            }
+
+
+            .dashboard-panel-header h3 {
+
+              margin:0;
+
+            }
+
+
+            /* ===========================================
+               VAZIO
+            =========================================== */
+
+
+            .dashboard-empty {
+
+              padding:
+                30px
+                15px;
+
+              text-align:center;
+
+              color:#667085;
+
+            }
+
+
+            /* ===========================================
+               AGENDA
+            =========================================== */
+
+
+            .dashboard-eventos {
+
+              display:grid;
+
+              grid-template-columns:
+                repeat(
+                  2,
+                  minmax(0,1fr)
+                );
+
+              gap:10px;
+
+            }
+
+
+            .dashboard-evento {
+
+              display:flex;
+
+              gap:12px;
+
+              align-items:
+                flex-start;
+
+              padding:14px;
+
+              border:
+                1px solid
+                #e4e7ec;
+
+              border-radius:10px;
+
+              background:#fff;
+
+              min-width:0;
+
+            }
+
+
+            .dashboard-evento-data {
+
+              flex:
+                0 0 auto;
+
+              min-width:82px;
+
+              padding:8px;
+
+              border-radius:8px;
+
+              background:#f2f4f7;
+
+              color:#344054;
+
+              text-align:center;
+
+              font-size:12px;
+
+              font-weight:700;
+
+            }
+
+
+            .dashboard-evento-info {
+
+              min-width:0;
+
+              flex:1;
+
+            }
+
+
+            .dashboard-evento-titulo {
+
+              font-weight:700;
+
+              color:#101828;
+
+              word-break:
+                break-word;
+
+            }
+
+
+            .dashboard-evento-detalhes {
+
+              margin-top:5px;
+
+              color:#667085;
+
+              font-size:12px;
+
+              line-height:1.5;
+
+              word-break:
+                break-word;
+
+            }
+
+
+            /* ===========================================
+               RESPONSIVO
+            =========================================== */
+
+
+            @media (
+              max-width:1100px
+            ) {
+
+
+              .dashboard-resumo {
+
+                grid-template-columns:
+                  repeat(
+                    2,
+                    minmax(0,1fr)
+                  );
+
+              }
+
+
+            }
+
+
+            @media (
+              max-width:850px
+            ) {
+
+
+              .dashboard-conteudo {
+
+                grid-template-columns:
+                  1fr;
+
+              }
+
+
+              .dashboard-card-agenda {
+
+                grid-column:
+                  auto;
+
+              }
+
+
+              .dashboard-eventos {
+
+                grid-template-columns:
+                  1fr;
+
+              }
+
+
+            }
+
+
+            @media (
+              max-width:600px
+            ) {
+
+
+              .dashboard-resumo {
+
+                grid-template-columns:
+                  1fr;
+
+              }
+
+
+            }
+
+
+          </style>
+
+
+          <!-- ==========================================
+               TÍTULO
+          =========================================== -->
+
 
           <div class="page-header">
 
 
             <div>
 
+
               <h2>
+
                 Visão geral
+
               </h2>
 
+
               <p>
-                Acompanhe funcionários
-                e documentos cadastrados.
+
+                Acompanhe funcionários ativos,
+                declarações, faltas e compromissos
+                da agenda.
+
               </p>
+
 
             </div>
 
 
             <div
-              class="actions no-print"
+              class="
+                actions
+                no-print
+              "
             >
+
 
               <a
 
-                class="btn btn-primary"
+                class="
+                  btn
+                  btn-primary
+                "
 
                 href="nova-declaracao.html"
 
@@ -2647,7 +3516,10 @@ const DashboardPage = {
 
               <a
 
-                class="btn btn-secondary"
+                class="
+                  btn
+                  btn-secondary
+                "
 
                 href="novo-funcionario.html"
 
@@ -2657,75 +3529,119 @@ const DashboardPage = {
 
               </a>
 
+
             </div>
 
-          </div>
-
-
-          <div class="cards">
-
-
-            ${this.statCard(
-
-              "Funcionários",
-
-              stats.funcionarios,
-
-              "👥"
-
-            )}
-
-
-            ${this.statCard(
-
-              "Declarações",
-
-              stats.declaracoes,
-
-              "📄"
-
-            )}
-
-
-            ${this.statCard(
-
-              "Declarações de Horas",
-
-              stats.horas,
-
-              "◷"
-
-            )}
-
-
-            ${this.statCard(
-
-              "Declarações de Dias",
-
-              stats.dias,
-
-              "▣"
-
-            )}
-
 
           </div>
 
 
-          <div class="grid-2">
+          <!-- ==========================================
+               CARDS
+          =========================================== -->
+
+
+          <div class="dashboard-resumo">
+
+
+            ${
+
+              this.statCard(
+
+                "Funcionários ativos",
+
+                funcionariosAtivos.length,
+
+                "👥"
+
+              )
+
+            }
+
+
+            ${
+
+              this.statCard(
+
+                "Declarações",
+
+                declaracoes.length,
+
+                "📄"
+
+              )
+
+            }
+
+
+            ${
+
+              this.statCard(
+
+                "Faltas registradas",
+
+                faltas.length,
+
+                "📅"
+
+              )
+
+            }
+
+
+            ${
+
+              this.statCard(
+
+                "Próximos eventos",
+
+                proximosEventos.length,
+
+                "🗓️"
+
+              )
+
+            }
+
+
+          </div>
+
+
+          <!-- ==========================================
+               CONTEÚDO
+          =========================================== -->
+
+
+          <div class="dashboard-conteudo">
+
+
+            <!-- ========================================
+                 DECLARAÇÕES RECENTES
+            ========================================= -->
 
 
             <section
-              class="card panel"
+
+              class="
+                card
+                panel
+                dashboard-card
+              "
+
             >
 
 
               <div
-                class="panel-header"
+                class="
+                  dashboard-panel-header
+                "
               >
 
+
                 <h3>
-                  Declarações recentes
+
+                  📄 Declarações recentes
+
                 </h3>
 
 
@@ -2745,92 +3661,152 @@ const DashboardPage = {
 
                 </a>
 
+
               </div>
 
 
-              ${this.recentTable(
+              ${
 
-                stats.listaDeclaracoes,
+                this.tabelaDeclaracoes(
 
-                stats.listaFuncionarios
+                  declaracoes,
 
-              )}
+                  mapaFuncionarios
+
+                )
+
+              }
 
 
             </section>
 
 
+            <!-- ========================================
+                 FALTAS RECENTES
+            ========================================= -->
+
+
             <section
-              class="card panel"
+
+              class="
+                card
+                panel
+                dashboard-card
+              "
+
             >
 
 
               <div
-                class="panel-header"
+                class="
+                  dashboard-panel-header
+                "
               >
+
 
                 <h3>
-                  Ações rápidas
+
+                  📅 Faltas recentes
+
                 </h3>
 
+
+                <a
+
+                  href="faltas.html"
+
+                  class="
+                    btn
+                    btn-secondary
+                    btn-sm
+                  "
+
+                >
+
+                  Ver todas
+
+                </a>
+
+
               </div>
 
 
+              ${
+
+                this.tabelaFaltas(
+
+                  faltas,
+
+                  mapaFuncionarios
+
+                )
+
+              }
+
+
+            </section>
+
+
+            <!-- ========================================
+                 AGENDA
+            ========================================= -->
+
+
+            <section
+
+              class="
+                card
+                panel
+                dashboard-card
+                dashboard-card-agenda
+              "
+
+            >
+
+
               <div
-                class="quick-actions"
+                class="
+                  dashboard-panel-header
+                "
               >
 
 
-                <a
-                  href="funcionarios.html"
-                >
-                  👥 Gerenciar funcionários
-                </a>
+                <h3>
+
+                  🗓️ Próximos eventos da agenda
+
+                </h3>
 
 
                 <a
-                  href="declaracoes.html"
-                >
-                  📄 Consultar declarações
-                </a>
 
-
-                <a
                   href="agenda.html"
+
+                  class="
+                    btn
+                    btn-secondary
+                    btn-sm
+                  "
+
                 >
-                  🗓️ Abrir Agenda da Escola
-                </a>
 
+                  Abrir agenda
 
-                <a
-                  href="relatorios.html"
-                >
-                  ▥ Abrir relatórios
-                </a>
-
-
-                <a
-                  href="nova-declaracao.html"
-                >
-                  ＋ Lançar documento
                 </a>
 
 
               </div>
 
 
-              <div
+              ${
 
-                style="margin-top:16px"
+                this.listaAgenda(
 
-                class="alert alert-warning"
+                  proximosEventos
 
-              >
+                )
 
-                Dados salvos online
-                no Supabase.
-
-              </div>
+              }
 
 
             </section>
@@ -2838,15 +3814,17 @@ const DashboardPage = {
 
           </div>
 
+
         `
 
       );
 
 
-    } catch (err) {
+    } catch (erro) {
+
 
       console.error(
-        err
+        erro
       );
 
 
@@ -2857,9 +3835,11 @@ const DashboardPage = {
         +
 
         (
-          err.message
+          erro.message
+
           ||
-          err
+
+          erro
         ),
 
         "danger"
@@ -2871,27 +3851,96 @@ const DashboardPage = {
   },
 
 
+  /* =====================================================
+     DATA LOCAL DE HOJE
+  ===================================================== */
+
+  dataHojeLocal() {
+
+
+    const agora =
+      new Date();
+
+
+    const ano =
+      agora.getFullYear();
+
+
+    const mes =
+
+      String(
+
+        agora.getMonth()
+        +
+        1
+
+      )
+
+        .padStart(
+          2,
+          "0"
+        );
+
+
+    const dia =
+
+      String(
+
+        agora.getDate()
+
+      )
+
+        .padStart(
+          2,
+          "0"
+        );
+
+
+    return (
+
+      `${ano}-${mes}-${dia}`
+
+    );
+
+  },
+
+
+  /* =====================================================
+     CARD DE RESUMO
+  ===================================================== */
+
   statCard(
     label,
     value,
     icon
   ) {
 
+
     return `
 
+
       <div
-        class="card stat-card"
+        class="
+          card
+          stat-card
+        "
       >
 
+
         <div>
+
 
           <div
             class="stat-label"
           >
 
-            ${App.escapeHTML(
-              label
-            )}
+            ${
+
+              App.escapeHTML(
+                label
+              )
+
+            }
 
           </div>
 
@@ -2904,6 +3953,7 @@ const DashboardPage = {
 
           </div>
 
+
         </div>
 
 
@@ -2915,82 +3965,176 @@ const DashboardPage = {
 
         </div>
 
+
       </div>
+
 
     `;
 
   },
 
 
-  recentTable(
-    list,
-    funcs
+  /* =====================================================
+     NOME DO FUNCIONÁRIO
+  ===================================================== */
+
+  nomeFuncionario(
+    funcionario
   ) {
 
-    const map =
-      Object.fromEntries(
 
-        funcs.map(
+    return (
 
-          f => [
+      funcionario?.nome
 
-            f.id,
+      ||
 
-            f
+      funcionario?.nome_completo
 
-          ]
+      ||
 
-        )
+      "Funcionário não encontrado"
 
-      );
+    );
+
+  },
 
 
-    const rows =
-      [...list]
+  /* =====================================================
+     DATA DA DECLARAÇÃO
+  ===================================================== */
+
+  dataDeclaracao(
+    declaracao
+  ) {
+
+
+    return (
+
+      declaracao.data
+
+      ||
+
+      declaracao.dataInicio
+
+      ||
+
+      declaracao.data_inicio
+
+      ||
+
+      declaracao.dataInicial
+
+      ||
+
+      declaracao.data_inicial
+
+      ||
+
+      ""
+
+    );
+
+  },
+
+
+  /* =====================================================
+     DECLARAÇÕES RECENTES
+  ===================================================== */
+
+  tabelaDeclaracoes(
+    declaracoes,
+    mapaFuncionarios
+  ) {
+
+
+    const registros =
+
+      [
+        ...declaracoes
+      ]
 
         .sort(
 
-          (a,b) =>
+          (a, b) => {
 
-            String(
-              b.id ||
-              ""
-            )
-              .localeCompare(
 
-                String(
-                  a.id ||
-                  ""
+            const dataA =
+              this.dataDeclaracao(
+                a
+              );
+
+
+            const dataB =
+              this.dataDeclaracao(
+                b
+              );
+
+
+            const porData =
+
+              String(
+                dataB
+              )
+
+                .localeCompare(
+
+                  String(
+                    dataA
+                  )
+
+                );
+
+
+            if (
+              porData !== 0
+            ) {
+
+              return porData;
+
+            }
+
+
+            return (
+
+              String(
+                b.id || ""
+              )
+
+                .localeCompare(
+
+                  String(
+                    a.id || ""
+                  )
+
                 )
 
-              )
+            );
+
+          }
 
         )
 
         .slice(
           0,
-          8
+          6
         );
 
 
     if (
-      !rows.length
+      !registros.length
     ) {
+
 
       return `
 
-        <div
-          class="empty"
-        >
 
-          <strong>
-            Nenhuma declaração
-          </strong>
+        <div class="dashboard-empty">
 
-          Cadastre a primeira declaração
-          para começar.
+          Nenhuma declaração registrada.
 
         </div>
+
 
       `;
 
@@ -2999,12 +4143,15 @@ const DashboardPage = {
 
     return `
 
+
       <div class="table-wrap">
+
 
         <table>
 
 
           <thead>
+
 
             <tr>
 
@@ -3026,122 +4173,211 @@ const DashboardPage = {
 
             </tr>
 
+
           </thead>
 
 
           <tbody>
 
 
-            ${rows.map(
+            ${
 
-              d => {
+              registros
 
-                const f =
-                  map[
-                    d.funcionarioId
-                  ];
+                .map(
 
-
-                return `
-
-                  <tr>
+                  declaracao => {
 
 
-                    <td>
+                    const funcionarioId =
 
-                      <strong>
+                      declaracao.funcionarioId
 
-                        ${App.escapeHTML(
+                      ??
 
-                          f?.nome
-
-                          ||
-
-                          "Funcionário removido"
-
-                        )}
-
-                      </strong>
-
-                    </td>
+                      declaracao.funcionario_id;
 
 
-                    <td>
+                    const funcionario =
 
-                      <span
+                      mapaFuncionarios[
 
-                        class="
-                          badge
-                          ${
-                            d.tipo ===
-                            "horas"
+                        String(
+                          funcionarioId
+                        )
 
-                              ? "badge-hours"
-
-                              : "badge-days"
-                          }
-                        "
-
-                      >
-
-                        ${
-                          d.tipo ===
-                          "horas"
-
-                            ? "Horas"
-
-                            : "Dias"
-                        }
-
-                      </span>
-
-                    </td>
+                      ];
 
 
-                    <td>
+                    const horas =
 
-                      ${App.formatDate(
+                      String(
 
-                        d.data
+                        declaracao.tipo
 
                         ||
 
-                        d.dataInicial
+                        ""
 
-                      )}
+                      )
 
-                    </td>
+                        .toLowerCase()
 
+                      ===
 
-                    <td>
-
-                      ${
-                        d.tipo ===
-                        "horas"
-
-                          ? `${
-                              d.quantidadeHoras
-                              ||
-                              0
-                            } h`
-
-                          : `${
-                              d.quantidadeDias
-                              ||
-                              0
-                            } dia(s)`
-                      }
-
-                    </td>
+                      "horas";
 
 
-                  </tr>
+                    const quantidade =
 
-                `;
+                      horas
 
-              }
+                        ?
 
-            ).join("")}
+                        `${
+
+                          Number(
+
+                            declaracao.quantidadeHoras
+
+                            ??
+
+                            declaracao.quantidade_horas
+
+                            ??
+
+                            0
+
+                          )
+
+                        } h`
+
+                        :
+
+                        `${
+
+                          Number(
+
+                            declaracao.quantidadeDias
+
+                            ??
+
+                            declaracao.quantidade_dias
+
+                            ??
+
+                            0
+
+                          )
+
+                        } dia(s)`;
+
+
+                    return `
+
+
+                      <tr>
+
+
+                        <td>
+
+                          <strong>
+
+                            ${
+
+                              App.escapeHTML(
+
+                                this.nomeFuncionario(
+                                  funcionario
+                                )
+
+                              )
+
+                            }
+
+                          </strong>
+
+                        </td>
+
+
+                        <td>
+
+
+                          <span
+
+                            class="
+                              badge
+                              ${
+                                horas
+
+                                  ?
+
+                                  "badge-hours"
+
+                                  :
+
+                                  "badge-days"
+                              }
+                            "
+
+                          >
+
+                            ${
+
+                              horas
+
+                                ?
+
+                                "Horas"
+
+                                :
+
+                                "Dias"
+
+                            }
+
+                          </span>
+
+
+                        </td>
+
+
+                        <td>
+
+                          ${
+
+                            App.formatDate(
+
+                              this.dataDeclaracao(
+                                declaracao
+                              )
+
+                            )
+
+                          }
+
+                        </td>
+
+
+                        <td>
+
+                          ${quantidade}
+
+                        </td>
+
+
+                      </tr>
+
+
+                    `;
+
+                  }
+
+                )
+
+                .join("")
+
+            }
 
 
           </tbody>
@@ -3149,10 +4385,640 @@ const DashboardPage = {
 
         </table>
 
+
       </div>
+
+
+    `;
+
+  },
+
+
+  /* =====================================================
+     FALTAS RECENTES
+  ===================================================== */
+
+  tabelaFaltas(
+    faltas,
+    mapaFuncionarios
+  ) {
+
+
+    const registros =
+
+      [
+        ...faltas
+      ]
+
+        .sort(
+
+          (a, b) => {
+
+
+            const dataA =
+
+              a.data
+
+              ??
+
+              a.data_falta
+
+              ??
+
+              "";
+
+
+            const dataB =
+
+              b.data
+
+              ??
+
+              b.data_falta
+
+              ??
+
+              "";
+
+
+            const porData =
+
+              String(
+                dataB
+              )
+
+                .localeCompare(
+
+                  String(
+                    dataA
+                  )
+
+                );
+
+
+            if (
+              porData !== 0
+            ) {
+
+              return porData;
+
+            }
+
+
+            return (
+
+              String(
+                b.id || ""
+              )
+
+                .localeCompare(
+
+                  String(
+                    a.id || ""
+                  )
+
+                )
+
+            );
+
+          }
+
+        )
+
+        .slice(
+          0,
+          6
+        );
+
+
+    if (
+      !registros.length
+    ) {
+
+
+      return `
+
+
+        <div class="dashboard-empty">
+
+          Nenhuma falta registrada.
+
+        </div>
+
+
+      `;
+
+    }
+
+
+    return `
+
+
+      <div class="table-wrap">
+
+
+        <table>
+
+
+          <thead>
+
+
+            <tr>
+
+              <th>
+                Funcionário
+              </th>
+
+              <th>
+                Data
+              </th>
+
+              <th>
+                Motivo
+              </th>
+
+            </tr>
+
+
+          </thead>
+
+
+          <tbody>
+
+
+            ${
+
+              registros
+
+                .map(
+
+                  falta => {
+
+
+                    const funcionarioId =
+
+                      falta.funcionarioId
+
+                      ??
+
+                      falta.funcionario_id;
+
+
+                    const funcionario =
+
+                      mapaFuncionarios[
+
+                        String(
+                          funcionarioId
+                        )
+
+                      ];
+
+
+                    const data =
+
+                      falta.data
+
+                      ??
+
+                      falta.data_falta;
+
+
+                    const motivo =
+
+                      falta.tipo
+
+                      ??
+
+                      falta.motivo
+
+                      ??
+
+                      "Falta";
+
+
+                    return `
+
+
+                      <tr>
+
+
+                        <td>
+
+                          <strong>
+
+                            ${
+
+                              App.escapeHTML(
+
+                                this.nomeFuncionario(
+                                  funcionario
+                                )
+
+                              )
+
+                            }
+
+                          </strong>
+
+                        </td>
+
+
+                        <td>
+
+                          ${
+
+                            App.formatDate(
+                              data
+                            )
+
+                          }
+
+                        </td>
+
+
+                        <td>
+
+
+                          <span
+                            class="
+                              badge
+                              badge-days
+                            "
+                          >
+
+                            ${
+
+                              App.escapeHTML(
+                                motivo
+                              )
+
+                            }
+
+                          </span>
+
+
+                        </td>
+
+
+                      </tr>
+
+
+                    `;
+
+                  }
+
+                )
+
+                .join("")
+
+            }
+
+
+          </tbody>
+
+
+        </table>
+
+
+      </div>
+
+
+    `;
+
+  },
+
+
+  /* =====================================================
+     CHAVE PARA ORDENAR AGENDA
+  ===================================================== */
+
+  chaveAgenda(
+    evento
+  ) {
+
+
+    const data =
+
+      String(
+
+        evento.data
+
+        ||
+
+        "9999-12-31"
+
+      )
+
+        .slice(
+          0,
+          10
+        );
+
+
+    const hora =
+
+      String(
+
+        evento.hora_inicio
+
+        ||
+
+        "23:59:59"
+
+      );
+
+
+    return (
+
+      `${data} ${hora}`
+
+    );
+
+  },
+
+
+  /* =====================================================
+     FORMATAR HORA
+  ===================================================== */
+
+  horaAgenda(
+    hora
+  ) {
+
+
+    if (!hora) {
+
+      return "";
+
+    }
+
+
+    return (
+
+      String(
+        hora
+      )
+
+        .slice(
+          0,
+          5
+        )
+
+    );
+
+  },
+
+
+  /* =====================================================
+     PRÓXIMOS EVENTOS
+  ===================================================== */
+
+  listaAgenda(
+    eventos
+  ) {
+
+
+    const registros =
+
+      [
+        ...eventos
+      ]
+
+        .slice(
+          0,
+          6
+        );
+
+
+    if (
+      !registros.length
+    ) {
+
+
+      return `
+
+
+        <div class="dashboard-empty">
+
+          Nenhum evento futuro cadastrado
+          na agenda.
+
+        </div>
+
+
+      `;
+
+    }
+
+
+    return `
+
+
+      <div class="dashboard-eventos">
+
+
+        ${
+
+          registros
+
+            .map(
+
+              evento => {
+
+
+                const inicio =
+
+                  this.horaAgenda(
+
+                    evento.hora_inicio
+
+                  );
+
+
+                const fim =
+
+                  this.horaAgenda(
+
+                    evento.hora_fim
+
+                  );
+
+
+                let horario =
+
+                  "Horário não informado";
+
+
+                if (
+
+                  inicio
+
+                  &&
+
+                  fim
+
+                ) {
+
+
+                  horario =
+
+                    `${inicio} às ${fim}`;
+
+
+                }
+
+                else if (
+                  inicio
+                ) {
+
+
+                  horario =
+                    inicio;
+
+
+                }
+
+
+                return `
+
+
+                  <div class="dashboard-evento">
+
+
+                    <div
+                      class="
+                        dashboard-evento-data
+                      "
+                    >
+
+                      ${
+
+                        App.formatDate(
+
+                          evento.data
+
+                        )
+
+                      }
+
+                    </div>
+
+
+                    <div
+                      class="
+                        dashboard-evento-info
+                      "
+                    >
+
+
+                      <div
+                        class="
+                          dashboard-evento-titulo
+                        "
+                      >
+
+                        ${
+
+                          App.escapeHTML(
+
+                            evento.titulo
+
+                            ||
+
+                            "Evento"
+
+                          )
+
+                        }
+
+                      </div>
+
+
+                      <div
+                        class="
+                          dashboard-evento-detalhes
+                        "
+                      >
+
+
+                        🕒 ${
+
+                          App.escapeHTML(
+                            horario
+                          )
+
+                        }
+
+
+                        ${
+
+                          evento.local
+
+                            ?
+
+                            ` &nbsp; • &nbsp; 📍 ${
+
+                              App.escapeHTML(
+                                evento.local
+                              )
+
+                            }`
+
+                            :
+
+                            ""
+
+                        }
+
+
+                        ${
+
+                          evento.categoria
+
+                            ?
+
+                            ` &nbsp; • &nbsp; ${
+
+                              App.escapeHTML(
+                                evento.categoria
+                              )
+
+                            }`
+
+                            :
+
+                            ""
+
+                        }
+
+
+                      </div>
+
+
+                    </div>
+
+
+                  </div>
+
+
+                `;
+
+              }
+
+            )
+
+            .join("")
+
+        }
+
+
+      </div>
+
 
     `;
 
   }
+
 
 };
