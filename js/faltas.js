@@ -1,6 +1,13 @@
 /* =====================================================
    CONTROLE DE FALTAS
-   COM RELATÓRIO POR FUNCIONÁRIO
+   E.M. PROFª EUNICE CARNEIRO
+
+   ALTERAÇÕES:
+   - Pesquisa de funcionário digitando nome
+   - Pesquisa também pela matrícula
+   - Pesquisa no registro de falta
+   - Pesquisa no relatório por funcionário
+   - Mantém cadastro, exclusão, relatório e impressão
 ===================================================== */
 
 
@@ -31,19 +38,6 @@ function normalizarFalta(falta) {
     return {};
   }
 
-
-  /*
-    O app.js transforma os campos do banco para:
-
-    funcionarioId
-    data
-    tipo
-    justificativa
-    observacoes
-
-    Mas deixamos compatibilidade também
-    com os nomes antigos.
-  */
 
   return {
 
@@ -111,10 +105,174 @@ function formatarDataFalta(data) {
 
 
 /* =====================================================
-   PÁGINA DE FALTAS
+   FUNÇÕES DE FUNCIONÁRIO
+===================================================== */
+
+function obterNomeFuncionarioFalta(funcionario) {
+
+  return (
+
+    funcionario?.nome ||
+
+    funcionario?.nome_completo ||
+
+    "Funcionário"
+
+  );
+
+}
+
+
+function obterRotuloFuncionarioFalta(funcionario) {
+
+  const nome =
+    obterNomeFuncionarioFalta(
+      funcionario
+    );
+
+
+  const matricula =
+    funcionario?.matricula;
+
+
+  return matricula
+
+    ? `${nome} — ${matricula}`
+
+    : nome;
+
+}
+
+
+/* =====================================================
+   NORMALIZA TEXTO PARA PESQUISA
+
+   Remove:
+   - maiúsculas/minúsculas
+   - acentos
+===================================================== */
+
+function normalizarTextoPesquisaFalta(
+  valor
+) {
+
+  return String(valor || "")
+
+    .normalize("NFD")
+
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    )
+
+    .toLowerCase()
+
+    .trim();
+
+}
+
+
+/* =====================================================
+   LOCALIZAR FUNCIONÁRIO PELO TEXTO DIGITADO
+===================================================== */
+
+function localizarFuncionarioDigitadoFalta(
+
+  texto,
+
+  funcionarios
+
+) {
+
+  const pesquisa =
+    normalizarTextoPesquisaFalta(
+      texto
+    );
+
+
+  if (!pesquisa) {
+    return null;
+  }
+
+
+  /*
+    Primeiro tenta localizar exatamente
+    pelo nome + matrícula.
+  */
+
+  let encontrado =
+    funcionarios.find(
+
+      funcionario =>
+
+        normalizarTextoPesquisaFalta(
+
+          obterRotuloFuncionarioFalta(
+            funcionario
+          )
+
+        ) === pesquisa
+
+    );
+
+
+  if (encontrado) {
+    return encontrado;
+  }
+
+
+  /*
+    Depois tenta nome exato.
+  */
+
+  encontrado =
+    funcionarios.find(
+
+      funcionario =>
+
+        normalizarTextoPesquisaFalta(
+
+          obterNomeFuncionarioFalta(
+            funcionario
+          )
+
+        ) === pesquisa
+
+    );
+
+
+  if (encontrado) {
+    return encontrado;
+  }
+
+
+  /*
+    Depois matrícula exata.
+  */
+
+  encontrado =
+    funcionarios.find(
+
+      funcionario =>
+
+        normalizarTextoPesquisaFalta(
+          funcionario.matricula
+        ) === pesquisa
+
+    );
+
+
+  return encontrado || null;
+
+}
+
+
+/* =====================================================
+   PÁGINA
 ===================================================== */
 
 const FaltasPage = {
+
 
   state: {
 
@@ -125,13 +283,21 @@ const FaltasPage = {
   },
 
 
+  /* ===================================================
+     INICIAR
+  =================================================== */
+
   async init() {
 
     try {
 
+
       const [
+
         funcionarios,
+
         faltas
+
       ] = await Promise.all([
 
         App.getAll(
@@ -148,11 +314,15 @@ const FaltasPage = {
       this.state = {
 
         funcionarios:
+
           Array.isArray(
             funcionarios
           )
+
             ? funcionarios
+
             : [],
+
 
         faltas:
 
@@ -169,17 +339,46 @@ const FaltasPage = {
       };
 
 
+      /*
+        Ordena os funcionários
+        alfabeticamente.
+      */
+
+      this.state.funcionarios.sort(
+
+        (a, b) =>
+
+          obterNomeFuncionarioFalta(a)
+
+            .localeCompare(
+
+              obterNomeFuncionarioFalta(b),
+
+              "pt-BR"
+
+            )
+
+      );
+
+
       this.renderLayout();
 
       this.bindEvents();
 
       this.render();
 
-    } catch (erro) {
+
+    }
+
+    catch (erro) {
+
 
       console.error(
+
         "Erro ao carregar faltas:",
+
         erro
+
       );
 
 
@@ -191,9 +390,7 @@ const FaltasPage = {
 
         `
 
-        <div
-          class="alert alert-danger"
-        >
+        <div class="alert alert-danger">
 
           Não foi possível carregar
           os registros de faltas.
@@ -231,6 +428,11 @@ const FaltasPage = {
 
       <style>
 
+
+        /* =============================================
+           TOOLBAR
+        ============================================= */
+
         .faltas-toolbar {
 
           display:flex;
@@ -241,6 +443,10 @@ const FaltasPage = {
 
         }
 
+
+        /* =============================================
+           RESUMO
+        ============================================= */
 
         .faltas-resumo {
 
@@ -291,6 +497,10 @@ const FaltasPage = {
         }
 
 
+        /* =============================================
+           FORMULÁRIO
+        ============================================= */
+
         .custom-modal-form {
 
           display:flex;
@@ -323,6 +533,8 @@ const FaltasPage = {
           flex-direction:column;
 
           gap:6px;
+
+          position:relative;
 
         }
 
@@ -365,6 +577,23 @@ const FaltasPage = {
         }
 
 
+        .form-field input:focus,
+
+        .form-field select:focus,
+
+        .form-field textarea:focus {
+
+          border-color:#2563eb;
+
+          box-shadow:
+            0 0 0 3px
+            rgba(37, 99, 235, 0.10);
+
+          background:#fff;
+
+        }
+
+
         .form-field textarea {
 
           resize:vertical;
@@ -373,6 +602,176 @@ const FaltasPage = {
 
         }
 
+
+        /* =============================================
+           CAMPO PESQUISÁVEL
+        ============================================= */
+
+        .funcionario-search-wrap {
+
+          position:relative;
+
+          width:100%;
+
+        }
+
+
+        .funcionario-search-input {
+
+          width:100%;
+
+          padding:11px 42px 11px 14px !important;
+
+          background:#fff !important;
+
+        }
+
+
+        .funcionario-search-icon {
+
+          position:absolute;
+
+          right:14px;
+
+          top:50%;
+
+          transform:
+            translateY(-50%);
+
+          color:#6b7280;
+
+          pointer-events:none;
+
+        }
+
+
+        .funcionario-search-list {
+
+          display:none;
+
+          position:absolute;
+
+          left:0;
+
+          right:0;
+
+          top:
+            calc(100% + 5px);
+
+          max-height:260px;
+
+          overflow-y:auto;
+
+          background:#fff;
+
+          border:
+            1px solid #d1d5db;
+
+          border-radius:8px;
+
+          box-shadow:
+            0 10px 30px
+            rgba(0,0,0,.12);
+
+          z-index:99999;
+
+        }
+
+
+        .funcionario-search-list.aberto {
+
+          display:block;
+
+        }
+
+
+        .funcionario-search-item {
+
+          width:100%;
+
+          border:0;
+
+          border-bottom:
+            1px solid #f3f4f6;
+
+          background:#fff;
+
+          padding:11px 14px;
+
+          text-align:left;
+
+          cursor:pointer;
+
+          font-size:14px;
+
+          color:#111827;
+
+        }
+
+
+        .funcionario-search-item:last-child {
+
+          border-bottom:0;
+
+        }
+
+
+        .funcionario-search-item:hover {
+
+          background:#f3f6fb;
+
+        }
+
+
+        .funcionario-search-item strong {
+
+          display:block;
+
+          font-size:14px;
+
+        }
+
+
+        .funcionario-search-matricula {
+
+          display:block;
+
+          margin-top:2px;
+
+          font-size:12px;
+
+          color:#6b7280;
+
+        }
+
+
+        .funcionario-search-vazio {
+
+          padding:14px;
+
+          color:#6b7280;
+
+          text-align:center;
+
+          font-size:13px;
+
+        }
+
+
+        .funcionario-search-ajuda {
+
+          font-size:12px;
+
+          color:#6b7280;
+
+          margin-top:2px;
+
+        }
+
+
+        /* =============================================
+           RELATÓRIO
+        ============================================= */
 
         .relatorio-faltas {
 
@@ -457,7 +856,13 @@ const FaltasPage = {
         }
 
 
-        @media (max-width: 768px) {
+        /* =============================================
+           RESPONSIVO
+        ============================================= */
+
+        @media (
+          max-width:768px
+        ) {
 
           .faltas-resumo {
 
@@ -482,49 +887,19 @@ const FaltasPage = {
         }
 
 
-        @media print {
-
-          body * {
-
-            visibility:hidden;
-
-          }
-
-
-          #relatorioImpressao,
-
-          #relatorioImpressao * {
-
-            visibility:visible;
-
-          }
-
-
-          #relatorioImpressao {
-
-            position:absolute;
-
-            left:0;
-
-            top:0;
-
-            width:100%;
-
-            padding:20px;
-
-          }
-
-        }
-
       </style>
 
 
       <div
         class="page-header"
-        style="margin-bottom:24px;"
+        style="
+          margin-bottom:24px;
+        "
       >
 
+
         <div>
+
 
           <h2
             style="
@@ -552,16 +927,29 @@ const FaltasPage = {
 
           </p>
 
+
         </div>
 
 
         <div
-          class="faltas-toolbar no-print"
+          class="
+            faltas-toolbar
+            no-print
+          "
         >
 
+
           <button
-            class="btn btn-secondary"
+
+            type="button"
+
+            class="
+              btn
+              btn-secondary
+            "
+
             id="btnRelatorioFaltas"
+
           >
 
             📊 Relatório por funcionário
@@ -570,15 +958,25 @@ const FaltasPage = {
 
 
           <button
-            class="btn btn-primary"
+
+            type="button"
+
+            class="
+              btn
+              btn-primary
+            "
+
             id="btnNovaFalta"
+
           >
 
             ＋ Registrar falta
 
           </button>
 
+
         </div>
+
 
       </div>
 
@@ -587,22 +985,33 @@ const FaltasPage = {
         class="faltas-resumo"
       >
 
+
         <div
           class="falta-resumo-card"
         >
 
-          <div class="falta-resumo-label">
+
+          <div
+            class="falta-resumo-label"
+          >
 
             Total de faltas
 
           </div>
 
+
           <div
+
             class="falta-resumo-valor"
+
             id="totalFaltas"
+
           >
+
             0
+
           </div>
+
 
         </div>
 
@@ -611,18 +1020,28 @@ const FaltasPage = {
           class="falta-resumo-card"
         >
 
-          <div class="falta-resumo-label">
+
+          <div
+            class="falta-resumo-label"
+          >
 
             Funcionários com faltas
 
           </div>
 
+
           <div
+
             class="falta-resumo-valor"
+
             id="funcionariosComFalta"
+
           >
+
             0
+
           </div>
+
 
         </div>
 
@@ -631,35 +1050,56 @@ const FaltasPage = {
           class="falta-resumo-card"
         >
 
-          <div class="falta-resumo-label">
+
+          <div
+            class="falta-resumo-label"
+          >
 
             Faltas justificadas
 
           </div>
 
+
           <div
+
             class="falta-resumo-valor"
+
             id="faltasJustificadas"
+
           >
+
             0
+
           </div>
 
+
         </div>
+
 
       </div>
 
 
-      <div class="card panel">
+      <div
+        class="
+          card
+          panel
+        "
+      >
+
 
         <div
+
           class="panel-header"
+
           style="
             display:flex;
             justify-content:space-between;
             align-items:center;
             margin-bottom:16px;
           "
+
         >
+
 
           <h3
             style="
@@ -674,11 +1114,20 @@ const FaltasPage = {
 
 
           <span
-            class="badge badge-hours"
+
+            class="
+              badge
+              badge-hours
+            "
+
             id="badgeTotalFaltas"
+
           >
+
             0 no total
+
           </span>
+
 
         </div>
 
@@ -686,6 +1135,7 @@ const FaltasPage = {
         <div
           id="tabelaFaltasContainer"
         ></div>
+
 
       </div>
 
@@ -702,37 +1152,50 @@ const FaltasPage = {
 
   bindEvents() {
 
+
     document
+
       .getElementById(
         "btnNovaFalta"
       )
+
       ?.addEventListener(
+
         "click",
+
         () =>
           this.openModalFalta()
+
       );
 
 
     document
+
       .getElementById(
         "btnRelatorioFaltas"
       )
+
       ?.addEventListener(
+
         "click",
+
         () =>
           this.openModalRelatorio()
+
       );
 
   },
 
 
   /* ===================================================
-     RENDERIZAÇÃO
+     RENDERIZAR TABELA
   =================================================== */
 
   render() {
 
+
     const container =
+
       document.getElementById(
         "tabelaFaltasContainer"
       );
@@ -751,14 +1214,12 @@ const FaltasPage = {
       this.state.funcionarios;
 
 
-    /*
-      Mapa usando ID numérico.
-    */
-
     const mapaFuncionarios =
+
       Object.fromEntries(
 
         funcionarios.map(
+
           funcionario => [
 
             String(
@@ -768,37 +1229,46 @@ const FaltasPage = {
             funcionario
 
           ]
+
         )
 
       );
 
 
-    /*
-      Resumo
-    */
+    /* ===============================================
+       CONTADORES
+    =============================================== */
 
     const funcionariosComFalta =
+
       new Set(
 
         faltas.map(
+
           falta =>
             String(
               falta.funcionarioId
             )
+
         )
 
       ).size;
 
 
     const faltasJustificadas =
+
       faltas.filter(
 
         falta => {
 
+
           const tipo =
+
             String(
               falta.tipo || ""
-            ).toLowerCase();
+            )
+
+              .toLowerCase();
 
 
           return (
@@ -820,37 +1290,54 @@ const FaltasPage = {
       ).length;
 
 
-    document.getElementById(
-      "totalFaltas"
-    ).textContent =
-      faltas.length;
+    document
+
+      .getElementById(
+        "totalFaltas"
+      )
+
+      .textContent =
+        faltas.length;
 
 
-    document.getElementById(
-      "funcionariosComFalta"
-    ).textContent =
-      funcionariosComFalta;
+    document
+
+      .getElementById(
+        "funcionariosComFalta"
+      )
+
+      .textContent =
+        funcionariosComFalta;
 
 
-    document.getElementById(
-      "faltasJustificadas"
-    ).textContent =
-      faltasJustificadas;
+    document
+
+      .getElementById(
+        "faltasJustificadas"
+      )
+
+      .textContent =
+        faltasJustificadas;
 
 
-    document.getElementById(
-      "badgeTotalFaltas"
-    ).textContent =
-      `${faltas.length} no total`;
+    document
+
+      .getElementById(
+        "badgeTotalFaltas"
+      )
+
+      .textContent =
+        `${faltas.length} no total`;
 
 
-    if (!faltas.length) {
+    if (
+      faltas.length === 0
+    ) {
+
 
       container.innerHTML = `
 
-        <div
-          class="empty"
-        >
+        <div class="empty">
 
           <strong>
             Nenhuma falta registrada
@@ -865,86 +1352,114 @@ const FaltasPage = {
 
       `;
 
+
       return;
+
     }
 
 
     const ordenadas =
+
       [...faltas].sort(
+
         (a, b) =>
 
           String(
             b.data || ""
-          ).localeCompare(
-
-            String(
-              a.data || ""
-            )
-
           )
+
+            .localeCompare(
+
+              String(
+                a.data || ""
+              )
+
+            )
 
       );
 
 
     container.innerHTML = `
 
+
       <div class="table-wrap">
+
 
         <table>
 
+
           <thead>
 
+
             <tr>
+
 
               <th>
                 ID
               </th>
 
+
               <th>
                 Funcionário
               </th>
+
 
               <th>
                 Data
               </th>
 
+
               <th>
                 Motivo
               </th>
 
+
               <th>
                 Justificativa / Observação
               </th>
+
 
               <th
                 style="
                   text-align:right;
                 "
               >
+
                 Ações
+
               </th>
 
+
             </tr>
+
 
           </thead>
 
 
           <tbody>
 
+
             ${ordenadas.map(
+
               falta => {
 
+
                 const funcionario =
+
                   mapaFuncionarios[
+
                     String(
                       falta.funcionarioId
                     )
+
                   ];
 
 
                 return `
 
+
                   <tr>
+
 
                     <td>
 
@@ -956,7 +1471,11 @@ const FaltasPage = {
                           font-size:12px;
                         "
                       >
-                        #${falta.id}
+
+                        #${escaparFalta(
+                          falta.id
+                        )}
+
                       </code>
 
                     </td>
@@ -968,11 +1487,13 @@ const FaltasPage = {
 
                         ${escaparFalta(
 
-                          funcionario?.nome ||
+                          funcionario
 
-                          funcionario?.nome_completo ||
+                            ? obterNomeFuncionarioFalta(
+                                funcionario
+                              )
 
-                          "Funcionário removido"
+                            : "Funcionário removido"
 
                         )}
 
@@ -993,7 +1514,10 @@ const FaltasPage = {
                     <td>
 
                       <span
-                        class="badge badge-days"
+                        class="
+                          badge
+                          badge-days
+                        "
                       >
 
                         ${escaparFalta(
@@ -1029,6 +1553,8 @@ const FaltasPage = {
 
                       <button
 
+                        type="button"
+
                         class="
                           btn
                           btn-danger
@@ -1049,7 +1575,9 @@ const FaltasPage = {
 
                     </td>
 
+
                   </tr>
+
 
                 `;
 
@@ -1057,9 +1585,12 @@ const FaltasPage = {
 
             ).join("")}
 
+
           </tbody>
 
+
         </table>
+
 
       </div>
 
@@ -1069,13 +1600,573 @@ const FaltasPage = {
 
 
   /* ===================================================
-     MODAL NOVA FALTA
+     HTML DO PESQUISADOR
+
+     tipo:
+     falta
+     relatorio
+  =================================================== */
+
+  htmlPesquisaFuncionario(
+    tipo
+  ) {
+
+
+    const inputId =
+
+      tipo === "falta"
+
+        ? "faltaFuncionarioPesquisa"
+
+        : "relatorioFuncionarioPesquisa";
+
+
+    const hiddenId =
+
+      tipo === "falta"
+
+        ? "faltaFuncionario"
+
+        : "relatorioFaltaFuncionario";
+
+
+    const listaId =
+
+      tipo === "falta"
+
+        ? "listaFuncionariosFalta"
+
+        : "listaFuncionariosRelatorio";
+
+
+    return `
+
+
+      <div
+        class="funcionario-search-wrap"
+      >
+
+
+        <input
+
+          type="text"
+
+          id="${inputId}"
+
+          class="funcionario-search-input"
+
+          placeholder="
+            Digite o nome ou matrícula...
+          "
+
+          autocomplete="off"
+
+        >
+
+
+        <span
+          class="funcionario-search-icon"
+        >
+
+          🔎
+
+        </span>
+
+
+        <input
+
+          type="hidden"
+
+          id="${hiddenId}"
+
+          value=""
+
+        >
+
+
+        <div
+
+          id="${listaId}"
+
+          class="funcionario-search-list"
+
+        ></div>
+
+
+      </div>
+
+
+      <small
+        class="funcionario-search-ajuda"
+      >
+
+        Digite parte do nome ou da matrícula
+        e clique no servidor desejado.
+
+      </small>
+
+    `;
+
+  },
+
+
+  /* ===================================================
+     CONFIGURAR CAMPO PESQUISÁVEL
+  =================================================== */
+
+  configurarPesquisaFuncionario(
+    tipo
+  ) {
+
+
+    const inputId =
+
+      tipo === "falta"
+
+        ? "faltaFuncionarioPesquisa"
+
+        : "relatorioFuncionarioPesquisa";
+
+
+    const hiddenId =
+
+      tipo === "falta"
+
+        ? "faltaFuncionario"
+
+        : "relatorioFaltaFuncionario";
+
+
+    const listaId =
+
+      tipo === "falta"
+
+        ? "listaFuncionariosFalta"
+
+        : "listaFuncionariosRelatorio";
+
+
+    const input =
+      document.getElementById(
+        inputId
+      );
+
+
+    const hidden =
+      document.getElementById(
+        hiddenId
+      );
+
+
+    const lista =
+      document.getElementById(
+        listaId
+      );
+
+
+    if (
+      !input ||
+      !hidden ||
+      !lista
+    ) {
+
+      return;
+
+    }
+
+
+    /* ===============================================
+       RENDERIZAR RESULTADOS
+    =============================================== */
+
+    const renderizarResultados =
+      () => {
+
+
+        const pesquisa =
+
+          normalizarTextoPesquisaFalta(
+            input.value
+          );
+
+
+        /*
+          Ao editar o texto depois de ter
+          escolhido alguém, tira o ID antigo.
+        */
+
+        hidden.value =
+          "";
+
+
+        if (
+          tipo === "relatorio"
+        ) {
+
+          this.gerarRelatorio(
+            ""
+          );
+
+        }
+
+
+        let encontrados =
+          this.state.funcionarios;
+
+
+        if (pesquisa) {
+
+
+          encontrados =
+
+            encontrados.filter(
+
+              funcionario => {
+
+
+                const nome =
+
+                  normalizarTextoPesquisaFalta(
+
+                    obterNomeFuncionarioFalta(
+                      funcionario
+                    )
+
+                  );
+
+
+                const matricula =
+
+                  normalizarTextoPesquisaFalta(
+
+                    funcionario.matricula
+
+                  );
+
+
+                const rotulo =
+
+                  normalizarTextoPesquisaFalta(
+
+                    obterRotuloFuncionarioFalta(
+                      funcionario
+                    )
+
+                  );
+
+
+                return (
+
+                  nome.includes(
+                    pesquisa
+                  )
+
+                  ||
+
+                  matricula.includes(
+                    pesquisa
+                  )
+
+                  ||
+
+                  rotulo.includes(
+                    pesquisa
+                  )
+
+                );
+
+              }
+
+            );
+
+        }
+
+
+        /*
+          Limita a quantidade exibida.
+          Continua pesquisando todos.
+        */
+
+        encontrados =
+          encontrados.slice(
+            0,
+            30
+          );
+
+
+        if (
+          encontrados.length === 0
+        ) {
+
+
+          lista.innerHTML = `
+
+            <div
+              class="
+                funcionario-search-vazio
+              "
+            >
+
+              Nenhum servidor encontrado.
+
+            </div>
+
+          `;
+
+
+          lista.classList.add(
+            "aberto"
+          );
+
+
+          return;
+
+        }
+
+
+        lista.innerHTML =
+
+          encontrados.map(
+
+            funcionario => {
+
+
+              const nome =
+
+                obterNomeFuncionarioFalta(
+                  funcionario
+                );
+
+
+              const matricula =
+
+                funcionario.matricula ||
+                "";
+
+
+              return `
+
+                <button
+
+                  type="button"
+
+                  class="
+                    funcionario-search-item
+                  "
+
+                  data-id="${
+                    escaparFalta(
+                      funcionario.id
+                    )
+                  }"
+
+                >
+
+                  <strong>
+
+                    ${escaparFalta(
+                      nome
+                    )}
+
+                  </strong>
+
+
+                  ${
+
+                    matricula
+
+                      ?
+
+                      `
+
+                      <span
+                        class="
+                          funcionario-search-matricula
+                        "
+                      >
+
+                        Matrícula:
+                        ${escaparFalta(
+                          matricula
+                        )}
+
+                      </span>
+
+                      `
+
+                      :
+
+                      ""
+
+                  }
+
+
+                </button>
+
+              `;
+
+            }
+
+          ).join("");
+
+
+        lista.classList.add(
+          "aberto"
+        );
+
+
+        /* =============================================
+           CLIQUE NO RESULTADO
+        =============================================== */
+
+        lista
+
+          .querySelectorAll(
+            ".funcionario-search-item"
+          )
+
+          .forEach(
+
+            botao => {
+
+
+              botao.addEventListener(
+
+                "click",
+
+                () => {
+
+
+                  const id =
+                    botao.dataset.id;
+
+
+                  const funcionario =
+
+                    this.state.funcionarios.find(
+
+                      f =>
+                        String(
+                          f.id
+                        ) ===
+                        String(
+                          id
+                        )
+
+                    );
+
+
+                  if (!funcionario) {
+                    return;
+                  }
+
+
+                  input.value =
+
+                    obterRotuloFuncionarioFalta(
+                      funcionario
+                    );
+
+
+                  hidden.value =
+                    funcionario.id;
+
+
+                  lista.classList.remove(
+                    "aberto"
+                  );
+
+
+                  if (
+                    tipo === "relatorio"
+                  ) {
+
+                    this.gerarRelatorio(
+                      funcionario.id
+                    );
+
+                  }
+
+                }
+
+              );
+
+            }
+
+          );
+
+      };
+
+
+    /* ===============================================
+       DIGITAR
+    =============================================== */
+
+    input.addEventListener(
+
+      "input",
+
+      renderizarResultados
+
+    );
+
+
+    /* ===============================================
+       FOCUS
+    =============================================== */
+
+    input.addEventListener(
+
+      "focus",
+
+      renderizarResultados
+
+    );
+
+
+    /* ===============================================
+       FECHAR AO CLICAR FORA
+    =============================================== */
+
+    document.addEventListener(
+
+      "click",
+
+      evento => {
+
+
+        if (
+
+          !input.contains(
+            evento.target
+          )
+
+          &&
+
+          !lista.contains(
+            evento.target
+          )
+
+        ) {
+
+          lista.classList.remove(
+            "aberto"
+          );
+
+        }
+
+      }
+
+    );
+
+  },
+
+
+  /* ===================================================
+     MODAL REGISTRAR FALTA
   =================================================== */
 
   openModalFalta() {
-
-    const funcionarios =
-      this.state.funcionarios;
 
 
     App.openModal({
@@ -1088,9 +2179,13 @@ const FaltasPage = {
 
         `
 
+
         <form
+
           id="formFalta"
+
           class="custom-modal-form"
+
         >
 
 
@@ -1098,66 +2193,18 @@ const FaltasPage = {
             class="form-field"
           >
 
-            <label
-              for="faltaFuncionario"
-            >
+
+            <label>
 
               Funcionário *
 
             </label>
 
 
-            <select
-              id="faltaFuncionario"
-              required
-            >
+            ${this.htmlPesquisaFuncionario(
+              "falta"
+            )}
 
-              <option value="">
-
-                Selecione um funcionário...
-
-              </option>
-
-
-              ${funcionarios.map(
-                funcionario => {
-
-                  const id =
-                    funcionario.id;
-
-                  const nome =
-                    funcionario.nome ||
-                    funcionario.nome_completo ||
-                    "Funcionário";
-
-
-                  return `
-
-                    <option
-                      value="${id}"
-                    >
-
-                      ${escaparFalta(
-                        nome
-                      )}
-
-                      ${
-                        funcionario.matricula
-                          ? ` — ${escaparFalta(
-                              funcionario.matricula
-                            )}`
-                          : ""
-                      }
-
-                    </option>
-
-                  `;
-
-                }
-
-              ).join("")}
-
-            </select>
 
           </div>
 
@@ -1171,6 +2218,7 @@ const FaltasPage = {
               class="form-field"
             >
 
+
               <label
                 for="faltaData"
               >
@@ -1181,15 +2229,28 @@ const FaltasPage = {
 
 
               <input
+
                 type="date"
+
                 id="faltaData"
+
                 value="${
+
                   new Date()
+
                     .toISOString()
-                    .slice(0,10)
+
+                    .slice(
+                      0,
+                      10
+                    )
+
                 }"
+
                 required
+
               >
+
 
             </div>
 
@@ -1197,6 +2258,7 @@ const FaltasPage = {
             <div
               class="form-field"
             >
+
 
               <label
                 for="faltaMotivo"
@@ -1208,35 +2270,52 @@ const FaltasPage = {
 
 
               <select
+
                 id="faltaMotivo"
+
                 required
+
               >
+
 
                 <option
                   value="Falta Injustificada"
                 >
+
                   Falta Injustificada
+
                 </option>
+
 
                 <option
                   value="Falta Justificada"
                 >
+
                   Falta Justificada
+
                 </option>
+
 
                 <option
                   value="Atestado Médico"
                 >
+
                   Atestado Médico
+
                 </option>
+
 
                 <option
                   value="Licença / Outros"
                 >
+
                   Licença / Outros
+
                 </option>
 
+
               </select>
+
 
             </div>
 
@@ -1248,6 +2327,7 @@ const FaltasPage = {
             class="form-field"
           >
 
+
             <label
               for="faltaJustificativa"
             >
@@ -1258,16 +2338,21 @@ const FaltasPage = {
 
 
             <textarea
+
               id="faltaJustificativa"
+
               placeholder="
                 Digite aqui os detalhes ou justificativa...
               "
+
             ></textarea>
+
 
           </div>
 
 
         </form>
+
 
         `,
 
@@ -1276,9 +2361,18 @@ const FaltasPage = {
 
         `
 
+
         <button
-          class="btn btn-secondary"
+
+          type="button"
+
+          class="
+            btn
+            btn-secondary
+          "
+
           data-close-modal
+
         >
 
           Cancelar
@@ -1287,28 +2381,76 @@ const FaltasPage = {
 
 
         <button
-          class="btn btn-primary"
+
+          type="button"
+
+          class="
+            btn
+            btn-primary
+          "
+
           id="btnSalvarFalta"
+
         >
 
           Salvar Registro
 
         </button>
 
+
         `
 
     });
 
 
+    /*
+      Ativa pesquisa depois
+      que o modal foi criado.
+    */
+
+    this.configurarPesquisaFuncionario(
+      "falta"
+    );
+
+
     document
+
       .getElementById(
         "btnSalvarFalta"
       )
+
       ?.addEventListener(
+
         "click",
+
         () =>
           this.salvar()
+
       );
+
+
+    /*
+      Dá foco automaticamente
+      no campo de servidor.
+    */
+
+    setTimeout(
+
+      () => {
+
+        document
+
+          .getElementById(
+            "faltaFuncionarioPesquisa"
+          )
+
+          ?.focus();
+
+      },
+
+      50
+
+    );
 
   },
 
@@ -1319,59 +2461,138 @@ const FaltasPage = {
 
   async salvar() {
 
+
     const funcionarioId =
+
       document.getElementById(
         "faltaFuncionario"
       )?.value;
 
 
+    const campoPesquisa =
+
+      document.getElementById(
+        "faltaFuncionarioPesquisa"
+      );
+
+
     const data =
+
       document.getElementById(
         "faltaData"
       )?.value;
 
 
     const tipo =
+
       document.getElementById(
         "faltaMotivo"
       )?.value;
 
 
     const justificativa =
+
       document.getElementById(
         "faltaJustificativa"
-      )?.value || "";
+      )?.value ||
+
+      "";
+
+
+    /* ===============================================
+       SE O USUÁRIO DIGITOU O NOME EXATO
+       MAS NÃO CLICOU NO RESULTADO
+    =============================================== */
+
+    let idFinal =
+      funcionarioId;
 
 
     if (
-      !funcionarioId ||
-      !data
+      !idFinal &&
+      campoPesquisa?.value
     ) {
+
+
+      const encontrado =
+
+        localizarFuncionarioDigitadoFalta(
+
+          campoPesquisa.value,
+
+          this.state.funcionarios
+
+        );
+
+
+      if (encontrado) {
+
+        idFinal =
+          encontrado.id;
+
+      }
+
+    }
+
+
+    if (
+      !idFinal
+    ) {
+
 
       App.toast(
 
-        "Preencha os campos obrigatórios.",
+        "Pesquise e selecione um funcionário.",
 
         "warning"
 
       );
 
+
+      campoPesquisa?.focus();
+
+
       return;
+
+    }
+
+
+    if (!data) {
+
+
+      App.toast(
+
+        "Informe a data da falta.",
+
+        "warning"
+
+      );
+
+
+      return;
+
     }
 
 
     const funcionarioIdNumerico =
+
       Number(
-        funcionarioId
+        idFinal
       );
 
 
     if (
+
       !Number.isInteger(
         funcionarioIdNumerico
-      ) ||
+      )
+
+      ||
+
       funcionarioIdNumerico <= 0
+
     ) {
+
 
       App.toast(
 
@@ -1381,11 +2602,14 @@ const FaltasPage = {
 
       );
 
+
       return;
+
     }
 
 
     const botao =
+
       document.getElementById(
         "btnSalvarFalta"
       );
@@ -1404,16 +2628,6 @@ const FaltasPage = {
 
     try {
 
-      /*
-        IMPORTANTE:
-        App.add("faltas") espera:
-
-        funcionarioId
-        data
-        tipo
-        justificativa
-        observacoes
-      */
 
       await App.add(
 
@@ -1453,15 +2667,14 @@ const FaltasPage = {
       App.closeModal();
 
 
-      /*
-        Recarrega os dados.
-      */
-
       this.state.faltas =
+
         (
+
           await App.getAll(
             "faltas"
           )
+
         ).map(
           normalizarFalta
         );
@@ -1470,17 +2683,24 @@ const FaltasPage = {
       this.render();
 
 
-    } catch (erro) {
+    }
+
+    catch (erro) {
+
 
       console.error(
+
         "Erro ao salvar falta:",
+
         erro
+
       );
 
 
       App.toast(
 
         "Erro ao salvar falta: " +
+
         (
           erro.message ||
           erro
@@ -1507,13 +2727,10 @@ const FaltasPage = {
 
 
   /* ===================================================
-     RELATÓRIO POR FUNCIONÁRIO
+     MODAL RELATÓRIO
   =================================================== */
 
   openModalRelatorio() {
-
-    const funcionarios =
-      this.state.funcionarios;
 
 
     App.openModal({
@@ -1526,6 +2743,7 @@ const FaltasPage = {
 
         `
 
+
         <div
           style="
             display:flex;
@@ -1535,74 +2753,22 @@ const FaltasPage = {
         >
 
 
-          <div>
+          <div
+            class="form-field"
+          >
 
-            <label
-              for="relatorioFaltaFuncionario"
-              style="
-                display:block;
-                font-weight:600;
-                margin-bottom:6px;
-              "
-            >
+
+            <label>
 
               Funcionário
 
             </label>
 
 
-            <select
-              id="relatorioFaltaFuncionario"
-              class="input"
-              style="
-                width:100%;
-                padding:10px;
-              "
-            >
+            ${this.htmlPesquisaFuncionario(
+              "relatorio"
+            )}
 
-              <option value="">
-
-                Selecione um funcionário...
-
-              </option>
-
-
-              ${funcionarios.map(
-                funcionario => {
-
-                  const id =
-                    funcionario.id;
-
-
-                  return `
-
-                    <option
-                      value="${id}"
-                    >
-
-                      ${escaparFalta(
-                        funcionario.nome ||
-                        funcionario.nome_completo ||
-                        "Funcionário"
-                      )}
-
-                      ${
-                        funcionario.matricula
-                          ? ` — ${escaparFalta(
-                              funcionario.matricula
-                            )}`
-                          : ""
-                      }
-
-                    </option>
-
-                  `;
-
-                }
-
-              ).join("")}
-
-            </select>
 
           </div>
 
@@ -1611,31 +2777,41 @@ const FaltasPage = {
             id="resultadoRelatorioFaltas"
           >
 
+
             <div
+
               class="empty"
+
               style="
                 padding:30px 10px;
               "
+
             >
+
 
               <strong>
 
-                Selecione um funcionário
+                Pesquise um funcionário
 
               </strong>
 
 
               <p>
 
-                O relatório será exibido aqui.
+                Digite o nome ou matrícula
+                para gerar o relatório.
 
               </p>
 
+
             </div>
+
 
           </div>
 
+
         </div>
+
 
         `,
 
@@ -1644,9 +2820,18 @@ const FaltasPage = {
 
         `
 
+
         <button
-          class="btn btn-secondary"
+
+          type="button"
+
+          class="
+            btn
+            btn-secondary
+          "
+
           data-close-modal
+
         >
 
           Fechar
@@ -1655,41 +2840,66 @@ const FaltasPage = {
 
 
         <button
-          class="btn btn-primary"
+
+          type="button"
+
+          class="
+            btn
+            btn-primary
+          "
+
           id="btnImprimirRelatorioFaltas"
+
         >
 
           🖨️ Imprimir
 
         </button>
 
+
         `
 
     });
 
 
-    document
-      .getElementById(
-        "relatorioFaltaFuncionario"
-      )
-      ?.addEventListener(
-        "change",
-        e =>
-          this.gerarRelatorio(
-            e.target.value
-          )
-      );
+    this.configurarPesquisaFuncionario(
+      "relatorio"
+    );
 
 
     document
+
       .getElementById(
         "btnImprimirRelatorioFaltas"
       )
+
       ?.addEventListener(
+
         "click",
+
         () =>
           this.imprimirRelatorio()
+
       );
+
+
+    setTimeout(
+
+      () => {
+
+        document
+
+          .getElementById(
+            "relatorioFuncionarioPesquisa"
+          )
+
+          ?.focus();
+
+      },
+
+      50
+
+    );
 
   },
 
@@ -1702,7 +2912,9 @@ const FaltasPage = {
     funcionarioId
   ) {
 
+
     const container =
+
       document.getElementById(
         "resultadoRelatorioFaltas"
       );
@@ -1715,38 +2927,56 @@ const FaltasPage = {
 
     if (!funcionarioId) {
 
+
       container.innerHTML = `
 
+
         <div
+
           class="empty"
+
           style="
             padding:30px 10px;
           "
+
         >
 
+
           <strong>
-            Selecione um funcionário
+
+            Pesquise um funcionário
+
           </strong>
 
+
           <p>
+
             O relatório será exibido aqui.
+
           </p>
+
 
         </div>
 
+
       `;
 
+
       return;
+
     }
 
 
     const funcionario =
+
       this.state.funcionarios.find(
 
         f =>
+
           String(
             f.id
           ) ===
+
           String(
             funcionarioId
           )
@@ -1756,10 +2986,14 @@ const FaltasPage = {
 
     if (!funcionario) {
 
+
       container.innerHTML = `
 
         <div
-          class="alert alert-danger"
+          class="
+            alert
+            alert-danger
+          "
         >
 
           Funcionário não encontrado.
@@ -1768,23 +3002,47 @@ const FaltasPage = {
 
       `;
 
+
       return;
+
     }
 
 
     const faltas =
-      this.state.faltas.filter(
 
-        falta =>
+      this.state.faltas
 
-          String(
-            falta.funcionarioId
-          ) ===
-          String(
-            funcionarioId
-          )
+        .filter(
 
-      );
+          falta =>
+
+            String(
+              falta.funcionarioId
+            ) ===
+
+            String(
+              funcionarioId
+            )
+
+        )
+
+        .sort(
+
+          (a, b) =>
+
+            String(
+              b.data || ""
+            )
+
+              .localeCompare(
+
+                String(
+                  a.data || ""
+                )
+
+              )
+
+        );
 
 
     const total =
@@ -1792,34 +3050,38 @@ const FaltasPage = {
 
 
     const injustificadas =
+
       faltas.filter(
 
-        falta => {
+        falta =>
 
-          const tipo =
-            String(
-              falta.tipo || ""
-            ).toLowerCase();
+          String(
+            falta.tipo || ""
+          )
 
+            .toLowerCase()
 
-          return tipo.includes(
-            "injustificada"
-          );
-
-        }
+            .includes(
+              "injustificada"
+            )
 
       ).length;
 
 
     const justificadas =
+
       faltas.filter(
 
         falta => {
 
+
           const tipo =
+
             String(
               falta.tipo || ""
-            ).toLowerCase();
+            )
+
+              .toLowerCase();
 
 
           return (
@@ -1842,47 +3104,54 @@ const FaltasPage = {
 
 
     const licencas =
+
       faltas.filter(
 
-        falta => {
+        falta =>
 
-          const tipo =
-            String(
-              falta.tipo || ""
-            ).toLowerCase();
+          String(
+            falta.tipo || ""
+          )
 
+            .toLowerCase()
 
-          return tipo.includes(
-            "licença"
-          );
-
-        }
+            .includes(
+              "licença"
+            )
 
       ).length;
 
 
     const nomeFuncionario =
-      funcionario.nome ||
-      funcionario.nome_completo ||
-      "Funcionário";
+
+      obterNomeFuncionarioFalta(
+        funcionario
+      );
 
 
     const matricula =
+
       funcionario.matricula ||
+
       "—";
 
 
     container.innerHTML = `
 
+
       <div
+
         id="relatorioImpressaoFaltas"
+
         class="relatorio-faltas"
+
       >
 
 
         <div
           class="relatorio-cabecalho"
         >
+
 
           <h2
             style="
@@ -1907,12 +3176,14 @@ const FaltasPage = {
 
           </div>
 
+
         </div>
 
 
         <div
           class="relatorio-funcionario"
         >
+
 
           <div
             style="
@@ -1937,6 +3208,7 @@ const FaltasPage = {
           >
 
             Matrícula:
+
             ${escaparFalta(
               matricula
             )}
@@ -1953,11 +3225,15 @@ const FaltasPage = {
           >
 
             Relatório gerado em:
-            ${new Date().toLocaleString(
-              "pt-BR"
-            )}
+
+            ${new Date()
+
+              .toLocaleString(
+                "pt-BR"
+              )}
 
           </div>
+
 
         </div>
 
@@ -1971,8 +3247,11 @@ const FaltasPage = {
             class="relatorio-card"
           >
 
+
             <div
-              class="relatorio-card-label"
+              class="
+                relatorio-card-label
+              "
             >
 
               Total de faltas
@@ -1981,12 +3260,15 @@ const FaltasPage = {
 
 
             <div
-              class="relatorio-card-value"
+              class="
+                relatorio-card-value
+              "
             >
 
               ${total}
 
             </div>
+
 
           </div>
 
@@ -1995,8 +3277,11 @@ const FaltasPage = {
             class="relatorio-card"
           >
 
+
             <div
-              class="relatorio-card-label"
+              class="
+                relatorio-card-label
+              "
             >
 
               Faltas injustificadas
@@ -2005,12 +3290,15 @@ const FaltasPage = {
 
 
             <div
-              class="relatorio-card-value"
+              class="
+                relatorio-card-value
+              "
             >
 
               ${injustificadas}
 
             </div>
+
 
           </div>
 
@@ -2019,8 +3307,11 @@ const FaltasPage = {
             class="relatorio-card"
           >
 
+
             <div
-              class="relatorio-card-label"
+              class="
+                relatorio-card-label
+              "
             >
 
               Justificadas / Atestados
@@ -2029,19 +3320,24 @@ const FaltasPage = {
 
 
             <div
-              class="relatorio-card-value"
+              class="
+                relatorio-card-value
+              "
             >
 
               ${justificadas}
 
             </div>
 
+
           </div>
+
 
         </div>
 
 
         ${
+
           licencas > 0
 
             ?
@@ -2049,14 +3345,21 @@ const FaltasPage = {
             `
 
             <div
-              class="alert alert-info"
+
+              class="
+                alert
+                alert-info
+              "
+
               style="
                 margin-bottom:18px;
               "
+
             >
 
               Registros de
               Licença / Outros:
+
               <strong>
                 ${licencas}
               </strong>
@@ -2068,22 +3371,29 @@ const FaltasPage = {
             :
 
             ""
+
         }
 
 
         ${
+
           total === 0
 
             ?
 
             `
 
+
             <div
+
               class="empty"
+
               style="
                 padding:30px 10px;
               "
+
             >
+
 
               <strong>
 
@@ -2099,7 +3409,9 @@ const FaltasPage = {
 
               </p>
 
+
             </div>
+
 
             `
 
@@ -2107,39 +3419,52 @@ const FaltasPage = {
 
             `
 
+
             <div
               class="table-wrap"
             >
 
+
               <table>
+
 
                 <thead>
 
+
                   <tr>
+
 
                     <th>
                       Data
                     </th>
 
+
                     <th>
                       Motivo
                     </th>
+
 
                     <th>
                       Justificativa / Observação
                     </th>
 
+
                   </tr>
+
 
                 </thead>
 
 
                 <tbody>
 
+
                   ${faltas.map(
+
                     falta => `
 
+
                       <tr>
+
 
                         <td>
 
@@ -2153,7 +3478,10 @@ const FaltasPage = {
                         <td>
 
                           <span
-                            class="badge badge-days"
+                            class="
+                              badge
+                              badge-days
+                            "
                           >
 
                             ${escaparFalta(
@@ -2179,16 +3507,23 @@ const FaltasPage = {
 
                         </td>
 
+
                       </tr>
 
+
                     `
+
                   ).join("")}
+
 
                 </tbody>
 
+
               </table>
 
+
             </div>
+
 
             `
 
@@ -2196,22 +3531,30 @@ const FaltasPage = {
 
 
         <div
+
           style="
             margin-top:25px;
             padding-top:15px;
-            border-top:1px solid #e5e7eb;
+            border-top:
+              1px solid #e5e7eb;
             font-size:13px;
             color:#6b7280;
           "
+
         >
 
           <strong>
-            Total de registros: ${total}
+
+            Total de registros:
+            ${total}
+
           </strong>
 
         </div>
 
+
       </div>
+
 
     `;
 
@@ -2219,12 +3562,14 @@ const FaltasPage = {
 
 
   /* ===================================================
-     IMPRIMIR RELATÓRIO
+     IMPRIMIR
   =================================================== */
 
   imprimirRelatorio() {
 
+
     const relatorio =
+
       document.getElementById(
         "relatorioImpressaoFaltas"
       );
@@ -2232,13 +3577,15 @@ const FaltasPage = {
 
     if (!relatorio) {
 
+
       App.toast(
 
-        "Selecione um funcionário para gerar o relatório.",
+        "Pesquise e selecione um funcionário para gerar o relatório.",
 
         "warning"
 
       );
+
 
       return;
 
@@ -2246,14 +3593,20 @@ const FaltasPage = {
 
 
     const janela =
+
       window.open(
+
         "",
+
         "_blank",
+
         "width=1000,height=800"
+
       );
 
 
     if (!janela) {
+
 
       App.toast(
 
@@ -2263,6 +3616,7 @@ const FaltasPage = {
 
       );
 
+
       return;
 
     }
@@ -2270,13 +3624,18 @@ const FaltasPage = {
 
     janela.document.write(`
 
+
       <!DOCTYPE html>
+
 
       <html lang="pt-BR">
 
+
       <head>
 
+
         <meta charset="UTF-8">
+
 
         <title>
           Relatório de Faltas
@@ -2284,6 +3643,7 @@ const FaltasPage = {
 
 
         <style>
+
 
           body {
 
@@ -2309,7 +3669,8 @@ const FaltasPage = {
 
             width:100%;
 
-            border-collapse:collapse;
+            border-collapse:
+              collapse;
 
             margin-top:20px;
 
@@ -2319,7 +3680,8 @@ const FaltasPage = {
           th,
           td {
 
-            border:1px solid #d1d5db;
+            border:
+              1px solid #d1d5db;
 
             padding:8px;
 
@@ -2335,7 +3697,7 @@ const FaltasPage = {
           }
 
 
-          .cabecalho {
+          .relatorio-cabecalho {
 
             border-bottom:
               2px solid #1f4b8f;
@@ -2347,11 +3709,12 @@ const FaltasPage = {
           }
 
 
-          .funcionario {
+          .relatorio-funcionario {
 
             background:#f8fafc;
 
-            border:1px solid #ddd;
+            border:
+              1px solid #ddd;
 
             padding:15px;
 
@@ -2360,7 +3723,7 @@ const FaltasPage = {
           }
 
 
-          .cards {
+          .relatorio-cards {
 
             display:grid;
 
@@ -2374,9 +3737,10 @@ const FaltasPage = {
           }
 
 
-          .card {
+          .relatorio-card {
 
-            border:1px solid #ddd;
+            border:
+              1px solid #ddd;
 
             padding:15px;
 
@@ -2385,13 +3749,35 @@ const FaltasPage = {
           }
 
 
-          .valor {
+          .relatorio-card-label {
+
+            font-size:12px;
+
+            color:#666;
+
+          }
+
+
+          .relatorio-card-value {
 
             font-size:24px;
 
             font-weight:bold;
 
             margin-top:5px;
+
+          }
+
+
+          .badge {
+
+            display:inline-block;
+
+            padding:3px 7px;
+
+            border-radius:6px;
+
+            background:#f3f4f6;
 
           }
 
@@ -2406,14 +3792,18 @@ const FaltasPage = {
 
           }
 
+
         </style>
+
 
       </head>
 
 
       <body>
 
+
         ${relatorio.innerHTML}
+
 
         <script>
 
@@ -2425,9 +3815,12 @@ const FaltasPage = {
 
         <\/script>
 
+
       </body>
 
+
       </html>
+
 
     `);
 
@@ -2441,7 +3834,10 @@ const FaltasPage = {
      EXCLUIR
   =================================================== */
 
-  async excluir(id) {
+  async excluir(
+    id
+  ) {
+
 
     if (
 
@@ -2460,15 +3856,22 @@ const FaltasPage = {
 
     try {
 
+
       await App.remove(
+
         "faltas",
+
         id
+
       );
 
 
       App.toast(
+
         "Falta removida com sucesso!",
+
         "info"
+
       );
 
 
@@ -2487,17 +3890,25 @@ const FaltasPage = {
 
       this.render();
 
-    } catch (erro) {
+
+    }
+
+    catch (erro) {
+
 
       console.error(
+
         "Erro ao excluir:",
+
         erro
+
       );
 
 
       App.toast(
 
         "Erro ao excluir registro: " +
+
         (
           erro.message ||
           erro
