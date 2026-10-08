@@ -1492,4 +1492,301 @@ const DashboardPage = {
           String(this.dataDeclaracao(a))
         );
 
-        return
+        return (
+          delta ||
+          String(b.id || "").localeCompare(
+            String(a.id || "")
+          )
+        );
+      })
+      .slice(0, 6);
+
+    if (!registros.length) {
+      return `
+        <div class="dashboard-empty">
+          Nenhuma declaração registrada.
+        </div>
+      `;
+    }
+
+    return `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Tipo</th>
+              <th>Data</th>
+              <th>Quantidade</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${registros.map(x => {
+              const f = mapa[
+                String(
+                  x.funcionarioId ??
+                  x.funcionario_id
+                )
+              ];
+
+              const horas = String(
+                x.tipo || ""
+              ).toLowerCase() === "horas";
+
+              const qtd = horas
+                ? `${
+                    Number(
+                      x.quantidadeHoras ??
+                      x.quantidade_horas ??
+                      0
+                    )
+                  } h`
+                : `${
+                    Number(
+                      x.quantidadeDias ??
+                      x.quantidade_dias ??
+                      0
+                    )
+                  } dia(s)`;
+
+              return `
+                <tr>
+
+                  <td>
+                    <strong>
+                      ${App.escapeHTML(
+                        this.nomeFuncionario(f)
+                      )}
+                    </strong>
+                  </td>
+
+                  <td>
+                    <span
+                      class="badge ${
+                        horas
+                          ? "badge-hours"
+                          : "badge-days"
+                      }"
+                    >
+                      ${horas ? "Horas" : "Dias"}
+                    </span>
+                  </td>
+
+                  <td>
+                    ${App.formatDate(
+                      this.dataDeclaracao(x)
+                    )}
+                  </td>
+
+                  <td>${qtd}</td>
+
+                </tr>
+              `;
+            }).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+    `;
+  },
+
+  /* =============================================================
+     FALTAS RECENTES
+  ============================================================= */
+
+  tabelaFaltas(faltas, mapa) {
+    const registros = [...faltas]
+      .sort((a, b) => {
+        const delta = String(
+          b.data ?? b.data_falta ?? ""
+        ).localeCompare(
+          String(
+            a.data ?? a.data_falta ?? ""
+          )
+        );
+
+        return (
+          delta ||
+          String(b.id || "").localeCompare(
+            String(a.id || "")
+          )
+        );
+      })
+      .slice(0, 6);
+
+    if (!registros.length) {
+      return `
+        <div class="dashboard-empty">
+          Nenhuma falta registrada.
+        </div>
+      `;
+    }
+
+    return `
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Data</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${registros.map(x => {
+              const f = mapa[
+                String(
+                  x.funcionarioId ??
+                  x.funcionario_id
+                )
+              ];
+
+              return `
+                <tr>
+
+                  <td>
+                    <strong>
+                      ${App.escapeHTML(
+                        this.nomeFuncionario(f)
+                      )}
+                    </strong>
+                  </td>
+
+                  <td>
+                    ${App.formatDate(
+                      x.data ?? x.data_falta
+                    )}
+                  </td>
+
+                  <td>
+                    <span class="badge badge-days">
+                      ${App.escapeHTML(
+                        x.tipo ??
+                        x.motivo ??
+                        "Falta"
+                      )}
+                    </span>
+                  </td>
+
+                </tr>
+              `;
+            }).join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+    `;
+  },
+
+  /* =============================================================
+     ORDENAR AGENDA
+  ============================================================= */
+
+  chaveAgenda(x) {
+    return (
+      `${String(
+        x.data || "9999-12-31"
+      ).slice(0, 10)} ` +
+      `${String(
+        x.hora_inicio || "23:59:59"
+      )}`
+    );
+  },
+
+  horaAgenda(v) {
+    return v
+      ? String(v).slice(0, 5)
+      : "";
+  },
+
+  /* =============================================================
+     PRÓXIMOS EVENTOS DA AGENDA
+  ============================================================= */
+
+  listaAgenda(eventos) {
+    const registros = [...eventos].slice(0, 6);
+
+    if (!registros.length) {
+      return `
+        <div class="dashboard-empty">
+          Nenhum evento futuro cadastrado na agenda.
+        </div>
+      `;
+    }
+
+    return `
+      <div class="dashboard-eventos">
+
+        ${registros.map(x => {
+          const inicio = this.horaAgenda(
+            x.hora_inicio
+          );
+
+          const fim = this.horaAgenda(
+            x.hora_fim
+          );
+
+          const horario = inicio && fim
+            ? `${inicio} às ${fim}`
+            : inicio || "Horário não informado";
+
+          return `
+            <div class="dashboard-evento">
+
+              <div class="dashboard-evento-data">
+                ${App.formatDate(x.data)}
+              </div>
+
+              <div class="dashboard-evento-info">
+
+                <div class="dashboard-evento-titulo">
+                  ${App.escapeHTML(
+                    x.titulo || "Evento"
+                  )}
+                </div>
+
+                <div class="dashboard-evento-detalhes">
+
+                  🕒 ${App.escapeHTML(horario)}
+
+                  ${
+                    x.local
+                      ? ` &nbsp; • &nbsp; 📍 ${
+                          App.escapeHTML(x.local)
+                        }`
+                      : ""
+                  }
+
+                  ${
+                    x.categoria
+                      ? ` &nbsp; • &nbsp; ${
+                          App.escapeHTML(x.categoria)
+                        }`
+                      : ""
+                  }
+
+                </div>
+
+              </div>
+
+            </div>
+          `;
+        }).join("")}
+
+      </div>
+    `;
+  }
+
+};
