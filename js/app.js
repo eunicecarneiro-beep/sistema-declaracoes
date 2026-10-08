@@ -1,50 +1,35 @@
+/* ===============================================================
+   APP.JS — E.M. PROFª EUNICE CARNEIRO
+   Atualização: acesso ao módulo Históricos Escolares no menu.
+   Mantém autenticação, Supabase, funcionários, declarações,
+   faltas, agenda, relatórios e Dashboard.
+   Os dados dos estudantes dependem de RLS no Supabase.
+================================================================ */
+
 const SUPABASE_URL = "https://cujlebxqqposqomtfvdk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx";
-
 const AUTH_SESSION_KEY = "eunice_auth_session";
 const AUTH_PROFILE_KEY = "eunice_auth_profile";
 const AUTH_ACCESS_KEY = "eunice_access_id";
 
 function authGetSession() {
-  try {
-    return JSON.parse(
-      localStorage.getItem(AUTH_SESSION_KEY) || "null"
-    );
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(localStorage.getItem(AUTH_SESSION_KEY) || "null"); }
+  catch { return null; }
 }
 
-function authSetSession(session) {
-  if (session) {
-    localStorage.setItem(
-      AUTH_SESSION_KEY,
-      JSON.stringify(session)
-    );
-  } else {
-    localStorage.removeItem(AUTH_SESSION_KEY);
-  }
+function authSetSession(x) {
+  if (x) localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(x));
+  else localStorage.removeItem(AUTH_SESSION_KEY);
 }
 
 function authGetProfile() {
-  try {
-    return JSON.parse(
-      localStorage.getItem(AUTH_PROFILE_KEY) || "null"
-    );
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(localStorage.getItem(AUTH_PROFILE_KEY) || "null"); }
+  catch { return null; }
 }
 
-function authSetProfile(profile) {
-  if (profile) {
-    localStorage.setItem(
-      AUTH_PROFILE_KEY,
-      JSON.stringify(profile)
-    );
-  } else {
-    localStorage.removeItem(AUTH_PROFILE_KEY);
-  }
+function authSetProfile(x) {
+  if (x) localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(x));
+  else localStorage.removeItem(AUTH_PROFILE_KEY);
 }
 
 function authGetAccessId() {
@@ -52,4973 +37,1459 @@ function authGetAccessId() {
 }
 
 function authSetAccessId(id) {
-  if (id) {
-    localStorage.setItem(
-      AUTH_ACCESS_KEY,
-      id
-    );
-  } else {
-    localStorage.removeItem(AUTH_ACCESS_KEY);
-  }
+  if (id) localStorage.setItem(AUTH_ACCESS_KEY, id);
+  else localStorage.removeItem(AUTH_ACCESS_KEY);
 }
 
 function authToken() {
   return authGetSession()?.access_token || "";
 }
 
-
-/* =========================================================
-   PROTEÇÃO IMEDIATA DAS PÁGINAS
-========================================================= */
+/* ===============================================================
+   PROTEÇÃO INICIAL DAS PÁGINAS
+================================================================ */
 
 (function protegerPaginaAgora() {
+  const arquivo = (
+    location.pathname.split("/").pop() || "index.html"
+  ).toLowerCase();
 
-  const arquivo =
-    (
-      location.pathname
-        .split("/")
-        .pop()
-      ||
-      "index.html"
-    ).toLowerCase();
+  if (arquivo === "login.html") return;
 
-
-  if (
-    arquivo === "login.html"
-  ) {
-    return;
-  }
-
-
-  const sessao =
-    authGetSession();
-
-
-  if (
-    !sessao?.access_token
-  ) {
-
-    const next =
-      encodeURIComponent(
-
-        (
-          location.pathname
-            .split("/")
-            .pop()
-          ||
-          "index.html"
-        )
-
-        +
-
-        location.search
-
-      );
-
-
-    location.replace(
-      `login.html?next=${next}`
+  if (!authGetSession()?.access_token) {
+    const next = encodeURIComponent(
+      (location.pathname.split("/").pop() || "index.html")
+      + location.search
     );
 
+    location.replace(`login.html?next=${next}`);
   }
-
 })();
 
-
-/* =========================================================
-   APP
-========================================================= */
+/* ===============================================================
+   APLICAÇÃO PRINCIPAL
+================================================================ */
 
 const App = (() => {
 
-
-  /* =======================================================
-     MENU
-  ======================================================= */
+  /* =============================================================
+     MENU LATERAL
+  ============================================================= */
 
   const NAV = [
-
     {
       key: "dashboard",
       href: "index.html",
       icon: "⌂",
       label: "Dashboard"
     },
-
     {
       key: "funcionarios",
       href: "funcionarios.html",
       icon: "👥",
       label: "Funcionários"
     },
-
     {
       key: "declaracoes",
       href: "declaracoes.html",
       icon: "📄",
       label: "Declarações"
     },
-
     {
       key: "nova-declaracao",
       href: "nova-declaracao.html",
       icon: "＋",
       label: "Nova Declaração"
     },
-
     {
       key: "novo-funcionario",
       href: "novo-funcionario.html",
       icon: "＋",
       label: "Novo Funcionário"
     },
-
     {
       key: "faltas",
       href: "faltas.html",
       icon: "📅",
       label: "Faltas"
     },
-
     {
       key: "agenda",
       href: "agenda.html",
       icon: "🗓️",
       label: "Agenda"
     },
-
     {
       key: "relatorios",
       href: "relatorios.html",
       icon: "▥",
       label: "Relatórios"
     }
-
   ];
 
-
   function getNav() {
+    const nav = [...NAV];
+    const perfil = authGetProfile();
 
-    const nav =
-      [...NAV];
+    /*
+      NOVO MÓDULO: HISTÓRICOS ESCOLARES
 
+      Visível apenas para:
+      - Administrador
+      - Secretaria
 
-    const perfil =
-      authGetProfile();
-
+      A restrição real aos dados depende também
+      das políticas RLS configuradas no Supabase.
+    */
 
     if (
-      perfil?.perfil ===
-      "administrador"
+      ["administrador", "secretaria"].includes(perfil?.perfil)
+      &&
+      perfil?.ativo !== false
     ) {
-
       nav.push({
-
-        key: "usuarios",
-
-        href: "usuarios.html",
-
-        icon: "👤",
-
-        label: "Usuários"
-
+        key: "historicos",
+        href: "historicos.html",
+        icon: "🎓",
+        label: "Históricos Escolares"
       });
-
-
-      nav.push({
-
-        key: "acessos",
-
-        href: "acessos.html",
-
-        icon: "🔐",
-
-        label: "Acessos"
-
-      });
-
     }
 
+    /* MENU EXCLUSIVO DO ADMINISTRADOR */
+
+    if (perfil?.perfil === "administrador") {
+      nav.push({
+        key: "usuarios",
+        href: "usuarios.html",
+        icon: "👤",
+        label: "Usuários"
+      });
+
+      nav.push({
+        key: "acessos",
+        href: "acessos.html",
+        icon: "🔐",
+        label: "Acessos"
+      });
+    }
 
     return nav;
-
   }
 
-
-  /* =======================================================
+  /* =============================================================
      UTILITÁRIOS
-  ======================================================= */
+  ============================================================= */
 
-  function escapeHTML(
-    value = ""
-  ) {
-
+  function escapeHTML(value = "") {
     return String(value)
-
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-
-      .replace(
-        /</g,
-        "&lt;"
-      )
-
-      .replace(
-        />/g,
-        "&gt;"
-      )
-
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-
-      .replace(
-        /'/g,
-        "&#039;"
-      );
-
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
+  function formatDate(dateValue) {
+    if (!dateValue) return "—";
 
-  function formatDate(
-    dateValue
-  ) {
+    const [y, m, d] = String(dateValue)
+      .slice(0, 10)
+      .split("-");
 
-    if (!dateValue) {
-      return "—";
-    }
-
-
-    const [
-      y,
-      m,
-      d
-    ] =
-      String(dateValue)
-
-        .slice(
-          0,
-          10
-        )
-
-        .split("-");
-
-
-    if (
-      !y ||
-      !m ||
-      !d
-    ) {
-
-      return dateValue;
-
-    }
-
-
-    return `${d}/${m}/${y}`;
-
+    return y && m && d
+      ? `${d}/${m}/${y}`
+      : dateValue;
   }
-
 
   function getPageKey() {
-
-    return (
-
-      document.body
-        .dataset
-        .page
-
-      ||
-
-      ""
-
-    );
-
+    return document.body.dataset.page || "";
   }
 
+  /* =============================================================
+     LAYOUT GERAL DO SISTEMA
+  ============================================================= */
 
-  /* =======================================================
-     LAYOUT GERAL
-  ======================================================= */
+  function layout(title, subtitle, content) {
+    const page = getPageKey();
 
-  function layout(
-    title,
-    subtitle,
-    content
-  ) {
+    document.title = `${title} | Sistema de Declarações`;
 
-    const page =
-      getPageKey();
-
-
-    document.title =
-      `${title} | Sistema de Declarações`;
-
-
-    document
-      .getElementById(
-        "app"
-      )
-      .innerHTML = `
-
-
+    document.getElementById("app").innerHTML = `
       <div class="app-shell">
 
-
-        <aside
-          class="sidebar"
-          id="sidebar"
-        >
-
+        <aside class="sidebar" id="sidebar">
 
           <div class="brand">
-
-
-            <div class="brand-mark">
-
-              EC
-
-            </div>
-
+            <div class="brand-mark">EC</div>
 
             <div class="brand-text">
-
-              <strong>
-
-                Sistema de Declarações
-
-              </strong>
-
-
-              <span>
-
-                E.M. Profª Eunice Carneiro
-
-              </span>
-
+              <strong>Sistema de Declarações</strong>
+              <span>E.M. Profª Eunice Carneiro</span>
             </div>
-
-
           </div>
-
 
           <nav class="nav">
-
-
-            ${
-
-              getNav()
-
-                .map(
-
-                  item => `
-
-
-                    <a
-
-                      href="${item.href}"
-
-                      class="${
-                        item.key === page
-                          ? "active"
-                          : ""
-                      }"
-
-                    >
-
-
-                      <span
-                        class="nav-icon"
-                      >
-
-                        ${item.icon}
-
-                      </span>
-
-
-                      <span>
-
-                        ${item.label}
-
-                      </span>
-
-
-                    </a>
-
-
-                  `
-
-                )
-
-                .join("")
-
-            }
-
-
+            ${getNav().map(item => `
+              <a
+                href="${item.href}"
+                class="${item.key === page ? "active" : ""}"
+              >
+                <span class="nav-icon">${item.icon}</span>
+                <span>${item.label}</span>
+              </a>
+            `).join("")}
           </nav>
 
-
           <div class="sidebar-footer">
-
             Banco de dados online • Supabase
-
           </div>
-
 
         </aside>
 
-
         <main class="main">
-
 
           <header class="topbar">
 
-
-            <div
-
-              style="
-                display:flex;
-                align-items:center;
-                gap:12px;
-              "
-
-            >
-
+            <div style="display:flex;align-items:center;gap:12px">
 
               <button
-
                 class="menu-toggle"
-
                 id="menuToggle"
-
                 aria-label="Abrir menu"
-
               >
-
                 ☰
-
               </button>
-
 
               <div class="topbar-title">
-
-
-                <h1>
-
-                  ${escapeHTML(title)}
-
-                </h1>
-
-
-                <p>
-
-                  ${escapeHTML(subtitle)}
-
-                </p>
-
-
+                <h1>${escapeHTML(title)}</h1>
+                <p>${escapeHTML(subtitle)}</p>
               </div>
 
-
             </div>
-
-
-            <!-- =========================================
-                 TOPO DIREITO
-                 AGORA SOMENTE USUÁRIO + SAIR
-            ========================================== -->
-
 
             <div
-
               class="no-print"
-
-              style="
-                display:flex;
-                gap:8px;
-                align-items:center;
-              "
-
+              style="display:flex;gap:8px;align-items:center"
             >
 
-
-              <span
-
-                style="
-                  font-size:13px;
-                  color:#667085;
-                "
-
-              >
-
-                👤 ${
-
-                  escapeHTML(
-
-                    authGetProfile()?.nome
-
-                    ||
-
-                    authGetProfile()?.username
-
-                    ||
-
-                    "Usuário"
-
-                  )
-
-                }
-
+              <span style="font-size:13px;color:#667085">
+                👤 ${escapeHTML(
+                  authGetProfile()?.nome ||
+                  authGetProfile()?.username ||
+                  "Usuário"
+                )}
               </span>
 
-
               <button
-
-                class="
-                  btn
-                  btn-secondary
-                  btn-sm
-                "
-
+                class="btn btn-secondary btn-sm"
                 type="button"
-
                 id="btnSairSistema"
-
               >
-
                 Sair
-
               </button>
 
-
             </div>
-
 
           </header>
 
-
           <section class="content">
-
             ${content}
-
           </section>
-
 
         </main>
 
-
       </div>
 
-
       <div id="modalRoot"></div>
-
-
     `;
 
-
-    /* ===================================================
-       MENU MOBILE
-    =================================================== */
+    /* MENU MOBILE */
 
     document
+      .getElementById("menuToggle")
+      ?.addEventListener("click", () => {
+        document
+          .getElementById("sidebar")
+          ?.classList.toggle("open");
+      });
 
-      .getElementById(
-        "menuToggle"
-      )
-
-      ?.addEventListener(
-
-        "click",
-
-        () => {
-
-          document
-
-            .getElementById(
-              "sidebar"
-            )
-
-            ?.classList.toggle(
-              "open"
-            );
-
-        }
-
-      );
-
-
-    /* ===================================================
-       SAIR
-    =================================================== */
+    /* BOTÃO SAIR */
 
     document
-
-      .getElementById(
-        "btnSairSistema"
-      )
-
-      ?.addEventListener(
-
-        "click",
-
-        () =>
-          logout()
-
-      );
-
+      .getElementById("btnSairSistema")
+      ?.addEventListener("click", () => logout());
   }
 
+  /* =============================================================
+     MODAIS
+  ============================================================= */
 
-  /* =======================================================
-     MODAL
-  ======================================================= */
-
-  function openModal({
-
-    title,
-
-    body,
-
-    footer = ""
-
-  }) {
-
-
-    const root =
-      document.getElementById(
-        "modalRoot"
-      );
-
+  function openModal({ title, body, footer = "" }) {
+    const root = document.getElementById("modalRoot");
 
     root.innerHTML = `
+      <div class="modal-backdrop show" id="modalBackdrop">
 
-
-      <div
-
-        class="
-          modal-backdrop
-          show
-        "
-
-        id="modalBackdrop"
-
-      >
-
-
-        <div
-
-          class="modal"
-
-          role="dialog"
-
-          aria-modal="true"
-
-        >
-
+        <div class="modal" role="dialog" aria-modal="true">
 
           <div class="modal-header">
 
-
-            <h3>
-
-              ${title}
-
-            </h3>
-
+            <h3>${title}</h3>
 
             <button
-
               class="modal-close"
-
               aria-label="Fechar"
-
               data-close-modal
-
             >
-
               ×
-
             </button>
 
-
           </div>
-
 
           <div class="modal-body">
-
             ${body}
-
           </div>
 
-
           ${
-
             footer
-
-              ?
-
-              `
-
-                <div class="modal-footer">
-
-                  ${footer}
-
-                </div>
-
-              `
-
-              :
-
-              ""
-
+              ? `<div class="modal-footer">${footer}</div>`
+              : ""
           }
-
 
         </div>
 
-
       </div>
-
-
     `;
 
+    root
+      .querySelectorAll("[data-close-modal]")
+      .forEach(b => b.addEventListener("click", closeModal));
 
     root
-
-      .querySelectorAll(
-        "[data-close-modal]"
-      )
-
-      .forEach(
-
-        btn => {
-
-          btn.addEventListener(
-
-            "click",
-
-            closeModal
-
-          );
-
+      .querySelector("#modalBackdrop")
+      ?.addEventListener("click", e => {
+        if (e.target.id === "modalBackdrop") {
+          closeModal();
         }
+      });
 
-      );
-
-
-    root
-
-      .querySelector(
-        "#modalBackdrop"
-      )
-
-      ?.addEventListener(
-
-        "click",
-
-        evento => {
-
-          if (
-
-            evento.target.id ===
-            "modalBackdrop"
-
-          ) {
-
-            closeModal();
-
-          }
-
-        }
-
-      );
-
-
-    document.addEventListener(
-
-      "keydown",
-
-      escClose
-
-    );
-
+    document.addEventListener("keydown", escClose);
   }
 
-
-  function escClose(
-    evento
-  ) {
-
-    if (
-      evento.key ===
-      "Escape"
-    ) {
-
+  function escClose(e) {
+    if (e.key === "Escape") {
       closeModal();
-
     }
-
   }
-
 
   function closeModal() {
-
-    const root =
-      document.getElementById(
-        "modalRoot"
-      );
-
+    const root = document.getElementById("modalRoot");
 
     if (root) {
-
-      root.innerHTML =
-        "";
-
+      root.innerHTML = "";
     }
 
-
-    document.removeEventListener(
-
-      "keydown",
-
-      escClose
-
-    );
-
+    document.removeEventListener("keydown", escClose);
   }
 
+  /* =============================================================
+     NOTIFICAÇÕES
+  ============================================================= */
 
-  /* =======================================================
-     MENSAGENS / TOAST
-  ======================================================= */
-
-  function toast(
-    message,
-    type = "success"
-  ) {
-
-
-    const id =
-      "toastRoot";
-
-
-    let root =
-      document.getElementById(
-        id
-      );
-
+  function toast(message, type = "success") {
+    let root = document.getElementById("toastRoot");
 
     if (!root) {
+      root = document.createElement("div");
 
-      root =
-        document.createElement(
-          "div"
-        );
-
-
-      root.id =
-        id;
-
+      root.id = "toastRoot";
 
       root.style.cssText =
-        "position:fixed;right:18px;bottom:18px;z-index:5000;display:flex;flex-direction:column;gap:10px";
+        "position:fixed;right:18px;bottom:18px;" +
+        "z-index:5000;display:flex;" +
+        "flex-direction:column;gap:10px";
 
-
-      document.body
-        .appendChild(
-          root
-        );
-
+      document.body.appendChild(root);
     }
 
-
-    const item =
-      document.createElement(
-        "div"
-      );
-
+    const item = document.createElement("div");
 
     const map = {
-
-      success:
-        "alert-success",
-
-      warning:
-        "alert-warning",
-
-      danger:
-        "alert-danger",
-
-      info:
-        "alert-info"
-
+      success: "alert-success",
+      warning: "alert-warning",
+      danger: "alert-danger",
+      info: "alert-info"
     };
 
-
-    item.className =
-      `alert ${
-        map[type]
-        ||
-        map.info
-      }`;
-
+    item.className = `alert ${map[type] || map.info}`;
 
     item.style.cssText +=
-      "box-shadow:0 12px 30px rgba(16,24,40,.14);max-width:360px;margin:0;";
+      "box-shadow:0 12px 30px rgba(16,24,40,.14);" +
+      "max-width:360px;margin:0;";
 
+    item.innerHTML = escapeHTML(message);
 
-    item.innerHTML =
-      escapeHTML(
-        message
-      );
+    root.appendChild(item);
 
-
-    root.appendChild(
-      item
-    );
-
-
-    setTimeout(
-
-      () =>
-        item.remove(),
-
-      3200
-
-    );
-
+    setTimeout(() => item.remove(), 3200);
   }
 
+  /* =============================================================
+     INTEGRAÇÃO COM SUPABASE
+  ============================================================= */
 
-  /* =======================================================
-     API
-  ======================================================= */
-
-  const API =
-    SUPABASE_URL +
-    "/rest/v1";
-
-
-  /* =======================================================
-     RENOVAR SESSÃO
-  ======================================================= */
+  const API = SUPABASE_URL + "/rest/v1";
 
   async function refreshSession() {
+    const atual = authGetSession();
 
-
-    const atual =
-      authGetSession();
-
-
-    if (
-      !atual?.refresh_token
-    ) {
-
+    if (!atual?.refresh_token) {
       return null;
-
     }
 
+    const res = await fetch(
+      `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
+      {
+        method: "POST",
 
-    const res =
-      await fetch(
+        headers: {
+          apikey: SUPABASE_KEY,
+          "Content-Type": "application/json"
+        },
 
-        `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
-
-        {
-
-          method:
-            "POST",
-
-
-          headers: {
-
-            apikey:
-              SUPABASE_KEY,
-
-            "Content-Type":
-              "application/json"
-
-          },
-
-
-          body:
-
-            JSON.stringify({
-
-              refresh_token:
-                atual.refresh_token
-
-            })
-
-        }
-
-      );
-
-
-    if (
-      !res.ok
-    ) {
-
-      return null;
-
-    }
-
-
-    const nova =
-      await res.json();
-
-
-    authSetSession(
-      nova
+        body: JSON.stringify({
+          refresh_token: atual.refresh_token
+        })
+      }
     );
 
+    if (!res.ok) {
+      return null;
+    }
+
+    const nova = await res.json();
+
+    authSetSession(nova);
 
     return nova;
-
   }
 
+  /* =============================================================
+     REQUISIÇÕES
+  ============================================================= */
 
-  /* =======================================================
-     REQUISIÇÕES SUPABASE
-  ======================================================= */
-
-  async function api(
-
-    path,
-
-    options = {},
-
-    retry = true
-
-  ) {
-
-
-    const token =
-      authToken();
-
+  async function api(path, options = {}, retry = true) {
+    const token = authToken();
 
     const headers = {
+      apikey: SUPABASE_KEY,
 
-      apikey:
-        SUPABASE_KEY,
+      Authorization: `Bearer ${token || SUPABASE_KEY}`,
 
+      "Content-Type": "application/json",
 
-      Authorization:
-        `Bearer ${
-          token
-          ||
-          SUPABASE_KEY
-        }`,
-
-
-      "Content-Type":
-        "application/json",
-
-
-      ...(
-        options.headers
-        ||
-        {}
-      )
-
+      ...(options.headers || {})
     };
 
+    const res = await fetch(
+      API + path,
+      {
+        ...options,
+        headers
+      }
+    );
 
-    const res =
-      await fetch(
+    if (res.status === 401 && retry) {
+      const nova = await refreshSession();
 
-        API + path,
-
-        {
-
-          ...options,
-
-          headers
-
-        }
-
-      );
-
-
-    /* ===================================================
-       RENOVA TOKEN SE EXPIRAR
-    =================================================== */
-
-    if (
-
-      res.status ===
-      401
-
-      &&
-
-      retry
-
-    ) {
-
-
-      const nova =
-        await refreshSession();
-
-
-      if (
-        nova?.access_token
-      ) {
-
-        return api(
-
-          path,
-
-          options,
-
-          false
-
-        );
-
+      if (nova?.access_token) {
+        return api(path, options, false);
       }
 
-
-      await logout(
-        false
-      );
-
+      await logout(false);
 
       throw new Error(
-
         "Sessão expirada. Entre novamente."
-
       );
-
     }
 
-
-    if (
-      !res.ok
-    ) {
-
-
-      const texto =
-        await res.text();
-
-
+    if (!res.ok) {
       throw new Error(
-
-        texto
-
-        ||
-
-        "Erro no Supabase"
-
+        (await res.text()) || "Erro no Supabase"
       );
-
     }
 
+    const texto = await res.text();
 
-    const texto =
-      await res.text();
-
-
-    return texto
-
-      ?
-
-      JSON.parse(
-        texto
-      )
-
-      :
-
-      null;
-
+    return texto ? JSON.parse(texto) : null;
   }
 
-
-  /* =======================================================
-     CARREGAR PERFIL ATUAL
-  ======================================================= */
+  /* =============================================================
+     PERFIL DO USUÁRIO
+  ============================================================= */
 
   async function carregarPerfilAtual() {
+    const sessao = authGetSession();
 
-
-    const sessao =
-      authGetSession();
-
-
-    if (
-      !sessao?.access_token
-    ) {
-
+    if (!sessao?.access_token) {
       return null;
-
     }
 
-
-    let uid =
-      sessao?.user?.id;
-
-
     try {
+      let token = authToken();
 
-
-      let token =
-        authToken();
-
-
-      let userRes =
-        await fetch(
-
-          `${SUPABASE_URL}/auth/v1/user`,
-
-          {
-
-            headers: {
-
-              apikey:
-                SUPABASE_KEY,
-
-              Authorization:
-                `Bearer ${token}`
-
-            }
-
+      let userRes = await fetch(
+        `${SUPABASE_URL}/auth/v1/user`,
+        {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${token}`
           }
-
-        );
-
-
-      /* =================================================
-         TENTA RENOVAR SE NECESSÁRIO
-      ================================================= */
-
-      if (
-        !userRes.ok
-      ) {
-
-
-        const nova =
-          await refreshSession();
-
-
-        if (
-          !nova?.access_token
-        ) {
-
-          return null;
-
         }
-
-
-        token =
-          nova.access_token;
-
-
-        userRes =
-          await fetch(
-
-            `${SUPABASE_URL}/auth/v1/user`,
-
-            {
-
-              headers: {
-
-                apikey:
-                  SUPABASE_KEY,
-
-                Authorization:
-                  `Bearer ${token}`
-
-              }
-
-            }
-
-          );
-
-      }
-
-
-      if (
-        !userRes.ok
-      ) {
-
-        return null;
-
-      }
-
-
-      const user =
-        await userRes.json();
-
-
-      uid =
-        user.id;
-
-
-      const atual =
-        authGetSession()
-        ||
-        {};
-
-
-      atual.user =
-        user;
-
-
-      authSetSession(
-        atual
       );
 
+      if (!userRes.ok) {
+        const nova = await refreshSession();
 
-      const resposta =
-        await api(
+        if (!nova?.access_token) {
+          return null;
+        }
 
-          `/usuarios_perfis?id=eq.${encodeURIComponent(
-            uid
-          )}&select=*`
+        token = nova.access_token;
 
+        userRes = await fetch(
+          `${SUPABASE_URL}/auth/v1/user`,
+          {
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${token}`
+            }
+          }
         );
-
-
-      const perfil =
-        resposta?.[0]
-        ||
-        null;
-
-
-      if (perfil) {
-
-        authSetProfile(
-          perfil
-        );
-
       }
 
+      if (!userRes.ok) {
+        return null;
+      }
+
+      const user = await userRes.json();
+
+      authSetSession({
+        ...(authGetSession() || {}),
+        user
+      });
+
+      const resposta = await api(
+        `/usuarios_perfis?id=eq.${encodeURIComponent(user.id)}&select=*`
+      );
+
+      const perfil = resposta?.[0] || null;
+
+      if (perfil) {
+        authSetProfile(perfil);
+      }
 
       return perfil;
 
-
     } catch {
-
       return null;
-
     }
-
   }
 
-
-  /* =======================================================
-     ATUALIZAR ATIVIDADE / ONLINE
-  ======================================================= */
+  /* =============================================================
+     CONTROLE DE ATIVIDADE
+  ============================================================= */
 
   async function atualizarAtividade() {
+    const id = authGetAccessId();
 
-
-    const id =
-      authGetAccessId();
-
-
-    if (
-
-      !id
-
-      ||
-
-      !authToken()
-
-    ) {
-
+    if (!id || !authToken()) {
       return;
-
     }
 
-
     try {
-
-
       await api(
-
-        `/acessos?id=eq.${encodeURIComponent(
-          id
-        )}`,
-
+        `/acessos?id=eq.${encodeURIComponent(id)}`,
         {
-
-          method:
-            "PATCH",
-
+          method: "PATCH",
 
           headers: {
-
-            Prefer:
-              "return=minimal"
-
+            Prefer: "return=minimal"
           },
 
+          body: JSON.stringify({
+            ultima_atividade: new Date().toISOString(),
 
-          body:
-
-            JSON.stringify({
-
-              ultima_atividade:
-                new Date()
-                  .toISOString(),
-
-
-              pagina_atual:
-
-                location.pathname
-                  .split("/")
-                  .pop()
-
-                ||
-
-                "index.html"
-
-            })
-
+            pagina_atual:
+              location.pathname.split("/").pop() ||
+              "index.html"
+          })
         }
-
       );
 
+      const perfil = await carregarPerfilAtual();
 
-      /* =================================================
-         CONFERE SE USUÁRIO AINDA ESTÁ ATIVO
-      ================================================= */
+      if (perfil && perfil.ativo === false) {
+        await logout(false);
 
-      const perfil =
-        await carregarPerfilAtual();
-
-
-      if (
-
-        perfil
-
-        &&
-
-        perfil.ativo === false
-
-      ) {
-
-
-        await logout(
-          false
-        );
-
-
-        location.replace(
-          "login.html"
-        );
-
+        location.replace("login.html");
       }
-
 
     } catch {
-
       /*
-        Não interrompe o uso da página
-        somente porque não conseguiu
-        atualizar o status online.
+        Um erro ao atualizar a presença online
+        não deve interromper a página.
       */
-
     }
-
   }
 
-
-  /* =======================================================
+  /* =============================================================
      LOGOUT
-  ======================================================= */
+  ============================================================= */
 
-  async function logout(
-    redirecionar = true
-  ) {
-
-
-    const accessId =
-      authGetAccessId();
-
-
-    const token =
-      authToken();
-
-
-    /* ===================================================
-       MARCA SAÍDA
-    =================================================== */
+  async function logout(redirecionar = true) {
+    const accessId = authGetAccessId();
+    const token = authToken();
 
     try {
-
-
-      if (
-
-        accessId
-
-        &&
-
-        token
-
-      ) {
-
-
+      if (accessId && token) {
         await api(
-
-          `/acessos?id=eq.${encodeURIComponent(
-            accessId
-          )}`,
-
+          `/acessos?id=eq.${encodeURIComponent(accessId)}`,
           {
-
-            method:
-              "PATCH",
-
+            method: "PATCH",
 
             headers: {
-
-              Prefer:
-                "return=minimal"
-
+              Prefer: "return=minimal"
             },
 
-
-            body:
-
-              JSON.stringify({
-
-                saiu_em:
-                  new Date()
-                    .toISOString(),
-
-
-                ultima_atividade:
-                  new Date()
-                    .toISOString()
-
-              })
-
+            body: JSON.stringify({
+              saiu_em: new Date().toISOString(),
+              ultima_atividade: new Date().toISOString()
+            })
           },
-
           false
-
         );
-
       }
-
-
     } catch {}
-
-
-    /* ===================================================
-       LOGOUT SUPABASE
-    =================================================== */
 
     try {
-
-
       if (token) {
-
-
         await fetch(
-
           `${SUPABASE_URL}/auth/v1/logout`,
-
           {
-
-            method:
-              "POST",
-
+            method: "POST",
 
             headers: {
-
-              apikey:
-                SUPABASE_KEY,
-
-              Authorization:
-                `Bearer ${token}`
-
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${token}`
             }
-
           }
-
         );
-
       }
-
-
     } catch {}
 
+    authSetSession(null);
+    authSetProfile(null);
+    authSetAccessId("");
 
-    /* ===================================================
-       LIMPA DADOS LOCAIS
-    =================================================== */
-
-    authSetSession(
-      null
-    );
-
-
-    authSetProfile(
-      null
-    );
-
-
-    authSetAccessId(
-      ""
-    );
-
-
-    if (
-      redirecionar
-    ) {
-
-      location.replace(
-        "login.html"
-      );
-
+    if (redirecionar) {
+      location.replace("login.html");
     }
-
   }
 
-
-  /* =======================================================
-     GERAR ID
-  ======================================================= */
+  /* =============================================================
+     GERADOR DE IDENTIFICADOR
+  ============================================================= */
 
   function generateId() {
-
     return (
-
-      Math.floor(
-        Date.now() / 1000
-      )
-
-      +
-
-      Math.floor(
-        Math.random() * 1000
-      )
-
+      Math.floor(Date.now() / 1000) +
+      Math.floor(Math.random() * 1000)
     );
-
   }
 
+  /* =============================================================
+     CONVERTER DADOS DO BANCO PARA O SISTEMA
+  ============================================================= */
 
-  /* =======================================================
-     BANCO -> SISTEMA
-  ======================================================= */
-
-  function fromDB(
-    store,
-    x
-  ) {
-
-
+  function fromDB(store, x) {
     if (!x) {
-
       return x;
-
     }
 
+    /* FUNCIONÁRIOS */
 
-    /* =====================================================
-       FUNCIONÁRIOS
-    ===================================================== */
-
-    if (
-      store ===
-      "funcionarios"
-    ) {
-
-
+    if (store === "funcionarios") {
       return {
-
-
-        id:
-          String(
-            x.id
-          ),
-
+        id: String(x.id),
 
         nome:
-
-          x.nome_completo
-
-          ||
-
-          x.nome
-
-          ||
-
+          x.nome_completo ||
+          x.nome ||
           "",
 
-
-        matricula:
-          x.matricula
-          ||
-          "",
-
+        matricula: x.matricula || "",
 
         cargo:
-
-          x.cargo_funcao
-
-          ||
-
-          x.cargo
-
-          ||
-
+          x.cargo_funcao ||
+          x.cargo ||
           "",
 
-
-        categoriaCargo:
-          x.categoria_cargo
-          ||
-          "",
-
-
-        setor:
-          x.setor
-          ||
-          "",
-
+        categoriaCargo: x.categoria_cargo || "",
+        setor: x.setor || "",
 
         vinculo:
-
-          x.tipo_vinculo
-
-          ||
-
-          x.vinculo
-
-          ||
-
+          x.tipo_vinculo ||
+          x.vinculo ||
           "",
 
-
-        status:
-
-          x.status
-
-          ||
-
-          "Ativo",
-
-
-        turno:
-          x.turno
-          ||
-          "",
-
-
-        cargaHoraria:
-          x.carga_horaria
-          ||
-          "",
-
-
-        dataAdmissao:
-          x.data_admissao
-          ||
-          "",
-
-
-        dataEntradaEscola:
-          x.data_entrada_escola
-          ||
-          "",
-
-
-        cpf:
-          x.cpf
-          ||
-          "",
-
-
-        telefone:
-          x.telefone
-          ||
-          "",
-
-
-        email:
-          x.email
-          ||
-          "",
-
-
-        endereco:
-          x.endereco
-          ||
-          "",
-
-
-        formacao:
-          x.formacao
-          ||
-          "",
-
-
-        especializacao:
-          x.especializacao
-          ||
-          "",
-
-
-        naturalidade:
-          x.naturalidade
-          ||
-          "",
-
-
-        dataNascimento:
-          x.data_nascimento
-          ||
-          "",
-
-
-        motivoInatividade:
-          x.motivo_inatividade
-          ||
-          "",
-
-
-        dataInatividade:
-          x.data_inatividade
-          ||
-          "",
-
-
-        observacoes:
-          x.observacoes
-          ||
-          ""
-
-
+        status: x.status || "Ativo",
+        turno: x.turno || "",
+        cargaHoraria: x.carga_horaria || "",
+        dataAdmissao: x.data_admissao || "",
+        dataEntradaEscola: x.data_entrada_escola || "",
+        cpf: x.cpf || "",
+        telefone: x.telefone || "",
+        email: x.email || "",
+        endereco: x.endereco || "",
+        formacao: x.formacao || "",
+        especializacao: x.especializacao || "",
+        naturalidade: x.naturalidade || "",
+        dataNascimento: x.data_nascimento || "",
+        motivoInatividade: x.motivo_inatividade || "",
+        dataInatividade: x.data_inatividade || "",
+        observacoes: x.observacoes || ""
       };
-
     }
 
+    /* DECLARAÇÕES */
 
-    /* =====================================================
-       DECLARAÇÕES
-    ===================================================== */
-
-    if (
-      store ===
-      "declaracoes"
-    ) {
-
-
+    if (store === "declaracoes") {
       return {
-
-
-        id:
-          String(
-            x.id
-          ),
-
-
-        funcionarioId:
-
-          String(
-            x.funcionario_id
-          ),
-
-
-        tipo:
-          x.tipo,
-
-
-        data:
-          x.data,
-
-
-        dataInicial:
-          x.data_inicial,
-
-
-        dataFinal:
-          x.data_final,
-
-
-        horaInicial:
-          x.hora_inicial,
-
-
-        horaFinal:
-          x.hora_final,
-
-
-        quantidadeHoras:
-          x.quantidade_horas,
-
-
-        quantidadeDias:
-          x.quantidade_dias,
-
-
-        observacoes:
-          x.observacoes
-
-
+        id: String(x.id),
+        funcionarioId: String(x.funcionario_id),
+        tipo: x.tipo,
+        data: x.data,
+        dataInicial: x.data_inicial,
+        dataFinal: x.data_final,
+        horaInicial: x.hora_inicial,
+        horaFinal: x.hora_final,
+        quantidadeHoras: x.quantidade_horas,
+        quantidadeDias: x.quantidade_dias,
+        observacoes: x.observacoes
       };
-
     }
 
+    /* FALTAS */
 
-    /* =====================================================
-       FALTAS
-    ===================================================== */
-
-    if (
-      store ===
-      "faltas"
-    ) {
-
-
+    if (store === "faltas") {
       return {
-
-
-        id:
-          String(
-            x.id
-          ),
-
-
-        funcionario_id:
-
-          String(
-            x.funcionario_id
-          ),
-
-
-        data_falta:
-          x.data_falta,
-
-
-        motivo:
-          x.motivo,
-
-
-        justificativa:
-          x.justificativa,
-
-
-        createdAt:
-          x.created_at
-
-
+        id: String(x.id),
+        funcionario_id: String(x.funcionario_id),
+        data_falta: x.data_falta,
+        motivo: x.motivo,
+        justificativa: x.justificativa,
+        createdAt: x.created_at
       };
-
     }
 
-
-    /* =====================================================
-       AGENDA / DEMAIS
-    ===================================================== */
+    /* AGENDA E DEMAIS TABELAS */
 
     return {
-
       ...x,
-
-
-      id:
-
-        String(
-          x.id
-        )
-
+      id: String(x.id)
     };
-
   }
 
+  /* =============================================================
+     CONVERTER DADOS DO SISTEMA PARA O BANCO
+  ============================================================= */
 
-  /* =======================================================
-     SISTEMA -> BANCO
-  ======================================================= */
+  function toDB(store, x) {
 
-  function toDB(
-    store,
-    x
-  ) {
+    /* FUNCIONÁRIOS */
 
-
-    /* =====================================================
-       FUNCIONÁRIOS
-    ===================================================== */
-
-    if (
-      store ===
-      "funcionarios"
-    ) {
-
-
+    if (store === "funcionarios") {
       return {
-
-
-        id:
-
-          x.id
-
-            ?
-
-            Number(
-              x.id
-            )
-
-            :
-
-            generateId(),
-
-
-        nome_completo:
-
-          x.nome
-
-          ||
-
-          null,
-
-
-        matricula:
-
-          x.matricula
-
-          ||
-
-          null,
-
-
-        cargo_funcao:
-
-          x.cargo
-
-          ||
-
-          null,
-
-
-        categoria_cargo:
-
-          x.categoriaCargo
-
-          ||
-
-          null,
-
-
-        setor:
-
-          x.setor
-
-          ||
-
-          null,
-
-
-        tipo_vinculo:
-
-          x.vinculo
-
-          ||
-
-          null,
-
-
-        status:
-
-          x.status
-
-          ||
-
-          "Ativo",
-
-
-        turno:
-
-          x.turno
-
-          ||
-
-          null,
-
-
-        carga_horaria:
-
-          x.cargaHoraria
-
-          ||
-
-          null,
-
-
-        data_admissao:
-
-          x.dataAdmissao
-
-          ||
-
-          null,
-
-
-        data_entrada_escola:
-
-          x.dataEntradaEscola
-
-          ||
-
-          null,
-
-
-        cpf:
-
-          x.cpf
-
-          ||
-
-          null,
-
-
-        telefone:
-
-          x.telefone
-
-          ||
-
-          null,
-
-
-        email:
-
-          x.email
-
-          ||
-
-          null,
-
-
-        endereco:
-
-          x.endereco
-
-          ||
-
-          null,
-
-
-        formacao:
-
-          x.formacao
-
-          ||
-
-          null,
-
-
-        especializacao:
-
-          x.especializacao
-
-          ||
-
-          null,
-
-
-        naturalidade:
-
-          x.naturalidade
-
-          ||
-
-          null,
-
-
-        data_nascimento:
-
-          x.dataNascimento
-
-          ||
-
-          null,
-
-
-        motivo_inatividade:
-
-          x.motivoInatividade
-
-          ||
-
-          null,
-
-
-        data_inatividade:
-
-          x.dataInatividade
-
-          ||
-
-          null,
-
-
-        observacoes:
-
-          x.observacoes
-
-          ||
-
-          null
-
-
+        id: x.id ? Number(x.id) : generateId(),
+
+        nome_completo: x.nome || null,
+        matricula: x.matricula || null,
+        cargo_funcao: x.cargo || null,
+        categoria_cargo: x.categoriaCargo || null,
+        setor: x.setor || null,
+        tipo_vinculo: x.vinculo || null,
+        status: x.status || "Ativo",
+        turno: x.turno || null,
+        carga_horaria: x.cargaHoraria || null,
+        data_admissao: x.dataAdmissao || null,
+        data_entrada_escola: x.dataEntradaEscola || null,
+        cpf: x.cpf || null,
+        telefone: x.telefone || null,
+        email: x.email || null,
+        endereco: x.endereco || null,
+        formacao: x.formacao || null,
+        especializacao: x.especializacao || null,
+        naturalidade: x.naturalidade || null,
+        data_nascimento: x.dataNascimento || null,
+        motivo_inatividade: x.motivoInatividade || null,
+        data_inatividade: x.dataInatividade || null,
+        observacoes: x.observacoes || null
       };
-
     }
 
+    /* DECLARAÇÕES */
 
-    /* =====================================================
-       DECLARAÇÕES
-    ===================================================== */
-
-    if (
-      store ===
-      "declaracoes"
-    ) {
-
-
+    if (store === "declaracoes") {
       return {
-
-
-        id:
-
-          x.id
-
-            ?
-
-            Number(
-              x.id
-            )
-
-            :
-
-            generateId(),
-
-
-        funcionario_id:
-
-          Number(
-            x.funcionarioId
-          ),
-
-
-        tipo:
-          x.tipo,
-
-
-        data:
-
-          x.data
-
-          ||
-
-          null,
-
-
-        data_inicial:
-
-          x.dataInicial
-
-          ||
-
-          null,
-
-
-        data_final:
-
-          x.dataFinal
-
-          ||
-
-          null,
-
-
-        hora_inicial:
-
-          x.horaInicial
-
-          ||
-
-          null,
-
-
-        hora_final:
-
-          x.horaFinal
-
-          ||
-
-          null,
-
-
-        quantidade_horas:
-
-          x.quantidadeHoras
-
-          ||
-
-          0,
-
-
-        quantidade_dias:
-
-          x.quantidadeDias
-
-          ||
-
-          0,
-
-
-        observacoes:
-
-          x.observacoes
-
-          ||
-
-          null
-
-
+        id: x.id ? Number(x.id) : generateId(),
+        funcionario_id: Number(x.funcionarioId),
+        tipo: x.tipo,
+        data: x.data || null,
+        data_inicial: x.dataInicial || null,
+        data_final: x.dataFinal || null,
+        hora_inicial: x.horaInicial || null,
+        hora_final: x.horaFinal || null,
+        quantidade_horas: x.quantidadeHoras || 0,
+        quantidade_dias: x.quantidadeDias || 0,
+        observacoes: x.observacoes || null
       };
-
     }
 
+    /* FALTAS */
 
-    /* =====================================================
-       FALTAS
-    ===================================================== */
-
-    if (
-      store ===
-      "faltas"
-    ) {
-
-
+    if (store === "faltas") {
       return {
-
-
-        id:
-
-          x.id
-
-            ?
-
-            Number(
-              x.id
-            )
-
-            :
-
-            generateId(),
-
+        id: x.id ? Number(x.id) : generateId(),
 
         funcionario_id:
-
-          x.funcionario_id
-
-          ||
-
+          x.funcionario_id ||
           x.funcionarioId,
 
-
         data_falta:
-
-          x.data_falta
-
-          ||
-
+          x.data_falta ||
           x.data,
 
-
         motivo:
-
-          x.motivo
-
-          ||
-
-          x.tipo
-
-          ||
-
+          x.motivo ||
+          x.tipo ||
           "Falta Injustificada",
 
-
-        justificativa:
-
-          x.justificativa
-
-          ||
-
-          null
-
-
+        justificativa: x.justificativa || null
       };
-
     }
 
-
-    /* =====================================================
-       AGENDA / DEMAIS
-    ===================================================== */
+    /* AGENDA E DEMAIS TABELAS */
 
     const payload = {
-
       ...x
-
     };
 
-
-    if (
-      !payload.id
-    ) {
-
-      payload.id =
-        generateId();
-
+    if (!payload.id) {
+      payload.id = generateId();
     }
-
 
     return payload;
-
   }
 
+  /* =============================================================
+     ADICIONAR REGISTRO
+  ============================================================= */
 
-  /* =======================================================
-     ADICIONAR
-  ======================================================= */
+  async function add(store, value) {
+    const payload = toDB(store, value);
 
-  async function add(
-    store,
-    value
-  ) {
+    const response = await api(
+      `/${store}`,
+      {
+        method: "POST",
 
+        headers: {
+          Prefer: "return=representation"
+        },
 
-    const dataToSend =
-      toDB(
-        store,
-        value
-      );
-
-
-    const resposta =
-      await api(
-
-        `/${store}`,
-
-        {
-
-          method:
-            "POST",
-
-
-          headers: {
-
-            Prefer:
-              "return=representation"
-
-          },
-
-
-          body:
-
-            JSON.stringify(
-              dataToSend
-            )
-
-        }
-
-      );
-
-
-    const item =
-
-      Array.isArray(
-        resposta
-      )
-
-        ?
-
-        resposta[0]
-
-        :
-
-        resposta;
-
-
-    return fromDB(
-
-      store,
-
-      item
-
-      ||
-
-      dataToSend
-
+        body: JSON.stringify(payload)
+      }
     );
 
+    return fromDB(
+      store,
+      (Array.isArray(response) ? response[0] : response) ||
+      payload
+    );
   }
 
+  /* =============================================================
+     ATUALIZAR REGISTRO
+  ============================================================= */
 
-  /* =======================================================
-     ATUALIZAR
-  ======================================================= */
-
-  async function put(
-    store,
-    value
-  ) {
-
-
-    if (
-      !value.id
-    ) {
-
-      return add(
-        store,
-        value
-      );
-
+  async function put(store, value) {
+    if (!value.id) {
+      return add(store, value);
     }
 
+    const payload = toDB(store, value);
 
-    const dataToSend =
-      toDB(
-        store,
-        value
-      );
-
-
-    const resposta =
-      await api(
-
-        `/${store}?id=eq.${encodeURIComponent(
-          value.id
-        )}`,
-
-        {
-
-          method:
-            "PATCH",
-
-
-          headers: {
-
-            Prefer:
-              "return=representation"
-
-          },
-
-
-          body:
-
-            JSON.stringify(
-              dataToSend
-            )
-
-        }
-
-      );
-
-
-    const item =
-
-      Array.isArray(
-        resposta
-      )
-
-        ?
-
-        resposta[0]
-
-        :
-
-        resposta;
-
-
-    return fromDB(
-
-      store,
-
-      item
-
-      ||
-
-      value
-
-    );
-
-  }
-
-
-  /* =======================================================
-     PEGAR UM
-  ======================================================= */
-
-  async function get(
-    store,
-    key
-  ) {
-
-
-    const resposta =
-      await api(
-
-        `/${store}?id=eq.${encodeURIComponent(
-          key
-        )}&select=*`
-
-      );
-
-
-    return fromDB(
-
-      store,
-
-      resposta?.[0]
-
-      ||
-
-      null
-
-    );
-
-  }
-
-
-  /* =======================================================
-     PEGAR TODOS
-  ======================================================= */
-
-  async function getAll(
-    store
-  ) {
-
-
-    const resposta =
-      await api(
-
-        `/${store}?select=*&order=id.asc`
-
-      );
-
-
-    return (
-
-      resposta
-
-      ||
-
-      []
-
-    ).map(
-
-      item =>
-        fromDB(
-          store,
-          item
-        )
-
-    );
-
-  }
-
-
-  /* =======================================================
-     REMOVER
-  ======================================================= */
-
-  async function remove(
-    store,
-    key
-  ) {
-
-
-    await api(
-
-      `/${store}?id=eq.${encodeURIComponent(
-        key
-      )}`,
-
+    const response = await api(
+      `/${store}?id=eq.${encodeURIComponent(value.id)}`,
       {
+        method: "PATCH",
 
-        method:
-          "DELETE"
+        headers: {
+          Prefer: "return=representation"
+        },
 
+        body: JSON.stringify(payload)
       }
-
     );
 
+    return fromDB(
+      store,
+      (Array.isArray(response) ? response[0] : response) ||
+      value
+    );
+  }
+
+  /* =============================================================
+     BUSCAR UM REGISTRO
+  ============================================================= */
+
+  async function get(store, key) {
+    const response = await api(
+      `/${store}?id=eq.${encodeURIComponent(key)}&select=*`
+    );
+
+    return fromDB(
+      store,
+      response?.[0] || null
+    );
+  }
+
+  /* =============================================================
+     BUSCAR TODOS OS REGISTROS
+  ============================================================= */
+
+  async function getAll(store) {
+    const response = await api(
+      `/${store}?select=*&order=id.asc`
+    );
+
+    return (response || []).map(
+      x => fromDB(store, x)
+    );
+  }
+
+  /* =============================================================
+     EXCLUIR REGISTRO
+  ============================================================= */
+
+  async function remove(store, key) {
+    await api(
+      `/${store}?id=eq.${encodeURIComponent(key)}`,
+      {
+        method: "DELETE"
+      }
+    );
 
     return true;
-
   }
 
-
-  /* =======================================================
+  /* =============================================================
      CONTADORES
-  ======================================================= */
+  ============================================================= */
 
   async function counts() {
-
-
-    const funcionarios =
-      await getAll(
-        "funcionarios"
-      );
-
-
-    const declaracoes =
-      await getAll(
-        "declaracoes"
-      );
-
+    const funcionarios = await getAll("funcionarios");
+    const declaracoes = await getAll("declaracoes");
 
     return {
+      funcionarios: funcionarios.length,
+      declaracoes: declaracoes.length,
 
+      horas: declaracoes.filter(
+        x => x.tipo === "horas"
+      ).length,
 
-      funcionarios:
-        funcionarios.length,
+      dias: declaracoes.filter(
+        x => x.tipo === "dias"
+      ).length,
 
-
-      declaracoes:
-        declaracoes.length,
-
-
-      horas:
-
-        declaracoes.filter(
-
-          item =>
-            item.tipo ===
-            "horas"
-
-        ).length,
-
-
-      dias:
-
-        declaracoes.filter(
-
-          item =>
-            item.tipo ===
-            "dias"
-
-        ).length,
-
-
-      listaFuncionarios:
-        funcionarios,
-
-
-      listaDeclaracoes:
-        declaracoes
-
-
+      listaFuncionarios: funcionarios,
+      listaDeclaracoes: declaracoes
     };
-
   }
 
-
-  /* =======================================================
-     EXPORTAR FUNÇÕES
-  ======================================================= */
+  /* =============================================================
+     FUNÇÕES DISPONÍVEIS PARA OUTRAS PÁGINAS
+  ============================================================= */
 
   return {
-
-
     escapeHTML,
-
-
     formatDate,
-
-
     getPageKey,
-
-
     layout,
-
-
     openModal,
-
-
     closeModal,
-
-
     toast,
-
-
     add,
-
-
     put,
-
-
     get,
-
-
     getAll,
-
-
     remove,
-
-
     counts,
 
+    seedDemoData: async () => {},
 
-    seedDemoData:
+    uid: () => generateId(),
 
-      async () => {},
+    rest: api,
 
-
-    uid:
-
-      () =>
-        generateId(),
-
-
-    rest:
-      api,
-
-
-    getSession:
-      authGetSession,
-
-
-    getProfile:
-      authGetProfile,
-
-
-    getAccessToken:
-      authToken,
-
+    getSession: authGetSession,
+    getProfile: authGetProfile,
+    getAccessToken: authToken,
 
     carregarPerfilAtual,
-
-
     atualizarAtividade,
-
-
     logout
-
-
   };
-
 
 })();
 
+/* ===============================================================
+   VALIDAR SESSÃO E MANTER USUÁRIO ONLINE
+================================================================ */
 
-/* =========================================================
-   VALIDAR SESSÃO / MANTER ONLINE
-========================================================= */
+document.addEventListener("DOMContentLoaded", async () => {
+  const perfil = await App.carregarPerfilAtual();
 
-document.addEventListener(
-
-  "DOMContentLoaded",
-
-  async () => {
-
-
-    const perfil =
-      await App
-        .carregarPerfilAtual();
-
-
-    if (
-
-      !perfil
-
-      ||
-
-      perfil.ativo === false
-
-    ) {
-
-
-      await App.logout();
-
-
-      return;
-
-    }
-
-
-    await App
-      .atualizarAtividade();
-
-
-    setInterval(
-
-      () =>
-        App.atualizarAtividade(),
-
-      60000
-
-    );
-
-
+  if (!perfil || perfil.ativo === false) {
+    await App.logout();
+    return;
   }
 
-);
+  await App.atualizarAtividade();
 
+  setInterval(
+    () => App.atualizarAtividade(),
+    60000
+  );
+});
 
-/* =========================================================
-   DASHBOARD NOVO
-========================================================= */
+/* ===============================================================
+   DASHBOARD
+   - Funcionários ativos
+   - Declarações recentes
+   - Faltas recentes
+   - Próximos eventos
+================================================================ */
 
 const DashboardPage = {
 
-
-  /* =====================================================
-     CARREGAR DASHBOARD
-  ===================================================== */
+  /* =============================================================
+     INICIAR DASHBOARD
+  ============================================================= */
 
   async init() {
-
-
     try {
-
-
       const [
-
         funcionarios,
-
         declaracoes,
-
         faltas,
-
         agenda
-
       ] = await Promise.all([
-
-
-        App.getAll(
-          "funcionarios"
-        ),
-
-
-        App.getAll(
-          "declaracoes"
-        ),
-
-
-        App.getAll(
-          "faltas"
-        ),
-
-
-        App.getAll(
-          "agenda"
-        )
-
-
+        App.getAll("funcionarios"),
+        App.getAll("declaracoes"),
+        App.getAll("faltas"),
+        App.getAll("agenda")
       ]);
 
+      /* SOMENTE FUNCIONÁRIOS ATIVOS NO INDICADOR */
 
-      /* =================================================
-         FUNCIONÁRIOS ATIVOS
+      const ativos = funcionarios.filter(
+        f => String(f.status || "Ativo")
+          .trim()
+          .toLowerCase() === "ativo"
+      );
 
-         Somente os ativos entram no total mostrado
-         no Dashboard.
-      ================================================= */
+      /* MAPA DOS FUNCIONÁRIOS */
 
+      const mapa = Object.fromEntries(
+        funcionarios.map(
+          f => [String(f.id), f]
+        )
+      );
 
-      const funcionariosAtivos =
+      /* PRÓXIMOS EVENTOS DA AGENDA */
 
-        funcionarios.filter(
+      const hoje = this.dataHojeLocal();
 
-          funcionario =>
-
-            String(
-
-              funcionario.status
-
-              ||
-
-              "Ativo"
-
+      const eventos = agenda
+        .filter(
+          x => String(x.data || "")
+            .slice(0, 10) >= hoje
+        )
+        .sort(
+          (a, b) =>
+            this.chaveAgenda(a).localeCompare(
+              this.chaveAgenda(b)
             )
-
-              .trim()
-
-              .toLowerCase()
-
-            ===
-
-            "ativo"
-
         );
 
-
-      /* =================================================
-         MAPA DE FUNCIONÁRIOS
-
-         Mantém todos no mapa para que declarações
-         e faltas históricas continuem mostrando
-         o nome corretamente.
-      ================================================= */
-
-
-      const mapaFuncionarios =
-
-        Object.fromEntries(
-
-          funcionarios.map(
-
-            funcionario => [
-
-              String(
-                funcionario.id
-              ),
-
-              funcionario
-
-            ]
-
-          )
-
-        );
-
-
-      /* =================================================
-         DATA DE HOJE
-      ================================================= */
-
-
-      const hoje =
-        this.dataHojeLocal();
-
-
-      /* =================================================
-         PRÓXIMOS EVENTOS
-      ================================================= */
-
-
-      const proximosEventos =
-
-        agenda
-
-          .filter(
-
-            evento => {
-
-
-              const data =
-
-                String(
-
-                  evento.data
-
-                  ||
-
-                  ""
-
-                )
-
-                  .slice(
-                    0,
-                    10
-                  );
-
-
-              return (
-
-                data
-
-                &&
-
-                data >= hoje
-
-              );
-
-            }
-
-          )
-
-          .sort(
-
-            (a, b) =>
-
-              this.chaveAgenda(a)
-
-                .localeCompare(
-
-                  this.chaveAgenda(b)
-
-                )
-
-          );
-
-
-      /* =================================================
-         LAYOUT
-      ================================================= */
-
+      /* LAYOUT DO DASHBOARD */
 
       App.layout(
-
-
         "Dashboard",
-
-
         "Visão geral do sistema interno de declarações",
-
-
         `
 
+        <style>
 
-          <style>
+          .dashboard-resumo {
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:16px;
+            margin-bottom:22px;
+          }
 
+          .dashboard-conteudo {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:18px;
+          }
 
-            /* ===========================================
-               CARDS DE RESUMO
-            =========================================== */
+          .dashboard-card {
+            min-width:0;
+          }
 
+          .dashboard-card-agenda {
+            grid-column:1/-1;
+          }
 
+          .dashboard-panel-header {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:16px;
+          }
+
+          .dashboard-panel-header h3 {
+            margin:0;
+          }
+
+          .dashboard-empty {
+            padding:30px 15px;
+            text-align:center;
+            color:#667085;
+          }
+
+          .dashboard-eventos {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+          }
+
+          .dashboard-evento {
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            padding:14px;
+            border:1px solid #e4e7ec;
+            border-radius:10px;
+            background:#fff;
+            min-width:0;
+          }
+
+          .dashboard-evento-data {
+            flex:0 0 auto;
+            min-width:82px;
+            padding:8px;
+            border-radius:8px;
+            background:#f2f4f7;
+            color:#344054;
+            text-align:center;
+            font-size:12px;
+            font-weight:700;
+          }
+
+          .dashboard-evento-info {
+            min-width:0;
+            flex:1;
+          }
+
+          .dashboard-evento-titulo {
+            font-weight:700;
+            color:#101828;
+            word-break:break-word;
+          }
+
+          .dashboard-evento-detalhes {
+            margin-top:5px;
+            color:#667085;
+            font-size:12px;
+            line-height:1.5;
+            word-break:break-word;
+          }
+
+          @media(max-width:1100px) {
             .dashboard-resumo {
-
-              display:grid;
-
-              grid-template-columns:
-                repeat(
-                  4,
-                  minmax(0,1fr)
-                );
-
-              gap:16px;
-
-              margin-bottom:22px;
-
+              grid-template-columns:repeat(2,minmax(0,1fr));
             }
+          }
 
-
-            /* ===========================================
-               ÁREA PRINCIPAL
-            =========================================== */
-
-
-            .dashboard-conteudo {
-
-              display:grid;
-
-              grid-template-columns:
-                repeat(
-                  2,
-                  minmax(0,1fr)
-                );
-
-              gap:18px;
-
+          @media(max-width:850px) {
+            .dashboard-conteudo,
+            .dashboard-eventos {
+              grid-template-columns:1fr;
             }
-
-
-            .dashboard-card {
-
-              min-width:0;
-
-            }
-
 
             .dashboard-card-agenda {
-
-              grid-column:
-                1 / -1;
-
+              grid-column:auto;
             }
+          }
 
-
-            /* ===========================================
-               CABEÇALHO DOS QUADROS
-            =========================================== */
-
-
-            .dashboard-panel-header {
-
-              display:flex;
-
-              align-items:center;
-
-              justify-content:
-                space-between;
-
-              gap:12px;
-
-              margin-bottom:16px;
-
+          @media(max-width:600px) {
+            .dashboard-resumo {
+              grid-template-columns:1fr;
             }
+          }
 
+        </style>
 
-            .dashboard-panel-header h3 {
+        <div class="page-header">
 
-              margin:0;
+          <div>
+            <h2>Visão geral</h2>
 
-            }
+            <p>
+              Acompanhe funcionários ativos, declarações,
+              faltas e compromissos da agenda.
+            </p>
+          </div>
 
+          <div class="actions no-print">
 
-            /* ===========================================
-               VAZIO
-            =========================================== */
+            <a
+              class="btn btn-primary"
+              href="nova-declaracao.html"
+            >
+              ＋ Nova Declaração
+            </a>
 
+            <a
+              class="btn btn-secondary"
+              href="novo-funcionario.html"
+            >
+              ＋ Novo Funcionário
+            </a>
 
-            .dashboard-empty {
+          </div>
 
-              padding:
-                30px
-                15px;
+        </div>
 
-              text-align:center;
+        <!-- INDICADORES -->
 
-              color:#667085;
+        <div class="dashboard-resumo">
 
-            }
+          ${this.statCard(
+            "Funcionários ativos",
+            ativos.length,
+            "👥"
+          )}
 
+          ${this.statCard(
+            "Declarações",
+            declaracoes.length,
+            "📄"
+          )}
 
-            /* ===========================================
-               AGENDA
-            =========================================== */
+          ${this.statCard(
+            "Faltas registradas",
+            faltas.length,
+            "📅"
+          )}
 
+          ${this.statCard(
+            "Próximos eventos",
+            eventos.length,
+            "🗓️"
+          )}
 
-            .dashboard-eventos {
+        </div>
 
-              display:grid;
+        <!-- CONTEÚDO -->
 
-              grid-template-columns:
-                repeat(
-                  2,
-                  minmax(0,1fr)
-                );
+        <div class="dashboard-conteudo">
 
-              gap:10px;
+          <!-- DECLARAÇÕES RECENTES -->
 
-            }
+          <section class="card panel dashboard-card">
 
+            <div class="dashboard-panel-header">
 
-            .dashboard-evento {
+              <h3>📄 Declarações recentes</h3>
 
-              display:flex;
-
-              gap:12px;
-
-              align-items:
-                flex-start;
-
-              padding:14px;
-
-              border:
-                1px solid
-                #e4e7ec;
-
-              border-radius:10px;
-
-              background:#fff;
-
-              min-width:0;
-
-            }
-
-
-            .dashboard-evento-data {
-
-              flex:
-                0 0 auto;
-
-              min-width:82px;
-
-              padding:8px;
-
-              border-radius:8px;
-
-              background:#f2f4f7;
-
-              color:#344054;
-
-              text-align:center;
-
-              font-size:12px;
-
-              font-weight:700;
-
-            }
-
-
-            .dashboard-evento-info {
-
-              min-width:0;
-
-              flex:1;
-
-            }
-
-
-            .dashboard-evento-titulo {
-
-              font-weight:700;
-
-              color:#101828;
-
-              word-break:
-                break-word;
-
-            }
-
-
-            .dashboard-evento-detalhes {
-
-              margin-top:5px;
-
-              color:#667085;
-
-              font-size:12px;
-
-              line-height:1.5;
-
-              word-break:
-                break-word;
-
-            }
-
-
-            /* ===========================================
-               RESPONSIVO
-            =========================================== */
-
-
-            @media (
-              max-width:1100px
-            ) {
-
-
-              .dashboard-resumo {
-
-                grid-template-columns:
-                  repeat(
-                    2,
-                    minmax(0,1fr)
-                  );
-
-              }
-
-
-            }
-
-
-            @media (
-              max-width:850px
-            ) {
-
-
-              .dashboard-conteudo {
-
-                grid-template-columns:
-                  1fr;
-
-              }
-
-
-              .dashboard-card-agenda {
-
-                grid-column:
-                  auto;
-
-              }
-
-
-              .dashboard-eventos {
-
-                grid-template-columns:
-                  1fr;
-
-              }
-
-
-            }
-
-
-            @media (
-              max-width:600px
-            ) {
-
-
-              .dashboard-resumo {
-
-                grid-template-columns:
-                  1fr;
-
-              }
-
-
-            }
-
-
-          </style>
-
-
-          <!-- ==========================================
-               TÍTULO
-          =========================================== -->
-
-
-          <div class="page-header">
-
-
-            <div>
-
-
-              <h2>
-
-                Visão geral
-
-              </h2>
-
-
-              <p>
-
-                Acompanhe funcionários ativos,
-                declarações, faltas e compromissos
-                da agenda.
-
-              </p>
-
+              <a
+                class="btn btn-secondary btn-sm"
+                href="declaracoes.html"
+              >
+                Ver todas
+              </a>
 
             </div>
 
+            ${this.tabelaDeclaracoes(
+              declaracoes,
+              mapa
+            )}
 
-            <div
-              class="
-                actions
-                no-print
-              "
-            >
+          </section>
 
+          <!-- FALTAS RECENTES -->
 
-              <a
+          <section class="card panel dashboard-card">
 
-                class="
-                  btn
-                  btn-primary
-                "
+            <div class="dashboard-panel-header">
 
-                href="nova-declaracao.html"
-
-              >
-
-                ＋ Nova Declaração
-
-              </a>
-
+              <h3>📅 Faltas recentes</h3>
 
               <a
-
-                class="
-                  btn
-                  btn-secondary
-                "
-
-                href="novo-funcionario.html"
-
+                class="btn btn-secondary btn-sm"
+                href="faltas.html"
               >
-
-                ＋ Novo Funcionário
-
+                Ver todas
               </a>
-
 
             </div>
 
+            ${this.tabelaFaltas(
+              faltas,
+              mapa
+            )}
 
-          </div>
+          </section>
 
+          <!-- AGENDA -->
 
-          <!-- ==========================================
-               CARDS
-          =========================================== -->
+          <section
+            class="
+              card
+              panel
+              dashboard-card
+              dashboard-card-agenda
+            "
+          >
 
+            <div class="dashboard-panel-header">
 
-          <div class="dashboard-resumo">
+              <h3>🗓️ Próximos eventos da agenda</h3>
 
-
-            ${
-
-              this.statCard(
-
-                "Funcionários ativos",
-
-                funcionariosAtivos.length,
-
-                "👥"
-
-              )
-
-            }
-
-
-            ${
-
-              this.statCard(
-
-                "Declarações",
-
-                declaracoes.length,
-
-                "📄"
-
-              )
-
-            }
-
-
-            ${
-
-              this.statCard(
-
-                "Faltas registradas",
-
-                faltas.length,
-
-                "📅"
-
-              )
-
-            }
-
-
-            ${
-
-              this.statCard(
-
-                "Próximos eventos",
-
-                proximosEventos.length,
-
-                "🗓️"
-
-              )
-
-            }
-
-
-          </div>
-
-
-          <!-- ==========================================
-               CONTEÚDO
-          =========================================== -->
-
-
-          <div class="dashboard-conteudo">
-
-
-            <!-- ========================================
-                 DECLARAÇÕES RECENTES
-            ========================================= -->
-
-
-            <section
-
-              class="
-                card
-                panel
-                dashboard-card
-              "
-
-            >
-
-
-              <div
-                class="
-                  dashboard-panel-header
-                "
+              <a
+                class="btn btn-secondary btn-sm"
+                href="agenda.html"
               >
+                Abrir agenda
+              </a>
 
+            </div>
 
-                <h3>
+            ${this.listaAgenda(eventos)}
 
-                  📄 Declarações recentes
+          </section>
 
-                </h3>
-
-
-                <a
-
-                  href="declaracoes.html"
-
-                  class="
-                    btn
-                    btn-secondary
-                    btn-sm
-                  "
-
-                >
-
-                  Ver todas
-
-                </a>
-
-
-              </div>
-
-
-              ${
-
-                this.tabelaDeclaracoes(
-
-                  declaracoes,
-
-                  mapaFuncionarios
-
-                )
-
-              }
-
-
-            </section>
-
-
-            <!-- ========================================
-                 FALTAS RECENTES
-            ========================================= -->
-
-
-            <section
-
-              class="
-                card
-                panel
-                dashboard-card
-              "
-
-            >
-
-
-              <div
-                class="
-                  dashboard-panel-header
-                "
-              >
-
-
-                <h3>
-
-                  📅 Faltas recentes
-
-                </h3>
-
-
-                <a
-
-                  href="faltas.html"
-
-                  class="
-                    btn
-                    btn-secondary
-                    btn-sm
-                  "
-
-                >
-
-                  Ver todas
-
-                </a>
-
-
-              </div>
-
-
-              ${
-
-                this.tabelaFaltas(
-
-                  faltas,
-
-                  mapaFuncionarios
-
-                )
-
-              }
-
-
-            </section>
-
-
-            <!-- ========================================
-                 AGENDA
-            ========================================= -->
-
-
-            <section
-
-              class="
-                card
-                panel
-                dashboard-card
-                dashboard-card-agenda
-              "
-
-            >
-
-
-              <div
-                class="
-                  dashboard-panel-header
-                "
-              >
-
-
-                <h3>
-
-                  🗓️ Próximos eventos da agenda
-
-                </h3>
-
-
-                <a
-
-                  href="agenda.html"
-
-                  class="
-                    btn
-                    btn-secondary
-                    btn-sm
-                  "
-
-                >
-
-                  Abrir agenda
-
-                </a>
-
-
-              </div>
-
-
-              ${
-
-                this.listaAgenda(
-
-                  proximosEventos
-
-                )
-
-              }
-
-
-            </section>
-
-
-          </div>
-
-
+        </div>
         `
-
       );
-
 
     } catch (erro) {
-
-
-      console.error(
-        erro
-      );
-
+      console.error(erro);
 
       App.toast(
-
-        "Erro ao carregar o dashboard: "
-
-        +
-
-        (
-          erro.message
-
-          ||
-
-          erro
-        ),
-
+        "Erro ao carregar o dashboard: " +
+        (erro.message || erro),
         "danger"
-
       );
-
     }
-
   },
 
-
-  /* =====================================================
-     DATA LOCAL DE HOJE
-  ===================================================== */
+  /* =============================================================
+     DATA ATUAL LOCAL
+  ============================================================= */
 
   dataHojeLocal() {
-
-
-    const agora =
-      new Date();
-
-
-    const ano =
-      agora.getFullYear();
-
-
-    const mes =
-
-      String(
-
-        agora.getMonth()
-        +
-        1
-
-      )
-
-        .padStart(
-          2,
-          "0"
-        );
-
-
-    const dia =
-
-      String(
-
-        agora.getDate()
-
-      )
-
-        .padStart(
-          2,
-          "0"
-        );
-
+    const a = new Date();
 
     return (
-
-      `${ano}-${mes}-${dia}`
-
+      `${a.getFullYear()}-` +
+      `${String(a.getMonth() + 1).padStart(2, "0")}-` +
+      `${String(a.getDate()).padStart(2, "0")}`
     );
-
   },
 
+  /* =============================================================
+     CARTÃO DE INDICADOR
+  ============================================================= */
 
-  /* =====================================================
-     CARD DE RESUMO
-  ===================================================== */
-
-  statCard(
-    label,
-    value,
-    icon
-  ) {
-
-
+  statCard(label, value, icon) {
     return `
-
-
-      <div
-        class="
-          card
-          stat-card
-        "
-      >
-
+      <div class="card stat-card">
 
         <div>
-
-
-          <div
-            class="stat-label"
-          >
-
-            ${
-
-              App.escapeHTML(
-                label
-              )
-
-            }
-
+          <div class="stat-label">
+            ${App.escapeHTML(label)}
           </div>
 
-
-          <div
-            class="stat-value"
-          >
-
+          <div class="stat-value">
             ${value}
-
           </div>
-
-
         </div>
 
-
-        <div
-          class="stat-icon"
-        >
-
+        <div class="stat-icon">
           ${icon}
-
         </div>
 
-
       </div>
-
-
     `;
-
   },
 
-
-  /* =====================================================
+  /* =============================================================
      NOME DO FUNCIONÁRIO
-  ===================================================== */
+  ============================================================= */
 
-  nomeFuncionario(
-    funcionario
-  ) {
-
-
+  nomeFuncionario(f) {
     return (
-
-      funcionario?.nome
-
-      ||
-
-      funcionario?.nome_completo
-
-      ||
-
+      f?.nome ||
+      f?.nome_completo ||
       "Funcionário não encontrado"
-
     );
-
   },
 
-
-  /* =====================================================
+  /* =============================================================
      DATA DA DECLARAÇÃO
-  ===================================================== */
+  ============================================================= */
 
-  dataDeclaracao(
-    declaracao
-  ) {
-
-
+  dataDeclaracao(x) {
     return (
-
-      declaracao.data
-
-      ||
-
-      declaracao.dataInicio
-
-      ||
-
-      declaracao.data_inicio
-
-      ||
-
-      declaracao.dataInicial
-
-      ||
-
-      declaracao.data_inicial
-
-      ||
-
+      x.data ||
+      x.dataInicio ||
+      x.data_inicio ||
+      x.dataInicial ||
+      x.data_inicial ||
       ""
-
     );
-
   },
 
-
-  /* =====================================================
+  /* =============================================================
      DECLARAÇÕES RECENTES
-  ===================================================== */
+  ============================================================= */
 
-  tabelaDeclaracoes(
-    declaracoes,
-    mapaFuncionarios
-  ) {
-
-
-    const registros =
-
-      [
-        ...declaracoes
-      ]
-
-        .sort(
-
-          (a, b) => {
-
-
-            const dataA =
-              this.dataDeclaracao(
-                a
-              );
-
-
-            const dataB =
-              this.dataDeclaracao(
-                b
-              );
-
-
-            const porData =
-
-              String(
-                dataB
-              )
-
-                .localeCompare(
-
-                  String(
-                    dataA
-                  )
-
-                );
-
-
-            if (
-              porData !== 0
-            ) {
-
-              return porData;
-
-            }
-
-
-            return (
-
-              String(
-                b.id || ""
-              )
-
-                .localeCompare(
-
-                  String(
-                    a.id || ""
-                  )
-
-                )
-
-            );
-
-          }
-
-        )
-
-        .slice(
-          0,
-          6
+  tabelaDeclaracoes(declaracoes, mapa) {
+    const registros = [...declaracoes]
+      .sort((a, b) => {
+        const delta = String(
+          this.dataDeclaracao(b)
+        ).localeCompare(
+          String(this.dataDeclaracao(a))
         );
 
-
-    if (
-      !registros.length
-    ) {
-
-
-      return `
-
-
-        <div class="dashboard-empty">
-
-          Nenhuma declaração registrada.
-
-        </div>
-
-
-      `;
-
-    }
-
-
-    return `
-
-
-      <div class="table-wrap">
-
-
-        <table>
-
-
-          <thead>
-
-
-            <tr>
-
-              <th>
-                Funcionário
-              </th>
-
-              <th>
-                Tipo
-              </th>
-
-              <th>
-                Data
-              </th>
-
-              <th>
-                Quantidade
-              </th>
-
-            </tr>
-
-
-          </thead>
-
-
-          <tbody>
-
-
-            ${
-
-              registros
-
-                .map(
-
-                  declaracao => {
-
-
-                    const funcionarioId =
-
-                      declaracao.funcionarioId
-
-                      ??
-
-                      declaracao.funcionario_id;
-
-
-                    const funcionario =
-
-                      mapaFuncionarios[
-
-                        String(
-                          funcionarioId
-                        )
-
-                      ];
-
-
-                    const horas =
-
-                      String(
-
-                        declaracao.tipo
-
-                        ||
-
-                        ""
-
-                      )
-
-                        .toLowerCase()
-
-                      ===
-
-                      "horas";
-
-
-                    const quantidade =
-
-                      horas
-
-                        ?
-
-                        `${
-
-                          Number(
-
-                            declaracao.quantidadeHoras
-
-                            ??
-
-                            declaracao.quantidade_horas
-
-                            ??
-
-                            0
-
-                          )
-
-                        } h`
-
-                        :
-
-                        `${
-
-                          Number(
-
-                            declaracao.quantidadeDias
-
-                            ??
-
-                            declaracao.quantidade_dias
-
-                            ??
-
-                            0
-
-                          )
-
-                        } dia(s)`;
-
-
-                    return `
-
-
-                      <tr>
-
-
-                        <td>
-
-                          <strong>
-
-                            ${
-
-                              App.escapeHTML(
-
-                                this.nomeFuncionario(
-                                  funcionario
-                                )
-
-                              )
-
-                            }
-
-                          </strong>
-
-                        </td>
-
-
-                        <td>
-
-
-                          <span
-
-                            class="
-                              badge
-                              ${
-                                horas
-
-                                  ?
-
-                                  "badge-hours"
-
-                                  :
-
-                                  "badge-days"
-                              }
-                            "
-
-                          >
-
-                            ${
-
-                              horas
-
-                                ?
-
-                                "Horas"
-
-                                :
-
-                                "Dias"
-
-                            }
-
-                          </span>
-
-
-                        </td>
-
-
-                        <td>
-
-                          ${
-
-                            App.formatDate(
-
-                              this.dataDeclaracao(
-                                declaracao
-                              )
-
-                            )
-
-                          }
-
-                        </td>
-
-
-                        <td>
-
-                          ${quantidade}
-
-                        </td>
-
-
-                      </tr>
-
-
-                    `;
-
-                  }
-
-                )
-
-                .join("")
-
-            }
-
-
-          </tbody>
-
-
-        </table>
-
-
-      </div>
-
-
-    `;
-
-  },
-
-
-  /* =====================================================
-     FALTAS RECENTES
-  ===================================================== */
-
-  tabelaFaltas(
-    faltas,
-    mapaFuncionarios
-  ) {
-
-
-    const registros =
-
-      [
-        ...faltas
-      ]
-
-        .sort(
-
-          (a, b) => {
-
-
-            const dataA =
-
-              a.data
-
-              ??
-
-              a.data_falta
-
-              ??
-
-              "";
-
-
-            const dataB =
-
-              b.data
-
-              ??
-
-              b.data_falta
-
-              ??
-
-              "";
-
-
-            const porData =
-
-              String(
-                dataB
-              )
-
-                .localeCompare(
-
-                  String(
-                    dataA
-                  )
-
-                );
-
-
-            if (
-              porData !== 0
-            ) {
-
-              return porData;
-
-            }
-
-
-            return (
-
-              String(
-                b.id || ""
-              )
-
-                .localeCompare(
-
-                  String(
-                    a.id || ""
-                  )
-
-                )
-
-            );
-
-          }
-
-        )
-
-        .slice(
-          0,
-          6
-        );
-
-
-    if (
-      !registros.length
-    ) {
-
-
-      return `
-
-
-        <div class="dashboard-empty">
-
-          Nenhuma falta registrada.
-
-        </div>
-
-
-      `;
-
-    }
-
-
-    return `
-
-
-      <div class="table-wrap">
-
-
-        <table>
-
-
-          <thead>
-
-
-            <tr>
-
-              <th>
-                Funcionário
-              </th>
-
-              <th>
-                Data
-              </th>
-
-              <th>
-                Motivo
-              </th>
-
-            </tr>
-
-
-          </thead>
-
-
-          <tbody>
-
-
-            ${
-
-              registros
-
-                .map(
-
-                  falta => {
-
-
-                    const funcionarioId =
-
-                      falta.funcionarioId
-
-                      ??
-
-                      falta.funcionario_id;
-
-
-                    const funcionario =
-
-                      mapaFuncionarios[
-
-                        String(
-                          funcionarioId
-                        )
-
-                      ];
-
-
-                    const data =
-
-                      falta.data
-
-                      ??
-
-                      falta.data_falta;
-
-
-                    const motivo =
-
-                      falta.tipo
-
-                      ??
-
-                      falta.motivo
-
-                      ??
-
-                      "Falta";
-
-
-                    return `
-
-
-                      <tr>
-
-
-                        <td>
-
-                          <strong>
-
-                            ${
-
-                              App.escapeHTML(
-
-                                this.nomeFuncionario(
-                                  funcionario
-                                )
-
-                              )
-
-                            }
-
-                          </strong>
-
-                        </td>
-
-
-                        <td>
-
-                          ${
-
-                            App.formatDate(
-                              data
-                            )
-
-                          }
-
-                        </td>
-
-
-                        <td>
-
-
-                          <span
-                            class="
-                              badge
-                              badge-days
-                            "
-                          >
-
-                            ${
-
-                              App.escapeHTML(
-                                motivo
-                              )
-
-                            }
-
-                          </span>
-
-
-                        </td>
-
-
-                      </tr>
-
-
-                    `;
-
-                  }
-
-                )
-
-                .join("")
-
-            }
-
-
-          </tbody>
-
-
-        </table>
-
-
-      </div>
-
-
-    `;
-
-  },
-
-
-  /* =====================================================
-     CHAVE PARA ORDENAR AGENDA
-  ===================================================== */
-
-  chaveAgenda(
-    evento
-  ) {
-
-
-    const data =
-
-      String(
-
-        evento.data
-
-        ||
-
-        "9999-12-31"
-
-      )
-
-        .slice(
-          0,
-          10
-        );
-
-
-    const hora =
-
-      String(
-
-        evento.hora_inicio
-
-        ||
-
-        "23:59:59"
-
-      );
-
-
-    return (
-
-      `${data} ${hora}`
-
-    );
-
-  },
-
-
-  /* =====================================================
-     FORMATAR HORA
-  ===================================================== */
-
-  horaAgenda(
-    hora
-  ) {
-
-
-    if (!hora) {
-
-      return "";
-
-    }
-
-
-    return (
-
-      String(
-        hora
-      )
-
-        .slice(
-          0,
-          5
-        )
-
-    );
-
-  },
-
-
-  /* =====================================================
-     PRÓXIMOS EVENTOS
-  ===================================================== */
-
-  listaAgenda(
-    eventos
-  ) {
-
-
-    const registros =
-
-      [
-        ...eventos
-      ]
-
-        .slice(
-          0,
-          6
-        );
-
-
-    if (
-      !registros.length
-    ) {
-
-
-      return `
-
-
-        <div class="dashboard-empty">
-
-          Nenhum evento futuro cadastrado
-          na agenda.
-
-        </div>
-
-
-      `;
-
-    }
-
-
-    return `
-
-
-      <div class="dashboard-eventos">
-
-
-        ${
-
-          registros
-
-            .map(
-
-              evento => {
-
-
-                const inicio =
-
-                  this.horaAgenda(
-
-                    evento.hora_inicio
-
-                  );
-
-
-                const fim =
-
-                  this.horaAgenda(
-
-                    evento.hora_fim
-
-                  );
-
-
-                let horario =
-
-                  "Horário não informado";
-
-
-                if (
-
-                  inicio
-
-                  &&
-
-                  fim
-
-                ) {
-
-
-                  horario =
-
-                    `${inicio} às ${fim}`;
-
-
-                }
-
-                else if (
-                  inicio
-                ) {
-
-
-                  horario =
-                    inicio;
-
-
-                }
-
-
-                return `
-
-
-                  <div class="dashboard-evento">
-
-
-                    <div
-                      class="
-                        dashboard-evento-data
-                      "
-                    >
-
-                      ${
-
-                        App.formatDate(
-
-                          evento.data
-
-                        )
-
-                      }
-
-                    </div>
-
-
-                    <div
-                      class="
-                        dashboard-evento-info
-                      "
-                    >
-
-
-                      <div
-                        class="
-                          dashboard-evento-titulo
-                        "
-                      >
-
-                        ${
-
-                          App.escapeHTML(
-
-                            evento.titulo
-
-                            ||
-
-                            "Evento"
-
-                          )
-
-                        }
-
-                      </div>
-
-
-                      <div
-                        class="
-                          dashboard-evento-detalhes
-                        "
-                      >
-
-
-                        🕒 ${
-
-                          App.escapeHTML(
-                            horario
-                          )
-
-                        }
-
-
-                        ${
-
-                          evento.local
-
-                            ?
-
-                            ` &nbsp; • &nbsp; 📍 ${
-
-                              App.escapeHTML(
-                                evento.local
-                              )
-
-                            }`
-
-                            :
-
-                            ""
-
-                        }
-
-
-                        ${
-
-                          evento.categoria
-
-                            ?
-
-                            ` &nbsp; • &nbsp; ${
-
-                              App.escapeHTML(
-                                evento.categoria
-                              )
-
-                            }`
-
-                            :
-
-                            ""
-
-                        }
-
-
-                      </div>
-
-
-                    </div>
-
-
-                  </div>
-
-
-                `;
-
-              }
-
-            )
-
-            .join("")
-
-        }
-
-
-      </div>
-
-
-    `;
-
-  }
-
-
-};
+        return
