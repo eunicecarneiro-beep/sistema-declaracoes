@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+
+  <title>
+    Documentos de Servidores | E.M. Profª Eunice Carneiro
+  </title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    .docs-layout {
+      display: grid;
+      grid-template-columns:
+        minmax(300px,.95fr) minmax(410px,1.25fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .docs-panel {
+      background: #fff;
+      border: 1px solid #e4e7ec;
+      border-radius: 15px;
+      padding: 21px;
+      box-shadow: 0 8px 24px rgba(16,24,40,.04);
+    }
+
+    .docs-panel h3 {
+      margin: 0 0 15px;
+      font-size: 17px;
+    }
+
+    .docs-panel h4 {
+      margin: 22px 0 13px;
+      font-size: 14px;
+    }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .docs-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .docs-field.full {
+      grid-column: 1/-1;
+    }
+
+    .docs-field label {
+      font-weight: 650;
+      color: #344054;
+      font-size: 12px;
+    }
+
+    .docs-field input,
+    .docs-field select,
+    .docs-field textarea {
+      width: 100%;
+      padding: 11px 12px;
+      background: #fff;
+      border: 1px solid #cdd5df;
+      border-radius: 9px;
+      color: #172033;
+      font: inherit;
+      outline: none;
+    }
+
+    .docs-field input:focus,
+    .docs-field textarea:focus,
+    .docs-field select:focus {
+      border-color: #2f6fed;
+      box-shadow: 0 0 0 3px #2f6fed18;
+    }
+
+    .docs-field textarea {
+      min-height: 110px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .docs-hint {
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .docs-typehint {
+      background: #eff6ff;
+      color: #1e40af;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .docs-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .docs-status {
+      margin: 12px 0 0;
+      font-size: 13px;
+      min-height: 20px;
+      color: #667085;
+    }
+
+    .docs-status.warn {
+      color: #b54708;
+    }
+
+    .docs-status.error {
+      color: #b42318;
+    }
+
+    .docs-status.ok {
+      color: #067647;
+    }
+
+    .docs-previewbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 13px;
+    }
+
+    .docs-previewbar h3 {
+      margin: 0;
+    }
+
+    .docs-page {
+      background: #fff;
+      width: 100%;
+      min-height: 690px;
+      padding: 36px 38px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      box-shadow: 0 8px 20px rgba(16,24,40,.06);
+      color: #111827;
+      font: 15px/1.65 "Times New Roman",serif;
+      overflow-wrap: anywhere;
+    }
+
+    .docs-letterhead {
+      text-align: center;
+      border-bottom: 1px solid #111827;
+      padding-bottom: 10px;
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+
+    .docs-letterhead b {
+      display: block;
+    }
+
+    .docs-letterhead small {
+      display: block;
+      font-size: 11px;
+    }
+
+    .docs-doc-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      letter-spacing: .04em;
+      margin: 0 0 25px;
+    }
+
+    .docs-place-date {
+      text-align: right;
+      margin: 0 0 22px;
+    }
+
+    .docs-destination {
+      margin-bottom: 20px;
+    }
+
+    .docs-destination div {
+      margin-bottom: 4px;
+    }
+
+    .docs-body {
+      text-align: justify;
+    }
+
+    .docs-body p {
+      text-indent: 28px;
+      margin: 0 0 15px;
+      white-space: pre-wrap;
+    }
+
+    .docs-signature {
+      text-align: center;
+      margin: 90px auto 0;
+      max-width: 370px;
+      line-height: 1.5;
+    }
+
+    .docs-signature-line {
+      border-top: 1px solid #111827;
+      padding-top: 6px;
+    }
+
+    .docs-badge {
+      background: #eef4ff;
+      color: #1b4fa0;
+      border-radius: 30px;
+      font-size: 11px;
+      padding: 6px 9px;
+    }
+
+    @media (max-width:1100px) {
+      .docs-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .docs-page {
+        min-height: 600px;
+      }
+    }
+
+    @media (max-width:650px) {
+      .docs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .docs-panel {
+        padding: 15px;
+      }
+
+      .docs-page {
+        padding: 18px 16px;
+        font-size: 13px;
+        min-height: 560px;
+      }
+    }
+  </style>
+</head>
+
+<body data-page="documentos-servidores">
+  <div id="app"></div>
+
+  <script src="js/app.js?v=20261008-docs2"></script>
+  <script src="js/documentos-servidores.js?v=20261008-docs2"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      DocumentosServidoresPage.init();
+    });
+  </script>
+</body>
+</html>
