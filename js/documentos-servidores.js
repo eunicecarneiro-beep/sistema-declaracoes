@@ -1451,3 +1451,70 @@ Por ser verdade, firmamos a presente declaração.`;
   };
 
 })();
+
+/* ========================================================
+   CORREÇÃO DEFINITIVA DA EXIBIÇÃO DOS SELETORES
+
+   Remove visualmente o campo antigo "Tipo de documento".
+   Mantém apenas:
+   1. O que deseja emitir?
+   2. Modelo
+
+   Os valores antigos permanecem disponíveis internamente
+   para não prejudicar a geração dos documentos.
+======================================================== */
+
+(function corrigirSeletoresDuplicados() {
+
+  const iniciarAnterior = DocumentosServidoresPage.init;
+
+  DocumentosServidoresPage.init = async function (...args) {
+
+    await iniciarAnterior.apply(this, args);
+
+    const seletorAntigo = document.getElementById("doc-tipo");
+
+    if (!seletorAntigo) return;
+
+    const blocoAntigo = seletorAntigo.closest(".docs-field");
+
+    if (!blocoAntigo) return;
+
+    // Identifica o bloco antigo para mantê-lo oculto,
+    // mesmo quando o usuário troca de categoria ou modelo.
+
+    blocoAntigo.classList.add(
+      "ds-seletor-antigo-oculto"
+    );
+
+    // Evita a duplicação da regra CSS.
+
+    if (!document.getElementById("ds-correcao-seletor-css")) {
+
+      const estilo = document.createElement("style");
+
+      estilo.id = "ds-correcao-seletor-css";
+
+      estilo.textContent = `
+        .ds-seletor-antigo-oculto {
+          display: none !important;
+        }
+      `;
+
+      document.head.appendChild(estilo);
+    }
+
+    // Ajusta a descrição do módulo.
+
+    const descricao = document.querySelector(
+      ".page-header p"
+    );
+
+    if (descricao) {
+      descricao.textContent =
+        "Escolha Declarações ou Memorandos e selecione o modelo desejado.";
+    }
+
+  };
+
+})();
