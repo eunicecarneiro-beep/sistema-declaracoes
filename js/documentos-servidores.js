@@ -1714,3 +1714,313 @@ Por ser verdade, firmamos a presente declaração.`;
     atualizarPeriodo();
   };
 })();
+/* ============================================================
+   LTS: DATAS E PERÍODO EM DOIS SENTIDOS
+   Cole este bloco ao FINAL de js/documentos-servidores.js.
+   Compatível com a correção anterior de dias inclusivos.
+============================================================ */
+(function instalarLtsBidirecional() {
+  const iniciarAnterior = DocumentosServidoresPage.init;
+
+  DocumentosServidoresPage.init = async function (...args) {
+    await iniciarAnterior.apply(this, args);
+
+    const $ = id => document.getElementById(id);
+    const inicio = $('doc-inicio');
+    const fim = $('doc-fim');
+    const dias = $('doc-prazo');
+    const tipo = $('doc-tipo');
+    const modelo = $('ds-modelo');
+    const titular = $('doc-secundario');
+    const bloco = $('doc-prazo-bloco');
+
+    if (!inicio || !fim || !dias || !tipo || !bloco) return;
+
+    const DIA = 24 * 60 * 60 * 1000;
+    const etiqueta = bloco.querySelector('label');
+    const retorno = document.createElement('div');
+
+    retorno.id = 'ds-retorno-licenca';
+
+    retorno.style.cssText =
+      'margin-top:9px;padding:10px 12px;border-radius:8px;' +
+      'background:#eff6ff;color:#1e40af;font-size:13px;font-weight:600;';
+
+    bloco.appendChild(retorno);
+
+    let ocupado = false;
+    let ultimaOrigem = 'fim';
+    let diasMemorizados = null;
+    let fimAutomatico = '';
+
+    function utc(data) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(data || '')) return null;
+
+      const t = Date.parse(data + 'T00:00:00Z');
+
+      if (!Number.isFinite(t)) return null;
+
+      return new Date(t).toISOString().slice(0, 10) === data
+        ? t
+        : null;
+    }
+
+    function iso(t) {
+      return new Date(t).toISOString().slice(0, 10);
+    }
+
+    function br(data) {
+      return data
+        ? data.slice(8, 10) + '/' +
+          data.slice(5, 7) + '/' +
+          data.slice(0, 4)
+        : '—';
+    }
+
+    function numeroValido() {
+      const n = Number(dias.value);
+
+      return dias.value !== '' &&
+        Number.isInteger(n) &&
+        n >= 1 &&
+        n <= 3650
+          ? n
+          : null;
+    }
+
+    function aplicavel() {
+      return ['substituicao', 'prorrogacao'].includes(tipo.value);
+    }
+
+    function notificar(campo) {
+      campo.dispatchEvent(
+        new Event('input', { bubbles: true })
+      );
+    }
+
+    /* INÍCIO + DIAS = ÚLTIMO DIA DA LICENÇA */
+
+    function calcularFim(n) {
+      const t = utc(inicio.value);
+
+      if (t === null || !n) return false;
+
+      // O primeiro dia já é o dia 1 da LTS.
+      const novoFim = iso(t + (n - 1) * DIA);
+
+      if (fim.value !== novoFim) {
+        fim.value = novoFim;
+        notificar(fim);
+      }
+
+      fimAutomatico = novoFim;
+      dias.value = String(n);
+      diasMemorizados = n;
+
+      notificar(dias);
+
+      return true;
+    }
+
+    /* INÍCIO + ÚLTIMO DIA = TOTAL DE DIAS */
+
+    function calcularDias() {
+      const a = utc(inicio.value);
+      const b = utc(fim.value);
+
+      if (a === null || b === null) return false;
+
+      // +1: inclui o primeiro e o último dia.
+      const n = Math.round((b - a) / DIA) + 1;
+
+      if (n < 1 || n > 3650) return false;
+
+      dias.value = String(n);
+      diasMemorizados = n;
+
+      notificar(dias);
+
+      return true;
+    }
+
+    /* RETORNO PREVISTO = DIA SEGUINTE AO FIM */
+
+    function mostrarRetorno() {
+      if (!aplicavel()) {
+        retorno.hidden = true;
+        return;
+      }
+
+      retorno.hidden = false;
+
+      const ini = utc(inicio.value);
+      const ult = utc(fim.value);
+
+      if (ini === null || ult === null || ult < ini) {
+        retorno.textContent =
+          'Retorno: informe um início e um término válidos.';
+
+        retorno.style.color = '#b42318';
+        return;
+      }
+
+      const diaSeguinte = br(iso(ult + DIA));
+
+      const eLts =
+        tipo.value === 'substituicao' ||
+        (
+          tipo.value === 'prorrogacao' &&
+          !!titular?.value.trim()
+        );
+
+      if (eLts) {
+        retorno.textContent =
+          'Último dia de LTS: ' + br(fim.value) +
+          '  •  Retorno previsto: ' + diaSeguinte;
+      } else {
+        retorno.textContent =
+          'Último dia do período informado: ' +
+          br(fim.value) +
+          '  •  Dia seguinte: ' + diaSeguinte;
+      }
+
+      retorno.style.color = '#1e40af';
+    }
+
+    /* SINCRONIZAR OS TRÊS CAMPOS */
+
+    function sincronizar(origem) {
+      if (ocupado) return;
+
+      ocupado = true;
+
+      try {
+        // O código antigo bloqueava a edição dos dias.
+        // Agora o campo permanece editável.
+        dias.readOnly = false;
+
+        if (etiqueta) {
+          etiqueta.textContent =
+            'Período em dias (editável)';
+        }
+
+        if (!aplicavel()) {
+          retorno.hidden = true;
+          return;
+        }
+
+        if (origem === 'dias') {
+          ultimaOrigem = 'dias';
+
+          const n = numeroValido();
+
+          if (n !== null) {
+            diasMemorizados = n;
+            calcularFim(n);
+          } else if (!dias.value && fimAutomatico === fim.value) {
+            fim.value = '';
+            fimAutomatico = '';
+            diasMemorizados = null;
+
+            notificar(fim);
+          } else if (dias.value) {
+            retorno.hidden = false;
+            retorno.textContent =
+              'Informe um período inteiro de 1 a 3650 dias.';
+            retorno.style.color = '#b42318';
+            return;
+          }
+
+        } else if (origem === 'inicio') {
+          // Se o usuário definiu o período, preservamos
+          // essa duração ao trocar a data inicial.
+          if (
+            ultimaOrigem === 'dias' &&
+            diasMemorizados !== null
+          ) {
+            calcularFim(diasMemorizados);
+          } else if (fim.value) {
+            calcularDias();
+          } else if (numeroValido() !== null) {
+            calcularFim(numeroValido());
+          }
+
+        } else if (origem === 'fim') {
+          // O usuário alterou a data final:
+          // recalculamos a quantidade de dias.
+          ultimaOrigem = 'fim';
+          fimAutomatico = '';
+
+          if (
+            !calcularDias() &&
+            inicio.value &&
+            fim.value
+          ) {
+            dias.value = '';
+            diasMemorizados = null;
+            notificar(dias);
+          }
+
+        } else if (inicio.value && fim.value) {
+          calcularDias();
+        }
+
+        mostrarRetorno();
+
+      } finally {
+        // Garante que a quantidade continue editável.
+        dias.readOnly = false;
+        ocupado = false;
+      }
+    }
+
+    /* EVENTOS */
+
+    inicio.addEventListener(
+      'input',
+      () => sincronizar('inicio')
+    );
+
+    inicio.addEventListener(
+      'change',
+      () => sincronizar('inicio')
+    );
+
+    fim.addEventListener(
+      'input',
+      () => sincronizar('fim')
+    );
+
+    fim.addEventListener(
+      'change',
+      () => sincronizar('fim')
+    );
+
+    dias.addEventListener(
+      'input',
+      () => sincronizar('dias')
+    );
+
+    dias.addEventListener(
+      'change',
+      () => sincronizar('dias')
+    );
+
+    tipo.addEventListener(
+      'change',
+      () => sincronizar('modelo')
+    );
+
+    modelo?.addEventListener(
+      'change',
+      () => sincronizar('modelo')
+    );
+
+    titular?.addEventListener(
+      'input',
+      mostrarRetorno
+    );
+
+    sincronizar('modelo');
+  };
+})();
