@@ -2024,3 +2024,175 @@ Por ser verdade, firmamos a presente declaração.`;
     sincronizar('modelo');
   };
 })();
+/* =========================================================
+   AUTO PREENCHER "CARGO/FUNÇÃO A CONTRATAR"
+   COM O CARGO DO SERVIDOR SUBSTITUÍDO
+   Cole ao FINAL de js/documentos-servidores.js
+========================================================= */
+(function instalarAutoCargoSubstituicao() {
+  const initAnterior = DocumentosServidoresPage.init;
+
+  DocumentosServidoresPage.init = async function (...args) {
+    await initAnterior.apply(this, args);
+
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function normalizar(txt) {
+      return String(txt || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function extrairMatricula(texto) {
+      const limpo = String(texto || '');
+      const match = limpo.match(/(\d{4,})/);
+      return match ? match[1] : '';
+    }
+
+    function encontrarCampoPorLabel(texto) {
+      const labels = $$('label');
+
+      for (const label of labels) {
+        if (normalizar(label.textContent).includes(normalizar(texto))) {
+          const forId = label.getAttribute('for');
+
+          if (forId) {
+            const el = document.getElementById(forId);
+            if (el) return el;
+          }
+
+          const container = label.parentElement;
+          if (!container) continue;
+
+          const campo = container.querySelector('input, select, textarea');
+          if (campo) return campo;
+        }
+      }
+
+      return null;
+    }
+
+    function obterSupabase() {
+      return (
+        window.supabaseClient ||
+        window.supabase ||
+        window.sb ||
+        null
+      );
+    }
+
+    let cacheFuncionarios = [];
+
+    async function carregarFuncionarios() {
+      if (cacheFuncionarios.length) return cacheFuncionarios;
+
+      const sb = obterSupabase();
+      if (!sb) return [];
+
+      try {
+        const { data, error } = await sb
+          .from('funcionarios')
+          .select('*')
+          .limit(5000);
+
+        if (error) throw error;
+
+        cacheFuncionarios = Array.isArray(data) ? data : [];
+        return cacheFuncionarios;
+      } catch (err) {
+        console.error('Erro ao carregar funcionários:', err);
+        return [];
+      }
+    }
+
+    function obterCargoFuncionario(funcionario) {
+      if (!funcionario) return '';
+
+      return (
+        funcionario.cargo_funcao ||
+        funcionario.cargoFuncao ||
+        funcionario.cargo ||
+        funcionario.funcao ||
+        funcionario.cargo_nome ||
+        funcionario.cargoNome ||
+        ''
+      );
+    }
+
+    async function aplicarNoFormulario() {
+      const campoServidor =
+        encontrarCampoPorLabel('Servidor interessado') ||
+        encontrarCampoPorLabel('Servidor substituído') ||
+        encontrarCampoPorLabel('Servidor a ser substituído');
+
+      const campoCargo =
+        encontrarCampoPorLabel('Cargo/função a contratar') ||
+        encontrarCampoPorLabel('Cargo / função a contratar');
+
+      if (!campoServidor || !campoCargo) return;
+
+      campoCargo.placeholder = 'Será preenchido automaticamente ao selecionar o servidor';
+
+      let temporizador = null;
+
+      async function preencherCargoAutomaticamente() {
+        const valor = String(campoServidor.value || '').trim();
+
+        if (!valor) return;
+
+        const funcionarios = await carregarFuncionarios();
+        if (!funcionarios.length) return;
+
+        const matricula = extrairMatricula(valor);
+        const nomeDigitado = normalizar(
+          valor.split('—')[0].split('-')[0].trim()
+        );
+
+        let encontrado = null;
+
+        if (matricula) {
+          encontrado = funcionarios.find((f) => {
+            const mat = String(
+              f.matricula ||
+              f.matricula_funcional ||
+              f.registro ||
+              ''
+            ).replace(/\D/g, '');
+
+            return mat === matricula;
+          });
+        }
+
+        if (!encontrado && nomeDigitado) {
+          encontrado =
+            funcionarios.find((f) => normalizar(f.nome) === nomeDigitado) ||
+            funcionarios.find((f) => normalizar(f.nome_completo) === nomeDigitado) ||
+            funcionarios.find((f) => normalizar(f.nome).includes(nomeDigitado)) ||
+            funcionarios.find((f) => nomeDigitado.includes(normalizar(f.nome)));
+        }
+
+        const cargo = obterCargoFuncionario(encontrado);
+
+        if (cargo) {
+          campoCargo.value = cargo;
+          campoCargo.dispatchEvent(new Event('input', { bubbles: true }));
+          campoCargo.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
+      campoServidor.addEventListener('change', preencherCargoAutomaticamente);
+      campoServidor.addEventListener('blur', preencherCargoAutomaticamente);
+
+      campoServidor.addEventListener('input', () => {
+        clearTimeout(temporizador);
+        temporizador = setTimeout(preencherCargoAutomaticamente, 300);
+      });
+
+      await preencherCargoAutomaticamente();
+    }
+
+    await aplicarNoFormulario();
+  };
+})();
