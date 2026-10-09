@@ -808,3 +808,646 @@ const DocumentosServidoresPage = (() => {
   }
   return {init};
 })();
+
+/* ============================================================
+   MELHORIA DA TELA — CATEGORIAS E DECLARAÇÃO DE COMPARECIMENTO
+   Cole TODO este bloco no FINAL do documentos-servidores.js.
+   Mantém as funções originais e todos os modelos anteriores.
+============================================================ */
+
+(function instalarTelaSimplificada() {
+  const originalInit = DocumentosServidoresPage.init;
+  const $ = id => document.getElementById(id);
+  const limpo = v => String(v ?? '').trim();
+  const esc = v => App.escapeHTML(limpo(v));
+  const dataBr = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '')
+    ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4)
+    : '[DATA]';
+
+  const grupos = {
+    declaracao: [
+      ['declaracao', 'Declaração funcional do servidor'],
+      ['comparecimento-responsavel', 'Comparecimento de pai, mãe ou responsável']
+    ],
+    requerimento: [
+      ['requerimento', 'Requerimento do servidor']
+    ],
+    memorando: [
+      ['prorrogacao', 'Prorrogação de contrato'],
+      ['substituicao', 'Substituição por licença (LTS)'],
+      ['contratacao', 'Contratação / reposição de vaga'],
+      ['calendario', 'Alteração de calendário escolar'],
+      ['zeladoria', 'Solicitação de zeladoria'],
+      ['transporte', 'Transporte para visita escolar'],
+      ['estagio', 'Parecer sobre estágio de servidor(a)'],
+      ['avanco', 'Parecer sobre avanço de nível'],
+      ['memorando', 'Personalizado (texto livre)']
+    ]
+  };
+
+  const estado = {
+    pais: false,
+    editado: false,
+    impOriginal: null,
+    wordOriginal: null,
+    atualizarOriginal: null,
+    renderizado: false
+  };
+
+  const valor = id => limpo($(id)?.value);
+
+  function mensagem(texto, erro = false) {
+    if (!$('doc-status')) return;
+    $('doc-status').textContent = texto;
+    $('doc-status').className = 'docs-status ' + (erro ? 'error' : 'ok');
+  }
+
+  function camposPais() {
+    return `
+      <div class="docs-field full" id="ds-pais-bloco" hidden>
+        <div class="docs-typehint">
+          Declaração para apresentar ao empregador, comprovando o
+          comparecimento de pai, mãe ou responsável à escola.
+          Preencha somente informações confirmadas pela secretaria.
+        </div>
+
+        <div class="docs-grid" style="margin-top:14px">
+          <div class="docs-field full">
+            <label>Nome completo do(a) responsável *</label>
+            <input
+              id="ds-nome"
+              autocomplete="off"
+              placeholder="Nome do pai, da mãe ou responsável"
+            >
+          </div>
+
+          <div class="docs-field full">
+            <label>Nome do(a) estudante (opcional)</label>
+            <input
+              id="ds-estudante"
+              autocomplete="off"
+              placeholder="Deixe em branco se não for necessário informar"
+            >
+          </div>
+
+          <div class="docs-field">
+            <label>Data do comparecimento *</label>
+            <input id="ds-data" type="date">
+          </div>
+
+          <div class="docs-field">
+            <label>Finalidade (opcional)</label>
+            <select id="ds-motivo">
+              <option value="">Assuntos escolares</option>
+              <option value="reunião pedagógica">Reunião pedagógica</option>
+              <option value="atendimento na secretaria">Atendimento na secretaria</option>
+              <option value="atendimento com a direção">Atendimento com a direção</option>
+              <option value="retirada do(a) estudante">Retirada do(a) estudante</option>
+              <option value="outros assuntos escolares">Outros assuntos escolares</option>
+            </select>
+          </div>
+
+          <div class="docs-field">
+            <label>Entrada *</label>
+            <input id="ds-entrada" type="time">
+          </div>
+
+          <div class="docs-field">
+            <label>Saída *</label>
+            <input id="ds-saida" type="time">
+          </div>
+
+          <div class="docs-field full">
+            <label>Nome de quem assinará *</label>
+            <input
+              id="ds-assinante"
+              value="Anderson Santos Silva"
+            >
+          </div>
+
+          <div class="docs-field full">
+            <label>Cargo de quem assinará *</label>
+            <input
+              id="ds-cargo"
+              value="Diretor de Unidade Escolar"
+            >
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function textoPais() {
+    const resp = valor('ds-nome') || '[NOME DO(A) RESPONSÁVEL]';
+    const aluno = valor('ds-estudante');
+    const dia = dataBr(valor('ds-data'));
+    const ini = valor('ds-entrada') || '[ENTRADA]';
+    const fim = valor('ds-saida') || '[SAÍDA]';
+    const motivo = valor('ds-motivo');
+    const objetivo = motivo || 'tratar de assuntos escolares';
+
+    return `Declaramos, para os devidos fins e especialmente para apresentação no local de trabalho, que ${resp} compareceu à Escola Municipal Professora Eunice Carneiro, no dia ${dia}, no período das ${ini} às ${fim}, para ${objetivo}${aluno ? ', em assunto relacionado ao(à) estudante ' + aluno : ''}.
+
+A presente declaração refere-se exclusivamente ao comparecimento registrado na unidade escolar, não representando, por si só, abono de jornada de trabalho.
+
+Por ser verdade, firmamos a presente declaração.`;
+  }
+
+  function conteudoPais() {
+    const texto = valor('doc-texto');
+
+    const parags = texto
+      .split(/\n\s*\n/)
+      .filter(Boolean)
+      .map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`)
+      .join('');
+
+    return `
+      <div class="docs-letterhead">
+        <b>PREFEITURA MUNICIPAL DE MONTES CLAROS</b>
+        <b>SECRETARIA MUNICIPAL DE EDUCAÇÃO</b>
+        <b>ESCOLA MUNICIPAL PROFESSORA EUNICE CARNEIRO</b>
+        <small>Rua D, 300 – José Correia Machado – Montes Claros/MG</small>
+      </div>
+
+      <div class="docs-doc-title">
+        DECLARAÇÃO DE COMPARECIMENTO
+      </div>
+
+      <div class="docs-place-date">
+        Montes Claros/MG, ${esc(dataBr(valor('ds-data')))}.
+      </div>
+
+      <div class="docs-body">
+        ${parags}
+      </div>
+
+      <div class="docs-signature">
+        <div class="docs-signature-line">
+          <strong>${esc(valor('ds-assinante') || '[ASSINANTE]')}</strong>
+        </div>
+
+        <div>${esc(valor('ds-cargo') || '[CARGO]')}</div>
+      </div>`;
+  }
+
+  function mostrarPais() {
+    const p = $('doc-preview');
+
+    if (!p || !estado.pais) return;
+
+    p.style.padding = '';
+    p.style.minHeight = '';
+    p.innerHTML = conteudoPais();
+  }
+
+  function atualizarPais(force = false) {
+    if (!estado.pais) return;
+
+    if (force || !estado.editado) {
+      $('doc-texto').value = textoPais();
+      estado.editado = false;
+    }
+
+    $('doc-edicao').textContent = estado.editado
+      ? 'Texto personalizado. Clique em Atualizar texto para refazer o modelo.'
+      : 'Texto gerado automaticamente. Você pode ajustá-lo antes de emitir.';
+
+    mostrarPais();
+  }
+
+  function validarPais() {
+    const erros = [];
+
+    if (!valor('ds-nome')) {
+      erros.push('Nome do responsável');
+    }
+
+    if (!valor('ds-data')) {
+      erros.push('Data do comparecimento');
+    }
+
+    if (!valor('ds-entrada')) {
+      erros.push('Horário de entrada');
+    }
+
+    if (!valor('ds-saida')) {
+      erros.push('Horário de saída');
+    }
+
+    if (
+      valor('ds-saida') &&
+      valor('ds-entrada') &&
+      valor('ds-saida') < valor('ds-entrada')
+    ) {
+      erros.push('Saída não pode ser anterior à entrada');
+    }
+
+    if (!valor('ds-assinante') || !valor('ds-cargo')) {
+      erros.push('Identificação de quem assinará');
+    }
+
+    if (
+      !valor('doc-texto') ||
+      /\[[^\]]+\]/.test(valor('doc-texto'))
+    ) {
+      erros.push('Texto incompleto');
+    }
+
+    return erros;
+  }
+
+  function htmlPais(acoes = false) {
+    return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Declaração de comparecimento</title>
+
+<style>
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  body {
+    font: 12pt/1.55 "Times New Roman", serif;
+    color: #111;
+    margin: 0;
+  }
+
+  .docs-letterhead {
+    text-align: center;
+    border-bottom: 1px solid #222;
+    padding-bottom: 11px;
+    margin-bottom: 28px;
+    line-height: 1.4;
+  }
+
+  .docs-letterhead b {
+    display: block;
+  }
+
+  .docs-letterhead small {
+    font-size: 9pt;
+  }
+
+  .docs-doc-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 13pt;
+    margin-bottom: 24px;
+  }
+
+  .docs-place-date {
+    text-align: right;
+    margin-bottom: 25px;
+  }
+
+  .docs-body {
+    text-align: justify;
+  }
+
+  .docs-body p {
+    margin: 0 0 16px;
+    text-indent: 1.2cm;
+    white-space: pre-wrap;
+  }
+
+  .docs-signature {
+    text-align: center;
+    max-width: 105mm;
+    margin: 30mm auto 0;
+    page-break-inside: avoid;
+  }
+
+  .docs-signature-line {
+    border-top: 1px solid #111;
+    padding-top: 6px;
+  }
+
+  .ds-print-actions {
+    padding: 12px;
+    text-align: center;
+    background: #eef2f7;
+    font: 14px Arial;
+  }
+
+  @media print {
+    .ds-print-actions {
+      display: none;
+    }
+  }
+</style>
+</head>
+
+<body>
+  ${
+    acoes
+      ? `<div class="ds-print-actions">
+           <button onclick="window.print()">
+             Imprimir / Salvar PDF
+           </button>
+         </div>`
+      : ''
+  }
+
+  ${conteudoPais()}
+</body>
+</html>`;
+  }
+
+  function imprimirPais() {
+    const erros = validarPais();
+
+    if (erros.length) {
+      return mensagem(
+        'Confira: ' + erros.join('; '),
+        true
+      );
+    }
+
+    const aba = window.open('', '_blank');
+
+    if (!aba) {
+      return mensagem(
+        'Permita a abertura de uma nova aba no navegador.',
+        true
+      );
+    }
+
+    aba.document.open();
+    aba.document.write(htmlPais(true));
+    aba.document.close();
+
+    mensagem(
+      'Documento aberto. Confira antes de imprimir ou salvar em PDF.'
+    );
+  }
+
+  function wordPais() {
+    const erros = validarPais();
+
+    if (erros.length) {
+      return mensagem(
+        'Confira: ' + erros.join('; '),
+        true
+      );
+    }
+
+    const blob = new Blob(
+      ['\ufeff', htmlPais(false)],
+      {
+        type: 'application/msword;charset=utf-8'
+      }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download =
+      'DECLARACAO_COMPARECIMENTO_' +
+      valor('ds-data') +
+      '.doc';
+
+    document.body.appendChild(a);
+
+    a.click();
+    a.remove();
+
+    setTimeout(
+      () => URL.revokeObjectURL(url),
+      60000
+    );
+
+    mensagem(
+      'Arquivo .doc criado. Confira no Word antes de utilizar.'
+    );
+  }
+
+  function opcoesGrupo(categoria, escolhida = '') {
+    const lista = grupos[categoria];
+
+    $('ds-modelo').innerHTML = lista
+      .map(([v, nome]) => `
+        <option value="${esc(v)}">
+          ${esc(nome)}
+        </option>
+      `)
+      .join('');
+
+    $('ds-modelo').value = lista.some(
+      x => x[0] === escolhida
+    )
+      ? escolhida
+      : lista[0][0];
+
+    $('ds-modelo-bloco').hidden =
+      categoria === 'requerimento';
+  }
+
+  function usarModelo() {
+    const id = valor('ds-modelo');
+    const pais = id === 'comparecimento-responsavel';
+
+    estado.pais = pais;
+    estado.editado = false;
+
+    const original = $('doc-tipo');
+
+    original.value = pais
+      ? 'declaracao'
+      : id;
+
+    original.dispatchEvent(
+      new Event('change', { bubbles: true })
+    );
+
+    for (
+      const item of $('doc-tipo')
+        .closest('.docs-grid')
+        .children
+    ) {
+      if (
+        item.id === 'ds-categoria-bloco' ||
+        item.id === 'ds-modelo-bloco' ||
+        item.id === 'ds-pais-bloco'
+      ) {
+        continue;
+      }
+
+      item.style.display = pais
+        ? 'none'
+        : '';
+    }
+
+    $('ds-pais-bloco').hidden = !pais;
+
+    if (pais) {
+      $('ds-data').value = $('doc-data').value;
+
+      $('doc-word').textContent =
+        'Baixar Word (.doc)';
+
+      atualizarPais(true);
+
+      mensagem(
+        'Preencha o comparecimento e confira os horários.'
+      );
+    } else {
+      mensagem(
+        'Selecione o modelo e preencha os dados do documento.'
+      );
+    }
+  }
+
+  async function montarInterfaceSimplificada() {
+    if (!$('doc-tipo')) return;
+
+    const tipo = $('doc-tipo');
+    const grid = tipo.closest('.docs-grid');
+
+    if (!grid || estado.renderizado) return;
+
+    estado.renderizado = true;
+
+    const rotuloAntigo = tipo.parentElement;
+
+    rotuloAntigo.style.display = 'none';
+
+    const categoria = document.createElement('div');
+
+    categoria.className = 'docs-field full';
+    categoria.id = 'ds-categoria-bloco';
+
+    categoria.innerHTML = `
+      <label>O que deseja emitir?</label>
+
+      <select id="ds-categoria">
+        <option value="declaracao">Declaração</option>
+        <option value="requerimento">Requerimento</option>
+        <option value="memorando">Memorando</option>
+      </select>`;
+
+    grid.insertBefore(
+      categoria,
+      rotuloAntigo
+    );
+
+    const modelo = document.createElement('div');
+
+    modelo.className = 'docs-field full';
+    modelo.id = 'ds-modelo-bloco';
+
+    modelo.innerHTML = `
+      <label>Modelo</label>
+      <select id="ds-modelo"></select>`;
+
+    grid.insertBefore(
+      modelo,
+      rotuloAntigo
+    );
+
+    const holder = document.createElement('div');
+
+    holder.innerHTML = camposPais();
+
+    grid.insertBefore(
+      holder.firstElementChild,
+      rotuloAntigo
+    );
+
+    // Preserva os geradores originais para os demais documentos.
+    estado.impOriginal =
+      $('doc-imprimir').onclick;
+
+    estado.wordOriginal =
+      $('doc-word').onclick;
+
+    estado.atualizarOriginal =
+      $('doc-atualizar').onclick;
+
+    $('doc-imprimir').onclick = () =>
+      estado.pais
+        ? imprimirPais()
+        : estado.impOriginal();
+
+    $('doc-word').onclick = () =>
+      estado.pais
+        ? wordPais()
+        : estado.wordOriginal();
+
+    $('doc-atualizar').onclick = () =>
+      estado.pais
+        ? atualizarPais(true)
+        : estado.atualizarOriginal();
+
+    // Atualiza a prévia específica da declaração para pais.
+    $('doc-texto').addEventListener(
+      'input',
+      () => {
+        if (!estado.pais) return;
+
+        estado.editado = true;
+        mostrarPais();
+      }
+    );
+
+    for (
+      const id of [
+        'ds-nome',
+        'ds-estudante',
+        'ds-data',
+        'ds-motivo',
+        'ds-entrada',
+        'ds-saida',
+        'ds-assinante',
+        'ds-cargo'
+      ]
+    ) {
+      $(id).addEventListener(
+        'input',
+        () => atualizarPais()
+      );
+
+      $(id).addEventListener(
+        'change',
+        () => atualizarPais()
+      );
+    }
+
+    $('ds-categoria').addEventListener(
+      'change',
+      () => {
+        opcoesGrupo(valor('ds-categoria'));
+        usarModelo();
+      }
+    );
+
+    $('ds-modelo').addEventListener(
+      'change',
+      usarModelo
+    );
+
+    const descricao =
+      document.querySelector('.page-header p');
+
+    if (descricao) {
+      descricao.textContent =
+        'Declarações, requerimentos e memorandos — escolha a categoria e depois o modelo.';
+    }
+
+    opcoesGrupo(
+      'declaracao',
+      tipo.value
+    );
+
+    usarModelo();
+  }
+
+  DocumentosServidoresPage.init = async function () {
+    await originalInit();
+    await montarInterfaceSimplificada();
+  };
+
+})();
