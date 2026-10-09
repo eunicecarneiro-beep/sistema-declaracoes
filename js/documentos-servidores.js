@@ -1518,3 +1518,199 @@ Por ser verdade, firmamos a presente declaração.`;
   };
 
 })();
+
+/* ===============================================================
+   CORREÇÃO: REQUERIMENTO DENTRO DE DECLARAÇÕES
+   E CÁLCULO AUTOMÁTICO DOS DIAS DE LICENÇA/PRORROGAÇÃO
+   Cole no FINAL de js/documentos-servidores.js.
+================================================================ */
+(function corrigirCategoriasEPeriodo() {
+  const inicializarAnterior = DocumentosServidoresPage.init;
+
+  DocumentosServidoresPage.init = async function (...args) {
+    await inicializarAnterior.apply(this, args);
+
+    const categoria = document.getElementById('ds-categoria');
+    const modelo = document.getElementById('ds-modelo');
+    const tipo = document.getElementById('doc-tipo');
+    const inicio = document.getElementById('doc-inicio');
+    const fim = document.getElementById('doc-fim');
+    const prazo = document.getElementById('doc-prazo');
+    const blocoPrazo = document.getElementById('doc-prazo-bloco');
+
+    if (!categoria || !modelo || !tipo || !inicio || !fim || !prazo) {
+      console.warn('Documentos: campos esperados não encontrados.');
+      return;
+    }
+
+    // 1) Somente duas categorias principais.
+    for (const opcao of Array.from(categoria.options)) {
+      if (opcao.value === 'requerimento') opcao.remove();
+      if (opcao.value === 'declaracao') opcao.textContent = 'Declarações';
+      if (opcao.value === 'memorando') opcao.textContent = 'Memorandos';
+    }
+
+    function ajustarModelos() {
+      if (categoria.value === 'declaracao') {
+        if (!Array.from(modelo.options).some(o => o.value === 'requerimento')) {
+          modelo.add(new Option('Requerimento do servidor', 'requerimento'));
+        }
+      } else {
+        // O requerimento não deve aparecer nos modelos de memorando.
+        for (const opcao of Array.from(modelo.options)) {
+          if (opcao.value === 'requerimento') opcao.remove();
+        }
+      }
+    }
+
+    // O seletor original atualiza a lista primeiro.
+    // Depois adicionamos o requerimento em Declarações.
+    categoria.addEventListener('change', ajustarModelos);
+    ajustarModelos();
+
+    // Mantém o seletor antigo oculto.
+    const antigo = document.getElementById('doc-tipo');
+    const campoAntigo = antigo?.closest('.docs-field');
+
+    if (campoAntigo) {
+      campoAntigo.classList.add('ds-original-oculto-permanente');
+
+      if (!document.getElementById('ds-css-original-oculto-permanente')) {
+        const css = document.createElement('style');
+        css.id = 'ds-css-original-oculto-permanente';
+        css.textContent =
+          '.ds-original-oculto-permanente{display:none!important}';
+
+        document.head.appendChild(css);
+      }
+    }
+
+    const descricao = document.querySelector('.page-header p');
+
+    if (descricao) {
+      descricao.textContent =
+        'Escolha Declarações ou Memorandos e, em seguida, o modelo desejado.';
+    }
+
+    // 2) Contagem de dias corridos, incluindo início e fim.
+    let ultimoAutomatico = null;
+
+    const etiqueta = blocoPrazo?.querySelector('label');
+
+    const ajuda = document.createElement('small');
+    ajuda.style.cssText =
+      'display:block;margin-top:5px;color:#667085;font-size:12px';
+
+    ajuda.textContent =
+      'Selecione as duas datas para calcular automaticamente.';
+
+    blocoPrazo?.appendChild(ajuda);
+
+    function diaUTC(str) {
+      const partes = str.split('-').map(Number);
+
+      if (
+        partes.length !== 3 ||
+        partes.some(n => !Number.isFinite(n))
+      ) {
+        return NaN;
+      }
+
+      return Date.UTC(
+        partes[0],
+        partes[1] - 1,
+        partes[2]
+      );
+    }
+
+    function dispararMudanca() {
+      prazo.dispatchEvent(
+        new Event('input', { bubbles: true })
+      );
+    }
+
+    function atualizarPeriodo() {
+      const aplicavel = [
+        'substituicao',
+        'prorrogacao'
+      ].includes(tipo.value);
+
+      if (!aplicavel) return;
+
+      // Quando faltar alguma data, permite digitar manualmente.
+      if (!inicio.value || !fim.value) {
+        if (
+          ultimoAutomatico !== null &&
+          prazo.value === ultimoAutomatico
+        ) {
+          prazo.value = '';
+          dispararMudanca();
+        }
+
+        ultimoAutomatico = null;
+        prazo.readOnly = false;
+
+        if (etiqueta) {
+          etiqueta.textContent = 'Período em dias (opcional)';
+        }
+
+        ajuda.textContent =
+          'Selecione as duas datas para calcular automaticamente.';
+
+        return;
+      }
+
+      // Conta o dia inicial e o dia final.
+      const dias = Math.round(
+        (diaUTC(fim.value) - diaUTC(inicio.value)) / 86400000
+      ) + 1;
+
+      // Impede resultado negativo ou zero.
+      if (!Number.isFinite(dias) || dias <= 0) {
+        if (prazo.value === ultimoAutomatico) {
+          prazo.value = '';
+          dispararMudanca();
+        }
+
+        ultimoAutomatico = null;
+        prazo.readOnly = false;
+
+        ajuda.textContent =
+          'A data final deve ser igual ou posterior à inicial.';
+
+        ajuda.style.color = '#b42318';
+
+        return;
+      }
+
+      // Preenche automaticamente o período.
+      ultimoAutomatico = String(dias);
+
+      prazo.readOnly = true;
+      prazo.value = ultimoAutomatico;
+
+      if (etiqueta) {
+        etiqueta.textContent =
+          'Período em dias (automático)';
+      }
+
+      ajuda.style.color = '#067647';
+      ajuda.textContent =
+        `${dias} dia(s) corrido(s), contando início e fim.`;
+
+      // Atualiza o texto do memorando automaticamente.
+      dispararMudanca();
+    }
+
+    // Recalcula sempre que uma data for alterada.
+    for (const campo of [inicio, fim]) {
+      campo.addEventListener('input', atualizarPeriodo);
+      campo.addEventListener('change', atualizarPeriodo);
+    }
+
+    tipo.addEventListener('change', atualizarPeriodo);
+    modelo.addEventListener('change', atualizarPeriodo);
+
+    atualizarPeriodo();
+  };
+})();
