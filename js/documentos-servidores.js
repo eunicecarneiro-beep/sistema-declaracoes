@@ -11,7 +11,7 @@ const DocumentosServidoresPage = (() => {
   const BRASAO = "data:image/jpeg;base64,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";
   const MEMO_CSS = '\n/* Página em A4 com o mesmo arranjo da referência da Secretaria. */\n.memo-sheet{box-sizing:border-box;width:210mm;min-height:297mm;padding:38mm 13mm 17mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.22;position:relative}\n.memo-header{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt;line-height:1.15;margin:0}\n.memo-header td{border:1px solid #222;padding:1.5mm 1mm;vertical-align:middle}\n.memo-header .memo-top td{height:19mm}\n.memo-header .memo-title td{height:4.2mm;text-align:center;font-weight:700;padding:.8mm}\n.memo-header .memo-address td{height:15.4mm}\n.memo-logo{text-align:center}\n.memo-logo img{display:block;width:16mm;height:15.5mm;object-fit:contain;margin:0 auto}\n.memo-school{text-align:center;line-height:1.18}\n.memo-school div{margin:0}\n.memo-school strong{font-size:14pt;font-weight:700;line-height:1.25;display:block}\n.memo-control{text-align:center;vertical-align:top!important;line-height:1.3}\n.memo-control .memo-num{margin-top:5mm}\n.memo-from{vertical-align:middle!important}\n.memo-to{vertical-align:top!important}\n.memo-to .memo-sector{margin-top:5mm}\n.memo-subject{margin:5.2mm 2.5mm 0;font-size:11pt;font-weight:700;line-height:1.3}\n.memo-content{margin:14mm 2.5mm 0;min-height:108.6mm;line-height:1.2;font-size:11pt}\n.memo-content .memo-greeting{margin:0 0 5.2mm}\n.memo-content .memo-paragraph{margin:0 0 5.2mm;text-align:left;white-space:pre-line}\n.memo-content .memo-farewell{margin:5.5mm 0 0}\n.memo-signature{width:112mm;max-width:100%;margin:0 auto;text-align:center;font-size:11pt;line-height:1.6;break-inside:avoid;page-break-inside:avoid}\n.memo-signature .memo-signature-line{border-top:1px solid #111;padding-top:1.8mm}\n.memo-viewport{position:relative;overflow:hidden;width:100%;background:#fff}\n.memo-viewport .memo-sheet{transform-origin:left top;box-shadow:none}\n@media print{\n  @page{size:A4;margin:0}\n  html,body{margin:0!important;padding:0!important;background:#fff!important}\n  .memo-viewport{overflow:visible!important;width:auto!important;height:auto!important}\n  .memo-viewport .memo-sheet{transform:none!important}\n  .memo-sheet{break-after:auto;page-break-after:auto;box-shadow:none!important}\n}\n';
   function ehMemo() {
-    return ['prorrogacao','substituicao','contratacao','memorando'].includes(valor('doc-tipo'));
+    return valor('doc-tipo') !== 'declaracao' && valor('doc-tipo') !== 'requerimento';
   }
   function ensureMemoStyle() {
     if (document.getElementById('estilo-memorando-oficial')) return;
@@ -94,8 +94,55 @@ const DocumentosServidoresPage = (() => {
     ['prorrogacao', 'Memorando — prorrogação de contrato'],
     ['substituicao', 'Memorando — substituição por licença (LTS)'],
     ['contratacao', 'Memorando — contratação / reposição de vaga'],
-    ['memorando', 'Memorando administrativo geral']
+    ['calendario', 'Memorando — alteração de calendário escolar'],
+    ['zeladoria', 'Memorando — solicitação de zeladoria'],
+    ['transporte', 'Memorando — transporte para visita escolar'],
+    ['estagio', 'Memorando — análise de estágio de servidor(a)'],
+    ['avanco', 'Memorando — parecer sobre avanço de nível'],
+    ['memorando', 'Memorando personalizado (livre)']
   ];
+
+  // Destinatários retirados de memorandos reais. Confirme os nomes atuais antes do envio.
+  const ENDERECAMENTO = {
+    prorrogacao: ['Polyana Ferreira Da Silva', 'Coordenadoria de Gestão Pessoal'],
+    substituicao: ['Polyana Ferreira Da Silva', 'Coordenadoria de Gestão Pessoal'],
+    contratacao: ['Polyana Ferreira Da Silva', 'Coordenadoria de Gestão Pessoal'],
+    calendario: ['Domingas Darc Mendes', 'Inspeção Escolar – Secretaria Municipal de Educação'],
+    zeladoria: ['Girlene Miranda de Melo', 'Coordenadoria de Gerência Administrativa'],
+    transporte: ['Soraya Figueiredo', 'Coordenadoria de Infraestrutura, Transporte e Logística'],
+    estagio: ['Nilza Pereira Dias', 'Coordenadoria de Avaliação e Capacitação de Servidores'],
+    avanco: ['Ana Cristina Fonseca de Vasconcelos', 'Coordenadora de Educação Inclusiva – Analistas / SME'],
+    memorando: ['', '']
+  };
+
+  const EXTRA_CAMPOS = [
+    ['doc-qtd', 'Quantidade de profissionais solicitados', 'zeladoria', 'number', 'Ex.: 2'],
+    ['doc-alunos-num', 'Quantidade de estudantes', 'transporte', 'number', 'Ex.: 40'],
+    ['doc-anos', 'Turmas ou anos escolares', 'transporte', 'text', 'Ex.: 1º e 2º anos'],
+    ['doc-turno', 'Turno', 'transporte', 'text', 'Ex.: matutino'],
+    ['doc-local', 'Local de destino', 'transporte', 'text', 'Ex.: Parque de Exposições'],
+    ['doc-hora-inicio', 'Início da visita', 'transporte', 'time', ''],
+    ['doc-hora-fim', 'Fim da visita', 'transporte', 'time', ''],
+    ['doc-saida', 'Horário de embarque', 'transporte', 'time', ''],
+    ['doc-retorno', 'Horário do retorno', 'transporte', 'time', ''],
+    ['doc-instituicao', 'Instituição / local do estágio (opcional)', 'estagio', 'text', ''],
+    ['doc-horario', 'Compatibilidade de horários (confirme)', 'estagio', 'text', 'Ex.: Fora da jornada de trabalho'],
+    ['doc-estudante', 'Nome do(a) estudante', 'avanco', 'text', 'Digite apenas se necessário'],
+    ['doc-turma-aluno', 'Turma / ano escolar', 'avanco', 'text', 'Ex.: 2º ano C'],
+    ['doc-anexos', 'Documentos anexos', 'avanco', 'text', 'Ex.: relatório pedagógico e requerimento']
+  ];
+
+  function definirDestinatario(tipo) {
+    if (!ENDERECAMENTO[tipo]) return;
+    $('doc-para').value = 'Charles Gutemberg Alencar Soares';
+    $('doc-ac').value = ENDERECAMENTO[tipo][0];
+    $('doc-setor').value = ENDERECAMENTO[tipo][1];
+  }
+
+  function periodoVisita() {
+    const ini = valor('doc-hora-inicio'), fim = valor('doc-hora-fim');
+    return ini && fim ? `das ${ini} às ${fim}` : (ini ? `a partir de ${ini}` : 'em horário a informar');
+  }
 
   function valor(id) { return limpa($(id)?.value); }
   function dt(valorData) {
@@ -163,8 +210,39 @@ const DocumentosServidoresPage = (() => {
         return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para exercer a função de ${cargoVaga}, em substituição ao(à) servidor(a) ${n}, matrícula nº ${mat}, que se encontra afastado(a) por licença para tratamento de saúde (LTS), conforme documentação administrativa a ser conferida.\n\nO afastamento informado tem início em ${inicio}${valor('doc-fim') ? `, com término previsto para ${fim}` : ''}${valor('doc-prazo') ? `, pelo período de ${valor('doc-prazo')} dias` : ''}.\n\n${outro ? `Caso seja cabível, indicamos para análise a continuidade ou contratação do(a) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, sem prejuízo dos procedimentos legais de contratação.\n\n` : ''}A substituição se faz necessária para ${just}.\n\nSolicitamos as providências administrativas cabíveis, a fim de assegurar a continuidade do atendimento aos estudantes e das atividades pedagógicas.`;
       case 'contratacao':
         return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para o cargo/função de ${cargoVaga}, tendo em vista a necessidade de reposição de pessoal nesta unidade escolar.\n\n${f ? `A necessidade decorre da situação funcional do(a) servidor(a) ${n}, matrícula nº ${mat}.` : 'A vaga e a situação funcional que motivam o pedido deverão ser confirmadas nos registros da unidade escolar.'} ${valor('doc-inicio') ? `A data informada para a ocorrência é ${inicio}.` : ''}\n\nJustificativa: ${just}.\n\nDiante da necessidade de manter a continuidade das atividades e o atendimento aos alunos, solicitamos a análise e autorização das providências de contratação cabíveis.`;
+      case 'calendario': {
+        const anterior = pad(dt(valor('doc-inicio')), 'DATA ORIGINAL');
+        const proposta = pad(dt(valor('doc-fim')), 'DATA PROPOSTA');
+        return `Solicitamos autorização para alterar a data do sábado letivo originalmente previsto para ${anterior}, propondo sua realização em ${proposta}.\n\nA solicitação fundamenta-se em: ${just}. Ressaltamos que a alteração deverá respeitar o calendário escolar aprovado, os dias letivos e a carga horária anual obrigatória.\n\nCertos da atenção e da análise dessa Coordenadoria, aguardamos manifestação quanto à alteração solicitada.`;
+      }
+      case 'zeladoria': {
+        const qtd = pad(valor('doc-qtd'), 'QUANTIDADE DE SERVIDORES');
+        const adicional = valor('doc-pedido');
+        return `Vimos, respeitosamente, solicitar a disponibilização de ${qtd} profissional(is) de servente de zeladoria para atender às necessidades desta unidade escolar.${adicional ? ` Solicitamos também ${adicional}.` : ''}\n\nJustificamos o pedido em razão de ${just}. A medida se faz necessária para assegurar a higienização adequada dos ambientes e a continuidade dos serviços de apoio escolar.\n\nSolicitamos a análise da demanda e a adoção das providências administrativas cabíveis.`;
+      }
+      case 'transporte': {
+        const q = pad(valor('doc-alunos-num'), 'NÚMERO DE ESTUDANTES');
+        const turmas = pad(valor('doc-anos'), 'TURMAS / ANOS');
+        const destino = pad(valor('doc-local'), 'DESTINO');
+        const dia = pad(dt(valor('doc-inicio')), 'DATA DA VISITA');
+        const turno = pad(valor('doc-turno'), 'TURNO');
+        const embarque = pad(valor('doc-saida'), 'HORÁRIO DE EMBARQUE');
+        const retorno = pad(valor('doc-retorno'), 'HORÁRIO DO RETORNO');
+        return `Vimos, por meio deste, solicitar a disponibilização de transporte escolar para ${q} estudante(s) das turmas ${turmas}, no dia ${dia}, no turno ${turno}, com destino a ${destino}, para realização de atividade pedagógica extraclasse.\n\nA visita está prevista para o período ${periodoVisita()}. Solicitamos embarque na escola a partir de ${embarque} e retorno previsto a partir de ${retorno}.\n\nA atividade tem por finalidade ${just}. Agradecemos a atenção e aguardamos a análise da solicitação.`;
+      }
+      case 'estagio': {
+        const instituicao = valor('doc-instituicao');
+        const horario = valor('doc-horario');
+        return `Vimos, por meio deste, solicitar análise e parecer dessa Coordenadoria quanto à possibilidade de o(a) servidor(a) ${n}, matrícula nº ${mat}, ocupante da função de ${cg}, realizar estágio supervisionado${instituicao ? ` na instituição ${instituicao}` : ''}.\n\n${horario ? `Informações apresentadas sobre a compatibilidade dos horários: ${horario}. ` : ''}Justificativa e demais esclarecimentos: ${just}.\n\nSolicitamos orientação sobre os requisitos e procedimentos aplicáveis, antes de qualquer autorização pela unidade escolar. Colocamo-nos à disposição para encaminhar os documentos complementares necessários.`;
+      }
+      case 'avanco': {
+        const aluno = pad(valor('doc-estudante'), 'NOME DO(A) ESTUDANTE');
+        const turma = pad(valor('doc-turma-aluno'), 'ANO / TURMA');
+        const anexos = valor('doc-anexos');
+        return `Vimos, por meio deste, solicitar análise e parecer da Coordenadoria de Educação Inclusiva acerca do pedido de avaliação para possível avanço de nível do(a) estudante ${aluno}, matriculado(a) no(a) ${turma}.\n\nContextualização apresentada pela unidade escolar: ${just}. O encaminhamento não pressupõe o deferimento do avanço, ficando sujeito à avaliação técnica e aos procedimentos pertinentes.\n\n${anexos ? `Encaminhamos em anexo: ${anexos}. ` : ''}Solicitamos orientação e parecer quanto às providências educacionais cabíveis.`;
+      }
       case 'memorando':
-        return `Cumprimentando-os cordialmente, encaminhamos, para conhecimento e providências, a seguinte solicitação: ${pad(valor('doc-pedido'), 'DESCRIÇÃO DA SOLICITAÇÃO')}.\n\n${just}\n\nDiante do exposto, solicitamos a análise da demanda e as providências administrativas cabíveis.`;
+        return `${pad(valor('doc-pedido'), 'DESCRIÇÃO DA SOLICITAÇÃO')}\n\n${just}\n\nDiante do exposto, solicitamos a análise e as providências administrativas cabíveis.`;
       default:
         return '';
     }
@@ -172,52 +250,83 @@ const DocumentosServidoresPage = (() => {
 
   function camposDinamicos() {
     const tipo = valor('doc-tipo');
-    const pr = $('doc-principal-legenda');
-    const sec = $('doc-secundario-bloco');
-    const inicio = $('doc-inicio-bloco');
-    const fim = $('doc-fim-bloco');
-    const prazo = $('doc-prazo-bloco');
-    const cargo = $('doc-cargo-bloco');
-    const pedido = $('doc-pedido-bloco');
-    const numero = $('doc-numero-bloco');
-    const justificativa = $('doc-motivo-legenda');
     const dicas = {
-      declaracao:'Selecione o servidor e informe a finalidade. Confira os dados funcionais antes de assinar.',
-      requerimento:'Documento em primeira pessoa, assinado pelo próprio servidor.',
-      prorrogacao:'Modelo no formato oficial enviado: indique a pessoa contratada e, quando couber, a professora afastada, início e prazo da LTS.',
-      substituicao:'Selecione primeiro o servidor afastado por LTS. O segundo servidor é opcional.',
-      contratacao:'Se houver servidor desligado, selecione-o. Informe o cargo solicitado e o motivo da vaga.',
-      memorando:'Memorando livre, com assunto, pedido e justificativa editáveis.'
+      declaracao: 'Declaração funcional. Confirme os registros antes da assinatura.',
+      requerimento: 'Requerimento em primeira pessoa, assinado pelo próprio servidor.',
+      prorrogacao: 'Prorrogação de contrato: confirme o término, o período solicitado e eventual LTS.',
+      substituicao: 'Contratação de substituto em LTS. Verifique o afastamento e a função.',
+      contratacao: 'Solicitação de contratação por vacância ou necessidade de pessoal.',
+      calendario: 'Modelo do Memorando 13: alteração de sábado letivo, sujeita à autorização.',
+      zeladoria: 'Modelo do Memorando 12: solicitação de serventes de zeladoria.',
+      transporte: 'Modelo do Memorando 16: transporte para visita pedagógica.',
+      estagio: 'Modelo do Memorando 7: pedido de parecer sobre estágio supervisionado.',
+      avanco: 'Modelo do Memorando 25: solicitação de análise e parecer sobre possível avanço de nível. Dados de estudantes não são salvos.',
+      memorando: 'Modelo personalizado: escolha destinatário, assunto, pedido e justificativa; todo o texto pode ser editado.'
     };
     $('doc-dica').textContent = dicas[tipo] || '';
-    pr.textContent = tipo === 'substituicao' ? 'Servidor afastado (LTS)' :
-      tipo === 'requerimento' ? 'Servidor requerente' :
-      tipo === 'contratacao' ? 'Servidor desligado / que gerou a vaga (opcional)' : 'Servidor interessado';
-    sec.hidden = !['substituicao','prorrogacao'].includes(tipo);
+    const semServidor = ['calendario','zeladoria','transporte','avanco','memorando'].includes(tipo);
+    $('doc-principal-bloco').hidden = semServidor;
+    $('doc-principal-legenda').textContent = ({
+      substituicao: 'Servidor afastado por LTS',
+      requerimento: 'Servidor requerente',
+      contratacao: 'Servidor desligado / vaga (opcional)',
+      estagio: 'Servidor solicitante de estágio'
+    })[tipo] || 'Servidor interessado';
+    $('doc-secundario-bloco').hidden = !['substituicao','prorrogacao'].includes(tipo);
+    $('doc-secundario-legenda').textContent = tipo === 'prorrogacao'
+      ? 'Servidor titular afastado por LTS (opcional)'
+      : 'Profissional sugerido para substituição (opcional)';
     $('doc-destino-simples').hidden = ehMemo();
     $('doc-memorando-cabecalho').hidden = !ehMemo();
-    inicio.hidden = !['prorrogacao','substituicao','contratacao'].includes(tipo);
-    fim.hidden = !['prorrogacao','substituicao'].includes(tipo);
-    prazo.hidden = !['substituicao','prorrogacao'].includes(tipo);
-    cargo.hidden = !['substituicao','contratacao'].includes(tipo);
-    pedido.hidden = !['memorando','requerimento'].includes(tipo);
-    numero.hidden = !['prorrogacao','substituicao','contratacao','memorando'].includes(tipo);
-    justificativa.textContent = tipo === 'declaracao' ? 'Finalidade ou observação da declaração' :
-      tipo === 'requerimento' ? 'Fundamentação / justificativa' : 'Justificativa da solicitação';
-    $('doc-inicio-legenda').textContent = tipo === 'prorrogacao' ? 'Início da LTS ou término do contrato' :
-      tipo === 'substituicao' ? 'Início da licença (LTS)' : 'Data da vacância / rescisão';
-    $('doc-fim-legenda').textContent = tipo === 'prorrogacao' ? 'Prorrogar até (opcional se houver LTS)' : 'Fim previsto da licença';
-    $('doc-secundario-legenda').textContent = tipo === 'prorrogacao' ? 'Servidor(a) titular afastado(a) por LTS (opcional)' : 'Profissional sugerido / substituto (opcional)';
+    $('doc-inicio-bloco').hidden = !['prorrogacao','substituicao','contratacao','calendario','transporte'].includes(tipo);
+    $('doc-fim-bloco').hidden = !['prorrogacao','substituicao','calendario'].includes(tipo);
+    $('doc-prazo-bloco').hidden = !['substituicao','prorrogacao'].includes(tipo);
+    $('doc-cargo-bloco').hidden = !['substituicao','contratacao'].includes(tipo);
+    $('doc-pedido-bloco').hidden = !['memorando','requerimento','zeladoria'].includes(tipo);
+    $('doc-numero-bloco').hidden = !ehMemo();
+    $('doc-motivo-legenda').textContent = ({
+      declaracao: 'Finalidade da declaração',
+      requerimento: 'Fundamentação do requerimento',
+      calendario: 'Motivo da alteração do calendário',
+      zeladoria: 'Necessidades de limpeza e manutenção',
+      transporte: 'Objetivo pedagógico da visita',
+      estagio: 'Contexto e justificativa do pedido de estágio',
+      avanco: 'Contextualização pedagógica (evite detalhes médicos sensíveis)',
+      memorando: 'Justificativa / fundamentação'
+    })[tipo] || 'Justificativa da solicitação';
+    $('doc-inicio-legenda').textContent = ({
+      prorrogacao: 'Início da LTS ou término do contrato',
+      substituicao: 'Início da licença (LTS)',
+      contratacao: 'Data da vacância / rescisão',
+      calendario: 'Data original do sábado letivo',
+      transporte: 'Data da visita'
+    })[tipo] || 'Data inicial';
+    $('doc-fim-legenda').textContent = ({
+      prorrogacao: 'Prorrogar até (se definido)',
+      substituicao: 'Fim previsto da licença',
+      calendario: 'Nova data proposta'
+    })[tipo] || 'Data final';
+    $('doc-pedido-legenda').textContent = tipo === 'zeladoria'
+      ? 'Solicitação adicional (opcional; ex.: ampliação de carga horária)'
+      : 'Pedido / objeto do documento';
+    for (const [id,,fieldTipo] of EXTRA_CAMPOS) {
+      $(id + '-bloco').hidden = fieldTipo !== tipo;
+    }
   }
 
   function assuntoPadrao(tipo) {
     return {
       declaracao:'Declaração funcional',
       requerimento:'Requerimento administrativo',
-      prorrogacao:'Solicitação de prorrogação contratual',
-      substituicao:'Solicitação de contratação para substituição durante licença para tratamento de saúde',
+      prorrogacao:'Solicitação de prorrogação de contrato',
+      substituicao:'Solicitação de contratação para substituição por LTS',
       contratacao:'Solicitação de contratação de servidor(a)',
-      memorando:'Assunto do memorando'
+      calendario:'Solicitação de alteração de data de sábado letivo no calendário escolar',
+      zeladoria:'Solicitação de serventes de zeladoria',
+      transporte:'Solicitação de transporte para estudantes',
+      estagio:'Solicitação de parecer sobre estágio supervisionado',
+      avanco:'Solicitação de análise e parecer sobre avanço de nível',
+      memorando:''
     }[tipo] || '';
   }
 
@@ -278,7 +387,7 @@ const DocumentosServidoresPage = (() => {
   }
   function temPendencias() {
     const tipo = valor('doc-tipo');
-    const requerServidor = ['declaracao','requerimento','prorrogacao','substituicao'].includes(tipo);
+    const requerServidor = ['declaracao','requerimento','prorrogacao','substituicao','estagio'].includes(tipo);
     const avisos = [];
     if (requerServidor && !servidor('doc-principal')) avisos.push('Selecione um servidor válido na lista.');
     if (!valor('doc-data')) avisos.push('Informe a data do documento.');
@@ -286,10 +395,18 @@ const DocumentosServidoresPage = (() => {
     if (tipo === 'substituicao' && !valor('doc-inicio')) avisos.push('Informe o início da licença.');
     if (['substituicao','contratacao'].includes(tipo) && !valor('doc-cargo')) avisos.push('Informe o cargo a contratar.');
     if (['memorando','requerimento'].includes(tipo) && !valor('doc-pedido')) avisos.push('Informe o pedido do documento.');
-    if (['memorando','requerimento','prorrogacao','substituicao','contratacao'].includes(tipo) && !valor('doc-motivo')) avisos.push('Informe a justificativa.');
+    if (['memorando','requerimento','prorrogacao','substituicao','contratacao','calendario','zeladoria','transporte','estagio','avanco'].includes(tipo) && !valor('doc-motivo')) avisos.push('Informe a justificativa.');
     if (tipo !== 'requerimento' && (!valor('doc-assinante') || !valor('doc-cargo-assinante'))) avisos.push('Confira os dados do assinante.');
     if (/\[INFORMAR [^\]]+\]/i.test(valor('doc-texto'))) avisos.push('O texto ainda contém campos [INFORMAR ...].');
     if (!valor('doc-texto')) avisos.push('O texto está vazio.');
+    if (tipo === 'calendario' && (!valor('doc-inicio') || !valor('doc-fim'))) avisos.push('Informe data original e nova data proposta.');
+    if (tipo === 'zeladoria' && (!valor('doc-qtd') || Number(valor('doc-qtd')) < 1)) avisos.push('Informe o número de profissionais solicitados.');
+    if (tipo === 'transporte') {
+      for (const [id,rot] of [['doc-alunos-num','Quantidade de estudantes'],['doc-anos','Turmas'],['doc-inicio','Data da visita'],['doc-turno','Turno'],['doc-local','Destino'],['doc-saida','Embarque'],['doc-retorno','Retorno']]) {
+        if (!valor(id)) avisos.push('Preencha: ' + rot + '.');
+      }
+    }
+    if (tipo === 'avanco' && (!valor('doc-estudante') || !valor('doc-turma-aluno'))) avisos.push('Informe estudante e turma para solicitar o parecer.');
     if (ehMemo()) {
       for(const [id,rot] of [['doc-numero','Número do memorando'],['doc-para','Para'],['doc-ac','A/C'],['doc-setor','Coordenadoria/Setor'],['doc-assunto','Assunto'],['doc-saudacao','Saudação'],['doc-despedida','Despedida']]) {
         if(!valor(id)) avisos.push('Preencha: '+rot+'.');
@@ -563,7 +680,7 @@ const DocumentosServidoresPage = (() => {
 
   function interface() {
     return `<div class="page-header"><div><h2>Documentos de Servidores</h2>
-      <p>Emita declarações, requerimentos e memorandos com os dados do cadastro da escola.</p></div>
+      <p>Modelos para a Secretaria: pessoal, calendário, zeladoria, transporte, estágio, inclusão e memorando livre.</p></div>
       <span class="docs-badge">Conferir antes de assinar</span></div>
     <div class="docs-layout">
       <section class="docs-panel"><h3>1. Preencher o documento</h3>
@@ -571,7 +688,7 @@ const DocumentosServidoresPage = (() => {
           <div class="docs-field full"><label>Tipo de documento</label>
             <select id="doc-tipo">${tipos.map(([v,n])=>`<option value="${v}">${esc(n)}</option>`).join('')}</select></div>
           <div class="docs-field full"><div class="docs-typehint" id="doc-dica"></div></div>
-          <div class="docs-field full"><label id="doc-principal-legenda">Servidor interessado</label>
+          <div class="docs-field full" id="doc-principal-bloco"><label id="doc-principal-legenda">Servidor interessado</label>
             <input list="doc-funcionarios" id="doc-principal" autocomplete="off" placeholder="Digite o nome ou matrícula e selecione uma opção"></div>
           <div class="docs-field full" id="doc-secundario-bloco" hidden><label id="doc-secundario-legenda">Profissional sugerido / substituto (opcional)</label>
             <input list="doc-funcionarios" id="doc-secundario" autocomplete="off" placeholder="Pesquise pelo nome ou matrícula"></div>
@@ -602,10 +719,16 @@ const DocumentosServidoresPage = (() => {
             <input id="doc-fim" type="date"></div>
           <div class="docs-field" id="doc-prazo-bloco" hidden><label>Período em dias (opcional)</label>
             <input id="doc-prazo" type="number" min="1" placeholder="Ex.: 60"></div>
-          <div class="docs-field full" id="doc-pedido-bloco" hidden><label>Pedido / objeto do requerimento</label>
+          <div class="docs-field full" id="doc-pedido-bloco" hidden><label id="doc-pedido-legenda">Pedido / objeto do requerimento</label>
             <textarea id="doc-pedido" placeholder="Descreva objetivamente o que está sendo solicitado."></textarea></div>
           <div class="docs-field full"><label id="doc-motivo-legenda">Justificativa / observações</label>
             <textarea id="doc-motivo" placeholder="Ex.: assegurar a continuidade das atividades pedagógicas e do atendimento aos alunos."></textarea></div>
+          ${EXTRA_CAMPOS.map(([id,label,kind,inputType,placeholder])=>`
+            <div class="docs-field ${['doc-local','doc-instituicao','doc-horario','doc-estudante','doc-anexos'].includes(id)?'full':''}" id="${id}-bloco" hidden>
+              <label>${esc(label)}</label>
+              <input id="${id}" type="${inputType}" ${inputType==='number'?'min="1"':''} placeholder="${esc(placeholder)}">
+            </div>
+          `).join('')}
           <div class="docs-field"><label>Nome do assinante</label>
             <input id="doc-assinante" value="Anderson Santos Silva"></div>
           <div class="docs-field"><label>Cargo do assinante</label>
@@ -655,6 +778,7 @@ const DocumentosServidoresPage = (() => {
     atualizarModelo(true);
     $('doc-tipo').addEventListener('change', () => {
       $('doc-assunto').value = assuntoPadrao(valor('doc-tipo'));
+      definirDestinatario(valor('doc-tipo'));
       S.textoEditado = false;
       camposDinamicos();
       atualizarModelo(true);
@@ -662,6 +786,10 @@ const DocumentosServidoresPage = (() => {
     for (const id of ['doc-principal','doc-secundario','doc-data','doc-numero','doc-destino','doc-assunto',
       'doc-cargo','doc-inicio','doc-fim','doc-prazo','doc-pedido','doc-motivo','doc-assinante','doc-cargo-assinante',
       'doc-para','doc-ac','doc-setor','doc-saudacao','doc-despedida']) {
+      $(id).addEventListener('input', () => atualizarModelo(false));
+      $(id).addEventListener('change', () => atualizarModelo(false));
+    }
+    for (const [id] of EXTRA_CAMPOS) {
       $(id).addEventListener('input', () => atualizarModelo(false));
       $(id).addEventListener('change', () => atualizarModelo(false));
     }
