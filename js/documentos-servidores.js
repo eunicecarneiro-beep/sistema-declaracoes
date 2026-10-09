@@ -2196,3 +2196,235 @@ Por ser verdade, firmamos a presente declaração.`;
     await aplicarNoFormulario();
   };
 })();
+
+/* ============================================================
+   CARGO AUTOMÁTICO PELO CADASTRO DE FUNCIONÁRIOS
+
+   Busca os dados na MESMA tabela utilizada pela página
+   Funcionários, por meio de App.getAll("funcionarios").
+
+   Ao selecionar o servidor afastado por LTS:
+   - Identifica nome e matrícula.
+   - Consulta o cargo/função já cadastrado.
+   - Preenche automaticamente o cargo a contratar.
+   - Atualiza o texto e a prévia do memorando.
+
+   Não altera nem grava dados do servidor.
+============================================================ */
+
+(function integrarCargoAoCadastro() {
+
+  const iniciarAnterior = DocumentosServidoresPage.init;
+
+  DocumentosServidoresPage.init = async function (...args) {
+
+    await iniciarAnterior.apply(this, args);
+
+    const campoServidor = document.getElementById(
+      "doc-principal"
+    );
+
+    const campoCargo = document.getElementById(
+      "doc-cargo"
+    );
+
+    const campoTipo = document.getElementById(
+      "doc-tipo"
+    );
+
+    const campoModelo = document.getElementById(
+      "ds-modelo"
+    );
+
+    if (!campoServidor || !campoCargo || !campoTipo) {
+      return;
+    }
+
+    // Carrega os mesmos funcionários da página Funcionários.
+
+    let funcionarios = [];
+
+    try {
+      funcionarios = await App.getAll("funcionarios");
+    } catch (erro) {
+      console.error(
+        "Erro ao consultar o cadastro de funcionários:",
+        erro
+      );
+
+      return;
+    }
+
+    function normalizar(valor) {
+      return String(valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase()
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function obterCargo(funcionario) {
+      return String(
+        funcionario?.cargo ||
+        funcionario?.cargo_funcao ||
+        ""
+      ).trim();
+    }
+
+    function localizarServidor() {
+
+      const selecionado = normalizar(
+        campoServidor.value
+      );
+
+      if (!selecionado) return null;
+
+      // Mesmo formato utilizado pela lista de servidores.
+      // Exemplo: NOME COMPLETO — Matrícula 123456
+
+      const encontrados = funcionarios.filter(
+        funcionario => {
+
+          const nome = normalizar(
+            funcionario.nome
+          );
+
+          const matricula = String(
+            funcionario.matricula || ""
+          ).trim();
+
+          const opcao = normalizar(
+            funcionario.nome +
+            (
+              matricula
+                ? " — Matrícula " + matricula
+                : ""
+            )
+          );
+
+          return (
+            selecionado === opcao ||
+            selecionado === nome ||
+            (
+              matricula &&
+              selecionado === normalizar(matricula)
+            )
+          );
+        }
+      );
+
+      // Não preenche automaticamente se houver
+      // dois servidores com identificação ambígua.
+
+      return encontrados.length === 1
+        ? encontrados[0]
+        : null;
+    }
+
+    function preencherCargo() {
+
+      const tipoAtual = campoTipo.value;
+
+      if (
+        tipoAtual !== "substituicao" &&
+        tipoAtual !== "contratacao"
+      ) {
+        return;
+      }
+
+      const funcionario = localizarServidor();
+
+      if (!funcionario) return;
+
+      const cargo = obterCargo(funcionario);
+
+      if (!cargo) return;
+
+      // Usa o cargo exatamente como está cadastrado.
+
+      if (campoCargo.value !== cargo) {
+
+        campoCargo.value = cargo;
+
+        // Atualiza a prévia e o memorando.
+
+        campoCargo.dispatchEvent(
+          new Event("input", {
+            bubbles: true
+          })
+        );
+
+        campoCargo.dispatchEvent(
+          new Event("change", {
+            bubbles: true
+          })
+        );
+      }
+    }
+
+    // Informa que o campo será preenchido automaticamente.
+
+    campoCargo.placeholder =
+      "Preenchido pelo cadastro do servidor";
+
+    const blocoCargo = document.getElementById(
+      "doc-cargo-bloco"
+    );
+
+    if (
+      blocoCargo &&
+      !document.getElementById("ds-ajuda-cargo")
+    ) {
+
+      const ajuda = document.createElement("small");
+
+      ajuda.id = "ds-ajuda-cargo";
+
+      ajuda.style.cssText = `
+        display:block;
+        margin-top:5px;
+        color:#667085;
+        font-size:12px;
+      `;
+
+      ajuda.textContent =
+        "Cargo preenchido automaticamente conforme o cadastro de Funcionários. Pode ser editado.";
+
+      blocoCargo.appendChild(ajuda);
+    }
+
+    // Preenche ao selecionar um servidor.
+
+    campoServidor.addEventListener(
+      "change",
+      preencherCargo
+    );
+
+    campoServidor.addEventListener(
+      "input",
+      preencherCargo
+    );
+
+    campoServidor.addEventListener(
+      "blur",
+      preencherCargo
+    );
+
+    // Preenche também ao trocar de modelo.
+
+    campoTipo.addEventListener(
+      "change",
+      preencherCargo
+    );
+
+    campoModelo?.addEventListener(
+      "change",
+      preencherCargo
+    );
+
+    preencherCargo();
+
+  };
+
+})();
