@@ -5,7 +5,7 @@
   Revise antes de imprimir, assinar ou protocolar.
 ==================================================================== */
 const DocumentosServidoresPage = (() => {
-  const S = { funcionarios: [], textoEditado: false, paginaPronta: false };
+  const S = { funcionarios: [], textoEditado: false, paginaPronta: false, aplicandoIA: false };
   const $ = id => document.getElementById(id);
 
   const BRASAO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCABCAEYDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKzbrxHpVnNJDPqNrHNGjSPE0y71VRliRnPAqZSUdW7DSb2POPFPxZv7PVdZ0mG3OnXlnAXjaRMq8gcFV3sNuJIzxxkH1ryzRPjJP4s13xFpk2t2t7c6V59pfafBLI8lnLcRbow2do2j5WGM4AIBznPPfGD9pL4a6lr6+INI8ValdzRWjWVzo8GnTMJism6OWPzNiK4zIhJYBlYZ+4ufmDXP2ptU07WdSvvCPwjtI7zUGRrvUdZ1ZEmuiq7UMiW+3OF4AMjYHf19D+zcc9VRlb/C/8jy/7UwC0deH/AIEv8z6o8A/GP+2fiTrukjVmv7zwteWv9q2y2zxBnMRMQRy5DYX5Txxgjnqd3wX8bdTuPF974bg16yubnS2ii1FI5y72CTv5iySI64LFd2MMxA4wOM/D8H7XHxUiuXkk+G/hBkY5YRXN1G5+ri5OfxB/x734cftMaautXd3r3w9uPCGoam0ZvtW0m6hv47hlXajSqTHKdoJAILkDse5/ZuO/58T/APAX/kN5rl//AEEQ/wDAo/5n6J/Dv4iSeOp7+P7A9vHaMQ8zgpyXPlrtI5OwAkg4yPcV29fP37Onxn+H99bJ4X0zxbLrWvXDz6hNJdWk1uhLPny4y6hQsalI1GckLnkk17lpevabriF9Pv7a9AAY+RKrkA9MgHiuSpCdCfsqy5Zdno/uO2jWp4iHtKMlKPdO6+9F+iiioNTyb49+OL/wvY6fYabfC0uL/wAwybF/eCJcAsrZyvLL0HryO/zpJBJFDa3TmMJdPlFDEysm5l8wjGApZWAy2TjOMHn6R+OPw9u/GNtpt5p8sEVxYiUvG8RMlwpUYjVweOQcAg5J7cmuU8D+CPDeu2Gi6P4hsBd67Z+ZEYra6fb9n3vJGJtjbSAr4xk9QOQefksbga2MxU09rLlbvZbX+Z7OHxEKFKLW99e/kfm4llLq2vCzhZBNc3RiQySBF3M+BlicAZPX/J9Y1P4L2rfD3SxZS2Z8TG7l+0XJ1Bfs8sahsKjE7T0XAHOd+ehryXXFRda1MRqERbqUKqjAUeY2AB24/wA+vQar8RLnU/B1toclhZqkUkhaZYEAKkLtCLjCMuG+Ycnefx/cuIsDnuKq4F5RXVOMJpz06KMvi96PNHX4P5rO9k2v52ynE5ZRjilj6TlJxaj63W2j5X/e7XXrieG/D1z4m1H7HazWttIInlMl7cLFGqqMklicf5/P0n4p/Cuy0TS9Pv8AQjDDHbabHJfrcXa+bLIWALohbLHLDO3jkY9/KbWf7NPHMojlaNgwjnQSIxHZlPBHsf8A9fSeNPH0/jOLT4ZrO2txa26Rs4QF2kAO5w2MqG3AlRxwPx1zbBZ7XzvBYjBV1HDQ5ueNtHfT3lzLm0+HT3XrqZ4DEZZTy3E0sTTvWlblf46O2luvdaG78Cm2eLr07d+NPlbyxyWwyHA/z/8AX+ktM1DUPCt7Y6nYXiwzsrvDcWrMVypAdGDKM43LkEEEMCM15T+xL4b0rxX8V9U0/V7NL2A6LM6IzsjI4lhwyOp3BsZHHqR06/SviXwhZ+LdV0fTfB/2W20q0jkhl8ydmmt55DukaVXO84Eajv36Ac/m/HGAqVM0niIavlja173T+61tz9a4JxEY5VGlLbmlftY968BeIP8AhKfB2lao0yzyXEIaRkUKN44YYBOMEEdT0op/gfQj4Z8I6TpjSpPJbW6o80cXlrI2OW25OMnJ6nrRWFJSVOKnvZX9T3J25ny7GpfeYLSVoQpnVS0e7ON2OOgJ/SvnXTviNrHw98UyS+K7G5i00WzCOztLVEwgcbWSMNk4w3cnrjJ6+7eN/Eh8I+FtQ1ZYDcvbICsY6EkhRn2BOT7A18e3+sXus3X2i/vJ7uUEtvmkLkc5IGTwM9v8n5zOMY8NKHs2+Za26fPuepgqPtVLmWm3n8j5R0zw3deN/Fl5aaYwkSSeWYzgkokXmEh+ucEEY9cj8fVn+Ecc1gbTyiqAYXA5U/3hz1/z9fYfhZ4c+Fvw50mT7b4ws4tdvSZb77UsivGSSywgAEBVB9TknPoK7j/hKfhX/wBDxpf/AJE/+J96/Rc1zqWYVKcsPK0I2cemvf8Ay8vU/Psly3B5ZSqQxcoupO6km1ov5f8APz9D4iT4S+IG8Qyac9s6wR4ZrzBEbRk8FTnk+3Y9ffr7n4PJPaCBFaN1Hyyg5IPqeea+rJfE3wrcDHjfSww6Z8z/AOJ/z/OMeIvhaRkeN9KHsfM/+J/z/PHF55jsXKnLn5eTtpr3fr93432wOVZNgoVIJxnz78zTsuy/z3vr0Vvnv9lO9/4VH8YdRm8Q2c246RNHBFGAxlLTQ8pk4K4DE5IwAe+Afqv4PTeI9d8SR6tdWguNKkaTZeTQqSmS3yq4O4YBK8gjBIyOp848Yah4Sv4bM+G9XtNZnRyJXtlb9wpXgEkD7xHQf3fzvfCzxxf+GPFdgsTXF1ZTuLZ7JZGYHewGVXdjcDg9OefWvjc6zyeOzSEq3uqKSfK935+XkfT5NlNLA5fKGHlzJttN9vXuu59a0UUV7ZJSuUsNcsrizlMN5bTI0UsW4MGU8EHH1rxPxL+z1bmW4ufD9686iTabEspZB3XzGPb/AGgT9e/X+PtFm1R5Hs/Csv2n/n/SVFY++1WO7/gXNfN3j7RfjF4d8RXGpeFpVtYXt0jhs75WT98N5Lh9uDuJRcbx2PAB3fkmc8Ryo4z6rXwfNBf8vLzivS8qdr9dG4/3j6bB4K9L2lOrZvpo/wApX/C/kU/iL8EdYvrFZ4dEvbXXxM0dvAkbSLeRhirJuBwroVypbAdSf9nd4NcQzWdzLbzxyQXMRKPDMpR42HUMp5B9j/8Ar+jdZ/aW+Lvwvkhh1nwPe6xBFBE1zcRpwr+Qry44YkB969eML1zk1J/2o/ht8V47qbxt4Hjtr2wspryZ7tTBOsMSxFyrod55lAUdyjY6c+jgeJ8BGilVU4pd4qTXqoOT9LxTt0Pks34Xq42s69BpSe+rSfnrb8Gz54LnsSf8/wCf89dnwp4O1rxpfSW2i2FxfSQoZJ2hjZ1gjHVnI7e3U9gT19huPHf7O3hqWykufD0lzLdBHhilv7qYbXMoVivTaTDJyewBPBGep0f9sXTofD9zF8PfAmLCxvBaywRQ+SqEwvL5ioozJlYiOBkkqO9d9TinKoU3Pnlb/BNeW8opb+Z4uH4OxjmvbtJeTTb/AK9Cz4T+A+owRRWmmabdGxki8xdRusQPMwIVpSjZ27jnbGeQgB653e1+BfgpofhHU1uri5Oq6pCVkhEhCiD/AGggPJyTyfwANfN1/wDFz9oH4gxTXGneHT4a0UIQ1zcgIVy+BJ94fKFIJUrnII7jPY/DTwr46bw7arr8dxrGsEyNcX1rC0MUwaQsqjIXgLgdO3fv8bieKaWFqxq4fByrSk+/vddUoKatdd7rot7fplHLZey9i6ipxirbael210Pqdr62RtrXESvjO0uAaK5rwfZrptoUHhiXSpCAWYSRyF/qxbd+Bor9XweLqYmhGtNcrfS0tP8AwJQl98V6HzlWnGnNxTvb0/RtfidZRRRXrHOMlhjnQpKiyJ/dcZFebfETw1o8kgDaVYsGX5gbdDnkdePeiivyDjz+HE+iyj4meIaB4B8MLr02PDmkjcZM4sYufuf7NfSHgjw/pdlpUJt9Ns4CEUAxQIuOPYUUV8Tw9/v0fX/I9fG/wmdXRRRX9KnwwUUUUAf/2Q==";
@@ -92,7 +92,7 @@ const DocumentosServidoresPage = (() => {
     ['declaracao', 'Declaração funcional do servidor'],
     ['requerimento', 'Requerimento do servidor'],
     ['prorrogacao', 'Memorando — prorrogação de contrato'],
-    ['substituicao', 'Memorando — substituição por licença (LTS)'],
+    ['substituicao', 'Memorando — substituição por afastamento'],
     ['contratacao', 'Memorando — contratação / reposição de vaga'],
     ['calendario', 'Memorando — alteração de calendário escolar'],
     ['zeladoria', 'Memorando — solicitação de zeladoria'],
@@ -161,7 +161,9 @@ const DocumentosServidoresPage = (() => {
   function servidor(campo) {
     const digitado = valor(campo);
     if (!digitado) return null;
-    const matches = S.funcionarios.filter(f => rotulo(f) === digitado);
+    const matches = S.funcionarios.filter(f => normaliza(rotulo(f)) === normaliza(digitado)
+      || normaliza(f.nome) === normaliza(digitado)
+      || (f.matricula && String(f.matricula) === digitado));
     return matches.length === 1 ? matches[0] : null;
   }
   function nome(f, rot = 'NOME DO SERVIDOR') { return pad(f?.nome, rot); }
@@ -203,13 +205,15 @@ const DocumentosServidoresPage = (() => {
         return `Declaramos, para os devidos fins, que ${n}, matrícula nº ${mat}, ${pad(cg, 'CARGO/FUNÇÃO')}, possui registro funcional nesta unidade escolar, E.M. Prof.ª Eunice Carneiro, conforme os dados constantes do cadastro da escola.${f?.vinculo ? ` O vínculo informado no cadastro é: ${f.vinculo}.` : ''}${f?.dataAdmissao ? ` A data de admissão registrada é ${dt(f.dataAdmissao) || f.dataAdmissao}.` : ''}\n\n${obs || 'A presente declaração é expedida a pedido do(a) interessado(a), para os fins que se fizerem necessários.'}\n\nPor ser expressão das informações registradas, firmamos a presente declaração, sujeita à conferência dos documentos funcionais.`;
       case 'requerimento':
         return `Eu, ${n}, matrícula nº ${mat}, ocupante do cargo/função de ${cg}, venho, respeitosamente, requerer o seguinte: ${pad(valor('doc-pedido'), 'OBJETO DO REQUERIMENTO')}.\n\n${just}\n\nDiante do exposto, solicito a análise do pedido e as providências administrativas cabíveis.\n\nNestes termos, peço deferimento.`;
-      case 'prorrogacao':
-        if (outro) return `Vimos, por meio deste, solicitar a prorrogação do contrato do(a) servidor(a) ${n}, matrícula nº ${mat}, ${cg}, que atua em substituição ao(à) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, afastado(a) em Licença para Tratamento de Saúde (LTS).\n\nConforme documentação do afastamento a ser conferida, ${nome(outro)} encontra-se em LTS${valor('doc-prazo') ? ` pelo período de ${valor('doc-prazo')} dias` : ''}${valor('doc-inicio') ? `, a partir de ${inicio}` : ''}.\n\nDiante da continuidade do afastamento, solicitamos a prorrogação do contrato de ${n}${valor('doc-fim') ? ` até ${fim}` : ' durante o período de substituição'}, a fim de ${just}.`;
-        return `Vimos, por meio deste, solicitar a prorrogação do contrato do(a) servidor(a) ${n}, matrícula nº ${mat}, ${cg}, que atua nesta unidade escolar.\n\nO término contratual informado está previsto para ${inicio}, e solicita-se a análise da prorrogação até ${fim}.\n\nA solicitação fundamenta-se na necessidade de ${just}, a fim de assegurar a continuidade das atividades da unidade escolar.`;
+      case 'prorrogacao': {
+        const titular = outro ? `, que atua em substituição ao(à) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, ${contextoAfastamentoIA()}` : ', que atua nesta unidade escolar';
+        const periodo = `A prorrogação é solicitada a partir de ${inicio}${valor('doc-fim') ? `, até ${fim}` : ''}${valor('doc-prazo') ? `, pelo período de ${valor('doc-prazo')} dias corridos` : ''}.`;
+        return `Vimos, por meio deste, solicitar a prorrogação do contrato do(a) servidor(a) ${n}, matrícula nº ${mat}, ${cg}${titular}.\n\n${periodo}\n\nA solicitação fundamenta-se na necessidade de ${just}. Solicitamos a análise e as providências administrativas cabíveis para a continuidade do contrato no período indicado.`;
+      }
       case 'substituicao':
-        return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para exercer a função de ${cargoVaga}, em substituição ao(à) servidor(a) ${n}, matrícula nº ${mat}, que se encontra afastado(a) por licença para tratamento de saúde (LTS), conforme documentação administrativa a ser conferida.\n\nO afastamento informado tem início em ${inicio}${valor('doc-fim') ? `, com término previsto para ${fim}` : ''}${valor('doc-prazo') ? `, pelo período de ${valor('doc-prazo')} dias` : ''}.\n\n${outro ? `Caso seja cabível, indicamos para análise a continuidade ou contratação do(a) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, sem prejuízo dos procedimentos legais de contratação.\n\n` : ''}A substituição se faz necessária para ${just}.\n\nSolicitamos as providências administrativas cabíveis, a fim de assegurar a continuidade do atendimento aos estudantes e das atividades pedagógicas.`;
+        return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para exercer a função de ${cargoVaga}, em substituição ao(à) servidor(a) ${n}, matrícula nº ${mat}, que se encontra ${contextoAfastamentoIA()}, conforme informações apresentadas à unidade escolar.\n\nO período de afastamento informado tem início em ${inicio}${valor('doc-fim') ? `, com término previsto para ${fim}` : ''}${valor('doc-prazo') ? `, pelo período de ${valor('doc-prazo')} dias` : ''}.\n\n${outro ? `Caso seja cabível, indicamos para análise a continuidade ou contratação do(a) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, sem prejuízo dos procedimentos legais de contratação.\n\n` : ''}A substituição se faz necessária para ${just}.\n\nSolicitamos as providências administrativas cabíveis, a fim de assegurar a continuidade do atendimento aos estudantes e das atividades pedagógicas.`;
       case 'contratacao':
-        return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para o cargo/função de ${cargoVaga}, tendo em vista a necessidade de reposição de pessoal nesta unidade escolar.\n\n${f ? `A necessidade decorre da situação funcional do(a) servidor(a) ${n}, matrícula nº ${mat}.` : 'A vaga e a situação funcional que motivam o pedido deverão ser confirmadas nos registros da unidade escolar.'} ${valor('doc-inicio') ? `A data informada para a ocorrência é ${inicio}.` : ''}\n\nJustificativa: ${just}.\n\nDiante da necessidade de manter a continuidade das atividades e o atendimento aos alunos, solicitamos a análise e autorização das providências de contratação cabíveis.`;
+        return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para o cargo/função de ${cargoVaga}, tendo em vista a necessidade de reposição de pessoal nesta unidade escolar.\n\n${f ? `A necessidade decorre da situação funcional do(a) servidor(a) ${n}, matrícula nº ${mat}${valor('doc-afastamento') ? `, referente a ${valor('doc-afastamento')}` : ''}.` : 'A vaga e a situação funcional que motivam o pedido deverão ser confirmadas nos registros da unidade escolar.'} ${valor('doc-inicio') ? `A data informada para a ocorrência é ${inicio}.` : ''}\n\nJustificativa: ${just}.\n\nDiante da necessidade de manter a continuidade das atividades e o atendimento aos alunos, solicitamos a análise e autorização das providências de contratação cabíveis.`;
       case 'calendario': {
         const anterior = pad(dt(valor('doc-inicio')), 'DATA ORIGINAL');
         const proposta = pad(dt(valor('doc-fim')), 'DATA PROPOSTA');
@@ -254,7 +258,7 @@ const DocumentosServidoresPage = (() => {
       declaracao: 'Declaração funcional. Confirme os registros antes da assinatura.',
       requerimento: 'Requerimento em primeira pessoa, assinado pelo próprio servidor.',
       prorrogacao: 'Prorrogação de contrato: confirme o término, o período solicitado e eventual LTS.',
-      substituicao: 'Contratação de substituto em LTS. Verifique o afastamento e a função.',
+      substituicao: 'Contratação de substituto durante afastamento. Informe o motivo real e a função.',
       contratacao: 'Solicitação de contratação por vacância ou necessidade de pessoal.',
       calendario: 'Modelo do Memorando 13: alteração de sábado letivo, sujeita à autorização.',
       zeladoria: 'Modelo do Memorando 12: solicitação de serventes de zeladoria.',
@@ -267,14 +271,14 @@ const DocumentosServidoresPage = (() => {
     const semServidor = ['calendario','zeladoria','transporte','avanco','memorando'].includes(tipo);
     $('doc-principal-bloco').hidden = semServidor;
     $('doc-principal-legenda').textContent = ({
-      substituicao: 'Servidor afastado por LTS',
+      substituicao: 'Servidor titular afastado',
       requerimento: 'Servidor requerente',
       contratacao: 'Servidor desligado / vaga (opcional)',
       estagio: 'Servidor solicitante de estágio'
     })[tipo] || 'Servidor interessado';
     $('doc-secundario-bloco').hidden = !['substituicao','prorrogacao'].includes(tipo);
     $('doc-secundario-legenda').textContent = tipo === 'prorrogacao'
-      ? 'Servidor titular afastado por LTS (opcional)'
+      ? 'Servidor titular afastado (opcional)'
       : 'Profissional sugerido para substituição (opcional)';
     $('doc-destino-simples').hidden = ehMemo();
     $('doc-memorando-cabecalho').hidden = !ehMemo();
@@ -295,8 +299,8 @@ const DocumentosServidoresPage = (() => {
       memorando: 'Justificativa / fundamentação'
     })[tipo] || 'Justificativa da solicitação';
     $('doc-inicio-legenda').textContent = ({
-      prorrogacao: 'Início da LTS ou término do contrato',
-      substituicao: 'Início da licença (LTS)',
+      prorrogacao: 'Início do período solicitado',
+      substituicao: 'Início do afastamento',
       contratacao: 'Data da vacância / rescisão',
       calendario: 'Data original do sábado letivo',
       transporte: 'Data da visita'
@@ -319,7 +323,7 @@ const DocumentosServidoresPage = (() => {
       declaracao:'Declaração funcional',
       requerimento:'Requerimento administrativo',
       prorrogacao:'Solicitação de prorrogação de contrato',
-      substituicao:'Solicitação de contratação para substituição por LTS',
+      substituicao:'Solicitação de contratação para substituição',
       contratacao:'Solicitação de contratação de servidor(a)',
       calendario:'Solicitação de alteração de data de sábado letivo no calendário escolar',
       zeladoria:'Solicitação de serventes de zeladoria',
@@ -331,6 +335,7 @@ const DocumentosServidoresPage = (() => {
   }
 
   function atualizarModelo(force = false) {
+    if (S.aplicandoIA) return;
     if (force || !S.textoEditado) {
       $('doc-texto').value = modeloTexto();
       S.textoEditado = false;
@@ -392,7 +397,7 @@ const DocumentosServidoresPage = (() => {
     if (requerServidor && !servidor('doc-principal')) avisos.push('Selecione um servidor válido na lista.');
     if (!valor('doc-data')) avisos.push('Informe a data do documento.');
     if (tipo === 'prorrogacao' && (!valor('doc-inicio') || (!valor('doc-fim') && !servidor('doc-secundario')))) avisos.push('Informe data inicial e data final ou selecione a pessoa afastada para prorrogação por LTS.');
-    if (tipo === 'substituicao' && !valor('doc-inicio')) avisos.push('Informe o início da licença.');
+    if (tipo === 'substituicao' && !valor('doc-inicio')) avisos.push('Informe o início do afastamento.');
     if (['substituicao','contratacao'].includes(tipo) && !valor('doc-cargo')) avisos.push('Informe o cargo a contratar.');
     if (['memorando','requerimento'].includes(tipo) && !valor('doc-pedido')) avisos.push('Informe o pedido do documento.');
     if (['memorando','requerimento','prorrogacao','substituicao','contratacao','calendario','zeladoria','transporte','estagio','avanco'].includes(tipo) && !valor('doc-motivo')) avisos.push('Informe a justificativa.');
@@ -412,7 +417,7 @@ const DocumentosServidoresPage = (() => {
         if(!valor(id)) avisos.push('Preencha: '+rot+'.');
       }
     }
-    return avisos;
+    return [...new Set([...avisos,...validacoesInteligentesIA()])];
   }
   function situacao(txt, classe = '') {
     $('doc-status').textContent = txt;
@@ -683,7 +688,7 @@ const DocumentosServidoresPage = (() => {
       <p>Modelos para a Secretaria: pessoal, calendário, zeladoria, transporte, estágio, inclusão e memorando livre.</p></div>
       <span class="docs-badge">Conferir antes de assinar</span></div>
     <div class="docs-layout">
-      <section class="docs-panel"><h3>1. Preencher o documento</h3>
+      <section class="docs-panel">${interfaceAssistente()}<h3>1. Preencher o documento</h3>
         <div class="docs-grid">
           <div class="docs-field full"><label>Tipo de documento</label>
             <select id="doc-tipo">${tipos.map(([v,n])=>`<option value="${v}">${esc(n)}</option>`).join('')}</select></div>
@@ -694,7 +699,7 @@ const DocumentosServidoresPage = (() => {
             <input list="doc-funcionarios" id="doc-secundario" autocomplete="off" placeholder="Pesquise pelo nome ou matrícula"></div>
           <datalist id="doc-funcionarios">${S.funcionarios.map(f=>`<option value="${esc(rotulo(f))}"></option>`).join('')}</datalist>
           <div class="docs-field"><label>Data do documento</label><input id="doc-data" type="date" value="${dataLocal()}"></div>
-          <div class="docs-field" id="doc-numero-bloco"><label>Número do memorando (opcional)</label>
+          <div class="docs-field" id="doc-numero-bloco"><label>Número do memorando *</label>
             <input id="doc-numero" placeholder="Ex.: 025"></div>
           <div class="docs-field full" id="doc-destino-simples"><label>Destinatário / A/C</label>
             <input id="doc-destino" value="Inspeção Escolar"></div>
@@ -719,6 +724,9 @@ const DocumentosServidoresPage = (() => {
             <input id="doc-fim" type="date"></div>
           <div class="docs-field" id="doc-prazo-bloco" hidden><label>Período em dias (opcional)</label>
             <input id="doc-prazo" type="number" min="1" placeholder="Ex.: 60"></div>
+          <div class="docs-field full" id="doc-afastamento-bloco" hidden><label for="doc-afastamento">Motivo do afastamento / situação da vaga</label>
+            <input id="doc-afastamento" list="doc-afastamentos" placeholder="Ex.: LTS, readaptação funcional, licença-maternidade ou rescisão">
+            <datalist id="doc-afastamentos"><option value="Licença para Tratamento de Saúde (LTS)"><option value="readaptação funcional"><option value="licença-maternidade"><option value="licença-prêmio"><option value="férias"><option value="rescisão de contrato"><option value="exoneração"><option value="aposentadoria"></datalist></div>
           <div class="docs-field full" id="doc-pedido-bloco" hidden><label id="doc-pedido-legenda">Pedido / objeto do requerimento</label>
             <textarea id="doc-pedido" placeholder="Descreva objetivamente o que está sendo solicitado."></textarea></div>
           <div class="docs-field full"><label id="doc-motivo-legenda">Justificativa / observações</label>
@@ -756,6 +764,523 @@ const DocumentosServidoresPage = (() => {
     </div>`;
   }
 
+  /* Assistente de redação. O layout e o exportador oficial ficam fora da IA. */
+  const IA_CAMPOS = ['doc-numero','doc-data','doc-assunto','doc-cargo','doc-inicio','doc-fim',
+    'doc-prazo','doc-afastamento','doc-pedido','doc-motivo','doc-para','doc-ac','doc-setor',
+    'doc-saudacao','doc-despedida','doc-qtd','doc-alunos-num','doc-anos','doc-turno','doc-local',
+    'doc-hora-inicio','doc-hora-fim','doc-saida','doc-retorno','doc-instituicao','doc-horario',
+    'doc-estudante','doc-turma-aluno','doc-anexos','ds-nome','ds-estudante','ds-data',
+    'ds-entrada','ds-saida'];
+  const IA_FORM = [...IA_CAMPOS,'doc-principal','doc-secundario','doc-assinante',
+    'doc-cargo-assinante','doc-destino','ds-motivo','ds-assinante','ds-cargo','doc-texto'];
+  const IA = { pedido: '', historico: [], controller: null, ocupado: false, sequencia: 0,
+    planoPendente: null, ultimoGerado: null, escrevendo: false, alteracoes: false };
+  const IA_DIA = 86400000;
+
+  function interfaceAssistente() {
+    return `<section class="docs-ai" aria-labelledby="ia-titulo">
+      <style>
+      .docs-ai{background:#f3f7ff;border:1px solid #cbdcfa;border-radius:12px;padding:16px;margin-bottom:22px;color:#172033}
+      .docs-ai h3{margin:0 0 7px!important}.docs-ai p{font-size:13px;line-height:1.5;margin:6px 0 12px}
+      .docs-ai textarea{min-height:120px!important}.docs-ai .docs-actions{margin-top:10px}
+      .docs-ai button{white-space:normal}.docs-ai small{display:block;margin-top:6px;line-height:1.5}
+      .docs-ai-status{white-space:pre-line;font-size:13px;line-height:1.5;margin-top:12px}
+      .docs-ai-status.error{color:#b42318}.docs-ai-status.warn{color:#92400e}
+      .docs-ai-questoes{display:grid;gap:7px;margin-top:10px}.docs-ai-questoes button{text-align:left;padding:9px;border:1px solid #b9cbed;background:white;border-radius:7px;color:#174582;cursor:pointer}
+      .docs-ai details{margin-top:10px;font-size:12px}.docs-ai summary{cursor:pointer}
+      .docs-ai [hidden]{display:none!important}@media print{.docs-ai{display:none!important}}
+      </style>
+      <h3 id="ia-titulo">Assistente de documentos</h3>
+      <p>Descreva o que precisa. A assistente escolhe o modelo, aproveita o cadastro e prepara o texto para sua conferência.</p>
+      <div class="docs-field"><label for="ia-pedido">Seu pedido ou complemento</label>
+        <textarea id="ia-pedido" maxlength="12000" placeholder="Ex.: Prorrogue o contrato de [nome], em substituição a [nome] em readaptação, a partir de 20/10/2026 por 30 dias. Justificativa: manter o atendimento aos alunos."></textarea></div>
+      <div class="docs-actions">
+        <button type="button" id="ia-gerar" class="btn btn-primary">Preparar documento</button>
+        <button type="button" id="ia-complementar" class="btn btn-secondary">Complementar pedido</button>
+        <button type="button" id="ia-cancelar" class="btn btn-secondary" hidden>Cancelar</button>
+      </div>
+      <details><summary>Referência e modo de redação</summary>
+        <div class="docs-field" style="margin-top:10px"><label for="ia-referencia">Informações ou texto de referência (opcional)</label>
+          <textarea id="ia-referencia" maxlength="16000" placeholder="Cole os fatos, o parecer ou um texto anterior que deva orientar a redação."></textarea></div>
+        <div class="docs-field"><label for="ia-modo">Modo</label><select id="ia-modo">
+          <option value="auto">Automático — usa IA conectada quando disponível</option>
+          <option value="local">Local — modelos e preenchimento assistido</option>
+          <option value="online">IA conectada — redação livre</option></select></div>
+        <small>O modo local funciona sem serviço de IA. A redação livre depende da integração ativada no servidor. Somente os dados necessários ao pedido são enviados à IA conectada.</small>
+      </details>
+      <div class="docs-actions" aria-label="Ajustar redação">
+        <button type="button" id="ia-melhorar" class="btn btn-secondary">Melhorar texto</button>
+        <button type="button" id="ia-resumir" class="btn btn-secondary">Mais sucinto</button>
+        <button type="button" id="ia-formalizar" class="btn btn-secondary">Mais formal</button>
+        <button type="button" id="ia-verificar" class="btn btn-secondary">Verificar dados</button>
+        <button type="button" id="ia-desfazer" class="btn btn-secondary" disabled>Desfazer</button>
+        <button type="button" id="ia-novo" class="btn btn-secondary">Novo pedido</button>
+      </div>
+      <div id="ia-status" class="docs-ai-status" role="status" aria-live="polite">Pronta para ajudar. O formato oficial do documento será mantido.</div>
+      <div id="ia-questoes" class="docs-ai-questoes"></div>
+      <button type="button" id="ia-aplicar" class="btn btn-secondary" hidden style="margin-top:10px">Aplicar sugestão recebida</button>
+    </section>`;
+  }
+
+  function dataValidaIA(x) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(x || '')) return false;
+    const t = Date.parse(x + 'T12:00:00Z');
+    return Number.isFinite(t) && new Date(t).toISOString().slice(0,10) === x;
+  }
+  function deslocarDiaIA(x, n) {
+    return dataValidaIA(x) ? new Date(Date.parse(x+'T12:00:00Z')+n*IA_DIA).toISOString().slice(0,10) : '';
+  }
+  function datasNoPedidoIA(texto) {
+    const ano = (valor('doc-data') || dataLocal()).slice(0,4);
+    const s = normaliza(texto), encontrados = [];
+    const meses = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const rx = /\b(\d{4})-(\d{2})-(\d{2})\b|\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{4}|\d{2}))?\b|\b(\d{1,2})\s+de\s+(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+(\d{4}))?\b|\b(hoje|amanha|ontem)\b/g;
+    let m;
+    while ((m = rx.exec(s))) {
+      let iso, inferido = false;
+      if (m[1]) iso = `${m[1]}-${m[2]}-${m[3]}`;
+      else if (m[4]) {
+        const a = m[6] ? (m[6].length === 2 ? '20'+m[6] : m[6]) : ano;
+        iso = `${a}-${m[5].padStart(2,'0')}-${m[4].padStart(2,'0')}`; inferido = !m[6];
+      } else if (m[7]) {
+        iso = `${m[9] || ano}-${String(meses.indexOf(m[8])+1).padStart(2,'0')}-${m[7].padStart(2,'0')}`; inferido = !m[9];
+      } else iso = deslocarDiaIA(dataLocal(),m[10] === 'amanha' ? 1 : m[10] === 'ontem' ? -1 : 0);
+      encontrados.push({valor:iso, valido:dataValidaIA(iso), inicio:m.index,
+        contexto:s.slice(Math.max(0,m.index-55),m.index), inferido});
+    }
+    return encontrados;
+  }
+  function cargoIA(f) { return limpa(f?.cargo || f?.cargo_funcao || f?.funcao); }
+  function rotuloCampoIA(id) {
+    const e = $(id), bloco = e?.closest('.docs-field');
+    return limpa(bloco?.querySelector('label')?.textContent) || id;
+  }
+  function tipoAtualIA() { return valor('ds-modelo') === 'comparecimento-responsavel' ? 'comparecimento-responsavel' : valor('doc-tipo'); }
+  function escolherTipoIA(tipo) {
+    const pais = tipo === 'comparecimento-responsavel';
+    const categoria = ['declaracao','requerimento'].includes(tipo) || pais ? 'declaracao' : 'memorando';
+    if ($('ds-categoria') && $('ds-modelo')) {
+      if (valor('ds-categoria') !== categoria) {
+        $('ds-categoria').value = categoria;
+        $('ds-categoria').dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      if (valor('ds-modelo') !== tipo) {
+        $('ds-modelo').value = tipo;
+        $('ds-modelo').dispatchEvent(new Event('change',{bubbles:true}));
+      }
+    } else if (valor('doc-tipo') !== tipo) {
+      $('doc-tipo').value = tipo;
+      $('doc-tipo').dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
+  function capturarIA() {
+    return {tipo:tipoAtualIA(), campos:Object.fromEntries(IA_FORM.filter(id=>$(id)).map(id=>[id,valor(id)]))};
+  }
+  function escreverTextoIA(texto) {
+    IA.escrevendo = true;
+    try {
+      $('doc-texto').value = texto;
+      S.textoEditado = true;
+      $('doc-texto').dispatchEvent(new Event('input',{bubbles:true}));
+    } finally { IA.escrevendo = false; }
+    $('doc-edicao').textContent = 'Texto preparado pela assistente. Confira os dados; você pode editar livremente.';
+  }
+  function informarIA(texto, classe = '') {
+    if (!$('ia-status')) return;
+    $('ia-status').textContent = texto;
+    $('ia-status').className = 'docs-ai-status ' + classe;
+  }
+  function registrarHistoricoIA() {
+    IA.historico.push(capturarIA());
+    if (IA.historico.length > 6) IA.historico.shift();
+    $('ia-desfazer').disabled = !IA.historico.length;
+  }
+  function mostrarPerguntasIA(perguntas = []) {
+    const area = $('ia-questoes'); area.replaceChildren();
+    const unicas = [...new Map(perguntas.map(p=>[p.campo+'|'+p.pergunta,p])).values()];
+    for (const p of unicas.slice(0,12)) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = p.pergunta;
+      b.onclick = () => {
+        const e = $(p.campo); if (!e) return;
+        e.closest('.docs-field')?.scrollIntoView({block:'center',behavior:'smooth'});
+        e.focus();
+      };
+      area.appendChild(b);
+    }
+  }
+  function pendenciasIA() {
+    let lista;
+    if (tipoAtualIA() === 'comparecimento-responsavel') {
+      lista = [];
+      for (const id of ['ds-nome','ds-data','ds-entrada','ds-saida','ds-assinante','ds-cargo'])
+        if (!valor(id)) lista.push(`Preencha: ${rotuloCampoIA(id)}.`);
+      if (valor('ds-entrada') && valor('ds-saida') && valor('ds-saida') < valor('ds-entrada')) lista.push('A saída do comparecimento deve ser posterior à entrada.');
+    } else lista = temPendencias();
+    return [...new Set([...lista,...validacoesInteligentesIA()])];
+  }
+  function validacoesInteligentesIA() {
+    const p = [], tipo = valor('doc-tipo');
+    for (const id of ['doc-data', ...(['prorrogacao','substituicao','contratacao','calendario','transporte'].includes(tipo) ? ['doc-inicio','doc-fim'] : [])])
+      if (valor(id) && !dataValidaIA(valor(id))) p.push(`Data inválida: ${rotuloCampoIA(id)}.`);
+    if (['prorrogacao','substituicao'].includes(tipo) && valor('doc-inicio') && valor('doc-fim') && valor('doc-fim') < valor('doc-inicio')) p.push('A data final deve ser igual ou posterior à inicial.');
+    if (['prorrogacao','substituicao'].includes(tipo) && valor('doc-prazo') && (!Number.isInteger(Number(valor('doc-prazo'))) || Number(valor('doc-prazo')) < 1 || Number(valor('doc-prazo')) > 3650)) p.push('O período deve ser inteiro, de 1 a 3650 dias.');
+    if (servidor('doc-principal') && servidor('doc-secundario') && servidor('doc-principal') === servidor('doc-secundario') && ['prorrogacao','substituicao'].includes(tipo)) p.push('O titular e o substituto precisam ser pessoas diferentes.');
+    if ((tipo === 'substituicao' || (tipo === 'prorrogacao' && servidor('doc-secundario'))) && !valor('doc-afastamento')) p.push('Preencha: Motivo do afastamento / situação da vaga.');
+    if (tipo === 'transporte' && valor('doc-saida') && valor('doc-retorno') && valor('doc-retorno') <= valor('doc-saida')) p.push('O retorno deve ser posterior ao embarque.');
+    if (/\[(?:INFORMAR|NOME|DATA|ENTRADA|SA[IÍ]DA|MATR[IÍ]CULA)[^\]]*\]|\{\{[^}]+\}\}/i.test(valor('doc-texto'))) p.push('O texto ainda contém informações a preencher.');
+    if (IA.ultimoGerado && valor('doc-texto') === IA.ultimoGerado.campos['doc-texto']) {
+      for (const id of ['doc-principal','doc-secundario','doc-inicio','doc-fim','doc-prazo','doc-afastamento','doc-cargo'])
+        if (valor(id) !== IA.ultimoGerado.campos[id]) { p.push('Os dados mudaram depois da redação. Prepare o texto novamente ou atualize-o manualmente.'); break; }
+    }
+    return p;
+  }
+
+  function candidatosIA(texto) {
+    const s = ' '+normaliza(texto).replace(/[^a-z0-9]+/g,' ')+' ';
+    const stop = new Set(['de','da','do','dos','das','e']);
+    return S.funcionarios.map(f=>{
+      const ns = normaliza(f.nome), tokens = ns.split(' ').filter(t=>!stop.has(t));
+      const full = s.includes(' '+ns+' '), mat = String(f.matricula).replace(/\D/g,'');
+      const porMat = mat.length >= 4 && s.includes(' '+mat+' ');
+      const presentes = tokens.filter(t=>s.includes(' '+t+' '));
+      const score = porMat ? 120 : full ? 110 : presentes.length >= 2 ? 70+presentes.length : presentes.length === 1 && presentes[0] === tokens[0] ? 30 : 0;
+      const fragmento = full ? ns : presentes.join(' ');
+      return {f,score,pos:fragmento ? normaliza(texto).indexOf(fragmento) : -1};
+    }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+  }
+  function detectarTipoIA(texto, atual) {
+    const s = normaliza(texto);
+    if (/comparecimento|compareceu|declaracao.*(?:pai|mae|responsavel)/.test(s)) return 'comparecimento-responsavel';
+    if (/prorrog|renov.*contrat|estend.*contrat/.test(s)) return 'prorrogacao';
+    if (/onibus|transporte|visita (?:pedagogica|escolar)|passeio/.test(s)) return 'transporte';
+    if (/sabado letivo|calendario escolar|alter.*data.*letiv/.test(s)) return 'calendario';
+    if (/zeladoria|servente|profissiona[il].*limpeza/.test(s)) return 'zeladoria';
+    if (/estagio|estagiari/.test(s)) return 'estagio';
+    if (/avanco de nivel|avanco.*(?:aluno|estudante)|progressao.*estudante/.test(s)) return 'avanco';
+    if (/substitui|substituto/.test(s) && /lts|licenca|readapt|afast/.test(s)) return 'substituicao';
+    if (/contrat|reposicao|vacancia|rescisao|exoneracao/.test(s)) return 'contratacao';
+    if (/requerimento|eu.*requeiro/.test(s)) return 'requerimento';
+    if (/declaracao.*(?:funcional|servidor)|declarar.*vinculo/.test(s)) return 'declaracao';
+    if (/memorando|solicit|providenc|manutenc|material|reparo/.test(s)) return 'memorando';
+    return atual || 'memorando';
+  }
+  function interpretarLocalIA(texto, preservar) {
+    const s = normaliza(texto), tipo = detectarTipoIA(texto,preservar ? tipoAtualIA() : 'memorando');
+    const plano = {tipo, campos:{}, principal_id:'',secundario_id:'',paragrafos:[],perguntas:[],avisos:[],resumo:'Documento preparado pelos modelos locais.'};
+    const campo = plano.campos;
+    const ult = rx => [...texto.matchAll(rx)].at(-1);
+    const num = ult(/memorando\s*(?:n[ºo°.]*\s*)?(\d{1,5})(?:\/\d{4})?/gi);
+    if (num) campo['doc-numero'] = num[1];
+    const prazo = ult(/\b(\d{1,4})\s*dias?\b/gi);
+    if (prazo && Number(prazo[1]) >= 1 && Number(prazo[1]) <= 3650) campo['doc-prazo'] = prazo[1];
+    const motivos = [/licen[cç]a[- ]maternidade/i,/licen[cç]a[- ]pr[eê]mio/i,/readapta[cç][aã]o(?: funcional)?/i,/\bLTS\b|licen[cç]a para tratamento de sa[uú]de/i,/rescis[aã]o(?: de contrato)?/i,/exonera[cç][aã]o/i,/aposentadoria/i,/f[eé]rias/i];
+    const nomesMotivos = ['licença-maternidade','licença-prêmio','readaptação funcional','Licença para Tratamento de Saúde (LTS)','rescisão de contrato','exoneração','aposentadoria','férias'];
+    const indice = motivos.findIndex(rx=>rx.test(texto));
+    if (indice >= 0) campo['doc-afastamento'] = nomesMotivos[indice];
+    const datas = datasNoPedidoIA(texto);
+    if (datas.some(d=>!d.valido)) plano.avisos.push('Uma data do pedido é inválida e não foi preenchida.');
+    if (datas.some(d=>d.inferido)) plano.avisos.push('Nas datas sem ano, foi usado o ano do documento. Confira.');
+    const validas = datas.filter(d=>d.valido);
+    const docData = validas.filter(d=>/(?:data do documento|data do memorando|emitido em|emissao)\s*:?\s*$/.test(d.contexto)).at(-1);
+    if (docData) campo['doc-data'] = docData.valor;
+    const periodo = validas.filter(d=>d!==docData);
+    if (tipo === 'comparecimento-responsavel' && periodo.length) campo['ds-data'] = periodo.at(-1).valor;
+    else if (periodo.length) {
+      const inicio = periodo.filter(d=>/(?:a partir de|in[ií]cio|desde|inicial|original|do dia)\s*:?\s*$/.test(d.contexto)).at(-1);
+      const fim = periodo.filter(d=>/(?:ate|termino|final|nova data|proposta|para o dia)\s*:?\s*$/.test(d.contexto)).at(-1);
+      if (inicio) campo['doc-inicio'] = inicio.valor;
+      if (fim) campo['doc-fim'] = fim.valor;
+      if (!inicio && periodo.some(d=>d!==fim)) campo['doc-inicio'] = periodo.find(d=>d!==fim).valor;
+      if (periodo.length > 1 && !fim) campo['doc-fim'] = periodo.at(-1).valor;
+    }
+    const cargo = texto.match(/\bPEB\s*(II|I|2|1)\b/i) || texto.match(/\b(ASEB|AJSG|auxiliar de doc[eê]ncia|servente de zeladoria|inspetor de alunos)\b/i);
+    if (cargo) campo['doc-cargo'] = /^PEB/i.test(cargo[0]) ? 'PEB '+cargo[1].replace('2','II').replace('1','I').toUpperCase() : cargo[0];
+    const candidates = candidatosIA(texto);
+    const fortes = candidates.filter(x=>x.score>=70 && !(x.score<120 && candidates.some(y=>y.score===120 && normaliza(y.f.nome)===normaliza(x.f.nome))));
+    let escolhidos = fortes;
+    if (!fortes.length && candidates.length === 1) escolhidos = candidates;
+    const ordenados = escolhidos.slice().sort((a,b)=>a.pos-b.pos);
+    const conector = s.search(/em substituicao|substituindo|no lugar de/);
+    let principal, secundario;
+    if (tipo === 'prorrogacao') {
+      principal = conector >= 0 ? ordenados.find(x=>x.pos<conector) : ordenados[0];
+      secundario = conector >= 0 ? ordenados.find(x=>x.pos>conector) : ordenados[1];
+    } else if (tipo === 'substituicao') {
+      principal = conector >= 0 ? ordenados.find(x=>x.pos>conector) : ordenados[0];
+      secundario = conector >= 0 ? ordenados.find(x=>x.pos<conector) : ordenados[1];
+    } else principal = ordenados[0];
+    for (const [p,id] of [[principal,'principal_id'],[secundario,'secundario_id']]) {
+      if (!p) continue;
+      const mesmos = escolhidos.filter(x=>normaliza(x.f.nome)===normaliza(p.f.nome)
+        || (p.score<110 && x.score<110 && x.pos===p.pos));
+      if (mesmos.length > 1 && p.score < 120) plano.perguntas.push({campo:id === 'principal_id' ? 'doc-principal':'doc-secundario',pergunta:'Há mais de um cadastro com esse nome. Selecione pela matrícula.'});
+      else plano[id] = String(p.f.id);
+    }
+    if (candidates.length > 1 && !escolhidos.length) plano.perguntas.push({campo:'doc-principal',pergunta:'O nome está incompleto ou é ambíguo. Selecione o servidor e confira a matrícula.'});
+    if (principal && !campo['doc-cargo']) campo['doc-cargo'] = cargoIA(principal.f);
+    const labels = {
+      'assunto':'doc-assunto','justificativa':'doc-motivo','motivo':'doc-motivo','objetivo':'doc-motivo',
+      'pedido':'doc-pedido','destino':'doc-local','local':'doc-local','turmas':'doc-anos','turno':'doc-turno',
+      'instituicao':'doc-instituicao','horario':'doc-horario','anexos':'doc-anexos','estudante':'doc-estudante',
+      'aluno':'doc-estudante','turma':'doc-turma-aluno','responsavel':'ds-nome','ac':'doc-ac','setor':'doc-setor','para':'doc-para'
+    };
+    for (const linha of texto.split(/[\n;]+/)) {
+      const m = linha.match(/^\s*([^:]{2,35}):\s*(.+)$/);
+      if (!m) continue;
+      const key = normaliza(m[1]).replace(/[^a-z ]/g,'');
+      if (labels[key]) campo[labels[key]] = limpa(m[2]);
+    }
+    if (!campo['doc-motivo']) {
+      const j = texto.match(/(?:justificativa\s*:|objetivo\s*:|porque\s+|pois\s+|tendo em vista\s+)([\s\S]+)/i);
+      if (j) campo['doc-motivo'] = j[1].trim().replace(/[.;]+$/,'');
+    }
+    const quantidade = texto.match(/\b(\d+)\s*(?:estudantes|alunos)\b/i);
+    if (quantidade) campo['doc-alunos-num'] = quantidade[1];
+    const zel = texto.match(/\b(\d+)\s*(?:serventes?|profissiona(?:is|l))\b/i);
+    if (zel) campo['doc-qtd'] = zel[1];
+    if (/matutino|vespertino|noturno|integral/.test(s)) campo['doc-turno'] = s.match(/matutino|vespertino|noturno|integral/)[0];
+    const horas = [...texto.matchAll(/\b([01]?\d|2[0-3])\s*[:h]\s*([0-5]\d)?\b/gi)].map(m=>`${m[1].padStart(2,'0')}:${m[2] || '00'}`);
+    if (tipo === 'comparecimento-responsavel') {
+      if (horas[0]) campo['ds-entrada'] = horas[0]; if (horas[1]) campo['ds-saida'] = horas[1];
+      if (campo['doc-estudante']) {campo['ds-estudante']=campo['doc-estudante']; delete campo['doc-estudante'];}
+    } else if (tipo === 'transporte') {
+      if (horas[0]) campo['doc-saida'] = horas[0]; if (horas[1]) campo['doc-retorno'] = horas[1];
+    }
+    const defaults = {
+      prorrogacao:'assegurar a continuidade das atividades e do atendimento aos estudantes durante o período solicitado',
+      substituicao:'assegurar a continuidade das atividades correspondentes à função durante o afastamento',
+      contratacao:'manter a continuidade das atividades da unidade escolar',
+      zeladoria:'atender às necessidades de higienização e conservação dos ambientes da escola'
+    };
+    if (!campo['doc-motivo'] && !(preservar && valor('doc-motivo')) && defaults[tipo]) campo['doc-motivo'] = defaults[tipo];
+    if (['memorando','requerimento'].includes(tipo) && !campo['doc-pedido'] && texto.trim()) {
+      const p = texto.replace(/^\s*(?:por favor[,\s]*)?(?:fa[cç]a|crie|redija|prepare|elabore)\s+(?:um[a]?\s+)?(?:memorando|requerimento|documento)?\s*(?:para\s+)?/i,'').trim();
+      campo['doc-pedido'] = p ? p[0].toUpperCase()+p.slice(1) : '';
+      if (!campo['doc-motivo'] && !(preservar && valor('doc-motivo'))) campo['doc-motivo'] = '';
+      plano.avisos.push('Para redigir livremente ou reformular assuntos fora dos modelos, ative a IA conectada. O modo local organiza as informações fornecidas.');
+    }
+    return plano;
+  }
+
+  function validarPlanoIA(raw) {
+    if (!raw || ![...tipos.map(t=>t[0]),'comparecimento-responsavel'].includes(raw.tipo)) throw new Error('A IA retornou um tipo de documento inválido.');
+    const campos = Array.isArray(raw.campos) ? Object.fromEntries(raw.campos.map(x=>[x.campo,x.valor])) : raw.campos || {};
+    const validados = {};
+    for (const [id,v] of Object.entries(campos)) {
+      if (!IA_CAMPOS.includes(id)) continue;
+      if (typeof v !== 'string' || v.length > 16000) throw new Error('A IA retornou um campo inválido.');
+      if (/data|inicio$|fim$/.test(id) && $(id)?.type === 'date' && v && !dataValidaIA(v)) throw new Error('A IA retornou uma data inválida.');
+      if ($(id)?.type === 'time' && v && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v)) throw new Error('A IA retornou um horário inválido.');
+      if ($(id)?.type === 'number' && v && (!/^\d+$/.test(v) || Number(v) < 1 || Number(v) > 100000)) throw new Error('A IA retornou uma quantidade inválida.');
+      validados[id] = limpa(v);
+    }
+    if (raw.assunto) validados['doc-assunto'] = String(raw.assunto).slice(0,250);
+    for (const key of ['principal_id','secundario_id'])
+      if (raw[key] && !S.funcionarios.some(f=>String(f.id)===String(raw[key]))) throw new Error('A IA indicou um servidor que não consta no cadastro.');
+    if (!Array.isArray(raw.paragrafos) || raw.paragrafos.length > 18 || raw.paragrafos.some(p=>typeof p!=='string' || p.length>12000)) throw new Error('A redação recebida é inválida.');
+    if (raw.paragrafos.some(p=>/<\/?(?:script|iframe|style|html|body|table)\b|```/i.test(p))) throw new Error('A redação deve conter somente texto, sem alterar o formato oficial.');
+    return {...raw,campos:validados,principal_id:String(raw.principal_id || ''),secundario_id:String(raw.secundario_id || ''),
+      perguntas:(raw.perguntas || []).filter(p=>p && typeof p.pergunta==='string' && IA_FORM.includes(p.campo)).slice(0,12),
+      avisos:(raw.avisos || []).filter(p=>typeof p==='string').slice(0,12)};
+  }
+  function aplicarPlanoIA(raw, preservar, origem) {
+    const plano = validarPlanoIA(raw); registrarHistoricoIA();
+    IA.ultimoGerado = null;
+    S.aplicandoIA = true;
+    try {
+      escolherTipoIA(plano.tipo);
+      if (!preservar) {
+        const manter = new Set(['doc-data','doc-numero','doc-para','doc-ac','doc-setor','doc-saudacao','doc-despedida']);
+        for (const id of [...IA_CAMPOS,'doc-principal','doc-secundario']) if ($(id) && !manter.has(id)) $(id).value='';
+      }
+      for (const [id,v] of Object.entries(plano.campos)) if ($(id)) $(id).value = v;
+      for (const [key,id] of [['principal_id','doc-principal'],['secundario_id','doc-secundario']]) {
+        const f = S.funcionarios.find(x=>String(x.id)===plano[key]);
+        if (f) $(id).value = rotulo(f);
+      }
+      if (!valor('doc-assunto')) $('doc-assunto').value = assuntoPadrao(plano.tipo) || 'Solicitação de providências';
+      const f = servidor('doc-principal');
+      if (f && !valor('doc-cargo')) $('doc-cargo').value = cargoIA(f);
+      sincronizarPeriodoIA(plano.campos['doc-prazo'] && !plano.campos['doc-fim'] ? 'dias' : 'fim');
+    } finally { S.aplicandoIA = false; }
+    if (plano.paragrafos.length) escreverTextoIA(plano.paragrafos.join('\n\n'));
+    else if (plano.tipo === 'comparecimento-responsavel') {
+      $('doc-atualizar').click();
+      escreverTextoIA(valor('doc-texto'));
+    } else escreverTextoIA(modeloTexto());
+    IA.ultimoGerado = capturarIA(); IA.alteracoes = false;
+    const pend = pendenciasIA();
+    const perguntas = [...plano.perguntas];
+    for (const id of ['doc-principal','doc-secundario',...IA_CAMPOS]) {
+      const el=$(id);
+      if (!el || valor(id) || el.closest('[hidden]') || el.closest('.docs-field')?.style.display==='none') continue;
+      if (pend.some(p=>normaliza(p).includes(normaliza(rotuloCampoIA(id)).replace(/\*/g,'').trim()))) perguntas.push({campo:id,pergunta:'Falta informar: '+rotuloCampoIA(id)});
+    }
+    if (pend.some(p=>/Selecione um servidor/.test(p))) perguntas.unshift({campo:'doc-principal',pergunta:'Qual servidor deve constar no documento? Selecione no cadastro.'});
+    mostrarPerguntasIA(perguntas);
+    informarIA(`${origem === 'online' ? 'IA conectada' : 'Modo local'}: ${plano.resumo || 'texto preparado.'}${pend.length ? '\nFaltam dados ou conferências: '+pend.join(' ') : '\nDados essenciais preenchidos. Confira a prévia antes de emitir.'}${plano.avisos.length ? '\n'+plano.avisos.join('\n') : ''}`,pend.length || plano.avisos.length ? 'warn':'');
+    IA.planoPendente = null; $('ia-aplicar').hidden=true;
+  }
+  function conexaoIA() {
+    const conf = window.DOCUMENTOS_IA_CONFIG || {};
+    const base = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : window.supabaseClient?.supabaseUrl || '';
+    if (!base && !conf.endpoint) return null;
+    const endpoint = new URL(conf.endpoint || base.replace(/\/$/,'')+'/functions/v1/documentos-ia',location.href);
+    const origemSupabase = base ? new URL(base).origin : '';
+    if (endpoint.origin !== origemSupabase && endpoint.origin !== location.origin) throw new Error('O serviço de IA deve usar o mesmo servidor do sistema ou seu projeto Supabase.');
+    if (endpoint.protocol !== 'https:' && endpoint.hostname !== 'localhost' && endpoint.hostname !== '127.0.0.1') throw new Error('O serviço de IA precisa de uma conexão HTTPS.');
+    return {endpoint:endpoint.href, chave:typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : conf.publishableKey || ''};
+  }
+  async function consultarIA(texto, acao, preservar, signal) {
+    const conexao = conexaoIA();
+    if (!conexao) { const e=new Error('A IA conectada ainda não está configurada.');e.local=true;throw e; }
+    if (typeof App.carregarPerfilAtual === 'function') await App.carregarPerfilAtual();
+    const token = typeof App.getAccessToken === 'function' ? App.getAccessToken() : typeof authGetSession === 'function' ? authGetSession()?.access_token : '';
+    if (!token) { const e=new Error('Entre novamente no sistema para usar a IA conectada.');e.local=true;throw e; }
+    const ids = new Set(candidatosIA(texto).slice(0,12).map(x=>String(x.f.id)));
+    for (const id of ['doc-principal','doc-secundario']) {const f=servidor(id);if(f)ids.add(String(f.id));}
+    const dados = capturarIA();
+    if (!preservar) {
+      const manter = new Set(['doc-data','doc-numero','doc-para','doc-ac','doc-setor','doc-saudacao','doc-despedida','doc-assinante','doc-cargo-assinante']);
+      dados.campos = Object.fromEntries(Object.entries(dados.campos).filter(([id])=>manter.has(id)));
+    }
+    const resposta = await fetch(conexao.endpoint,{method:'POST',signal,
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(conexao.chave ? {apikey:conexao.chave}:{})},
+      body:JSON.stringify({pedido:texto,acao,referencia:valor('ia-referencia'),contexto:dados,
+        funcionarios_ids:[...ids],principal_id:preservar ? String(servidor('doc-principal')?.id || ''):'',
+        secundario_id:preservar ? String(servidor('doc-secundario')?.id || ''):'',
+        modelo_base:preservar ? modeloTexto():''})});
+    if (!resposta.ok) {
+      let mensagem='';try {mensagem=(await resposta.json()).error || '';}catch {}
+      const e=new Error(mensagem || (resposta.status===404 ? 'A função de IA ainda não foi ativada no servidor.' : `Não foi possível consultar a IA (${resposta.status}).`));
+      e.local=true;throw e;
+    }
+    return validarPlanoIA(await resposta.json());
+  }
+  function limparRedacaoLocalIA(texto) {
+    return texto.replace(/\r\n?/g,'\n').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n')
+      .replace(/\bvenho atraves deste\b/gi,'venho, por meio deste,').replace(/\ba gente solicita\b/gi,'solicitamos')
+      .replace(/\bprecisamos que seja feito\b/gi,'solicitamos a realização de').trim();
+  }
+  async function executarIA(acao = 'gerar') {
+    if (IA.ocupado) return;
+    const pedidoAtual = valor('ia-pedido'), ajustar = ['melhorar','resumir','formalizar'].includes(acao);
+    if (!pedidoAtual && !ajustar && acao!=='complementar') { informarIA('Descreva o documento que deseja preparar.','warn');$('ia-pedido').focus();return; }
+    if (ajustar && !valor('doc-texto')) {informarIA('Prepare ou escreva um texto antes de ajustar a redação.','warn');return;}
+    const preservar = ajustar || acao==='complementar';
+    const texto = acao === 'complementar' ? [IA.pedido,pedidoAtual].filter(Boolean).join('\nComplemento: ') : ajustar ? [IA.pedido,pedidoAtual].filter(Boolean).join('\n') : pedidoAtual;
+    const antes = JSON.stringify(capturarIA()), seq=++IA.sequencia;
+    IA.controller=new AbortController();IA.ocupado=true;
+    for(const e of document.querySelectorAll('.docs-ai button')) if(e.id!=='ia-cancelar') e.disabled=true;
+    $('ia-cancelar').hidden=false; $('ia-aplicar').hidden=true;
+    informarIA('Preparando o texto e verificando os dados…');
+    const timeout=setTimeout(()=>IA.controller?.abort('timeout'),45000);
+    try {
+      let plano, origem='local', aviso='';
+      if (valor('ia-modo')!=='local') {
+        try {plano=await consultarIA(texto,acao,preservar,IA.controller.signal);origem='online';}
+        catch(e) {
+          if (IA.controller.signal.aborted) throw e;
+          if (valor('ia-modo')==='online') throw e;
+          aviso='IA conectada indisponível: '+e.message;
+        }
+      }
+      if (!plano) {
+        if (ajustar) {
+          registrarHistoricoIA();
+          if (acao==='resumir') {informarIA('Para resumir sem perder informações, ative a IA conectada. O texto atual foi mantido.','warn');return;}
+          escreverTextoIA(limparRedacaoLocalIA(valor('doc-texto')));
+          IA.ultimoGerado=capturarIA();
+          informarIA('Revisão local de apresentação concluída. Para uma reformulação completa, ative a IA conectada.'+(aviso?'\n'+aviso:''),'warn');return;
+        }
+        plano=interpretarLocalIA(acao==='complementar'?pedidoAtual:texto,preservar);
+        if(aviso)plano.avisos.push(aviso);
+      }
+      if(seq!==IA.sequencia || IA.controller.signal.aborted)return;
+      IA.pedido=texto;
+      if(JSON.stringify(capturarIA())!==antes) {
+        IA.planoPendente={plano,preservar,origem};$('ia-aplicar').hidden=false;
+        informarIA('Você alterou o documento durante a consulta. A sugestão está pronta; clique em “Aplicar sugestão recebida” para substituir o rascunho atual.','warn');
+      } else aplicarPlanoIA(plano,preservar,origem);
+    } catch(e) {
+      informarIA(IA.controller?.signal.aborted ? 'Preparação interrompida. Seu documento foi mantido.' : 'Não foi possível preparar o texto: '+e.message,'error');
+    } finally {
+      clearTimeout(timeout);IA.ocupado=false;IA.controller=null;
+      for(const e of document.querySelectorAll('.docs-ai button'))e.disabled=false;
+      $('ia-desfazer').disabled=!IA.historico.length;$('ia-cancelar').hidden=true;
+    }
+  }
+
+  let periodoOcupadoIA=false, origemPeriodoIA='fim', duracaoPeriodoIA=null;
+  function sincronizarPeriodoIA(origem) {
+    if(periodoOcupadoIA)return;
+    periodoOcupadoIA=true;
+    try {
+      const tipo=valor('doc-tipo'), aplicavel=['prorrogacao','substituicao'].includes(tipo);
+      const retorno=$('ds-retorno-licenca');
+      if(retorno)retorno.hidden=!aplicavel;
+      $('doc-prazo').readOnly=false;
+      if(!aplicavel)return;
+      const a=valor('doc-inicio'), b=valor('doc-fim'), n=Number(valor('doc-prazo'));
+      if(origem==='dias')origemPeriodoIA='dias';
+      if(origem==='fim')origemPeriodoIA='fim';
+      if(origem==='dias' || (origem==='inicio' && origemPeriodoIA==='dias')) {
+        const q=origem==='dias'?n:duracaoPeriodoIA;
+        if(dataValidaIA(a) && Number.isInteger(q) && q>=1 && q<=3650) {
+          $('doc-fim').value=deslocarDiaIA(a,q-1);duracaoPeriodoIA=q;
+          $('doc-prazo').value=String(q);
+        }
+      } else if(dataValidaIA(a) && dataValidaIA(b)) {
+        const dias=Math.round((Date.parse(b+'T12:00:00Z')-Date.parse(a+'T12:00:00Z'))/IA_DIA)+1;
+        $('doc-prazo').value=dias>=1 && dias<=3650?String(dias):'';duracaoPeriodoIA=dias;
+      } else if(dataValidaIA(a) && !b && Number.isInteger(n) && n>=1 && n<=3650) {
+        $('doc-fim').value=deslocarDiaIA(a,n-1);duracaoPeriodoIA=n;
+      }
+      const fim=valor('doc-fim');
+      if(retorno)retorno.textContent=dataValidaIA(a)&&dataValidaIA(fim)&&fim>=a
+        ? `Período: ${dt(a)} a ${dt(fim)} (${valor('doc-prazo')} dias corridos, incluindo início e fim). Dia seguinte ao término: ${dt(deslocarDiaIA(fim,1))}.`
+        : 'Informe datas válidas ou início e quantidade de dias para calcular o período.';
+      if(!S.aplicandoIA)atualizarModelo(false);
+    } finally {periodoOcupadoIA=false;}
+  }
+  function contextoAfastamentoIA() {
+    const causa=valor('doc-afastamento');
+    if(!causa)return 'em situação de afastamento a confirmar';
+    if(/readapt/.test(normaliza(causa)))return 'em readaptação funcional';
+    return 'em afastamento por '+causa;
+  }
+  function instalarAssistente() {
+    $('ia-gerar').onclick=()=>executarIA('gerar');
+    $('ia-complementar').onclick=()=>executarIA('complementar');
+    for(const acao of ['melhorar','resumir','formalizar'])$('ia-'+acao).onclick=()=>executarIA(acao);
+    $('ia-cancelar').onclick=()=>IA.controller?.abort('user');
+    $('ia-verificar').onclick=()=>{const p=pendenciasIA();informarIA(p.length?p.join('\n'):'Dados essenciais preenchidos. Confira o conteúdo e a prévia antes de emitir.',p.length?'warn':'');};
+    $('ia-aplicar').onclick=()=>{if(IA.planoPendente){const p=IA.planoPendente;aplicarPlanoIA(p.plano,p.preservar,p.origem);}};
+    $('ia-desfazer').onclick=()=>{
+      const anterior=IA.historico.pop();if(!anterior)return;
+      S.aplicandoIA=true;
+      try{escolherTipoIA(anterior.tipo);for(const [id,v]of Object.entries(anterior.campos))if($(id))$(id).value=v;}
+      finally{S.aplicandoIA=false;}
+      escreverTextoIA(anterior.campos['doc-texto']);IA.ultimoGerado=null;
+      $('ia-desfazer').disabled=!IA.historico.length;informarIA('Rascunho anterior restaurado.');mostrarPerguntasIA([]);
+    };
+    $('ia-novo').onclick=()=>{IA.pedido='';IA.planoPendente=null;$('ia-pedido').value='';$('ia-referencia').value='';$('ia-aplicar').hidden=true;mostrarPerguntasIA([]);informarIA('Descreva um novo pedido. O rascunho atual será preservado até você preparar o próximo.');$('ia-pedido').focus();};
+    $('ia-pedido').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();executarIA('gerar');}});
+    const retorno=document.createElement('small');retorno.id='ds-retorno-licenca';retorno.className='docs-hint';$('doc-prazo-bloco').appendChild(retorno);
+    for(const [id,origem]of [['doc-inicio','inicio'],['doc-fim','fim'],['doc-prazo','dias']])for(const evento of ['input','change'])$(id).addEventListener(evento,()=>sincronizarPeriodoIA(origem));
+    function atualizarCargo(){
+      if(['substituicao','contratacao'].includes(valor('doc-tipo'))){const f=servidor('doc-principal');if(f&&cargoIA(f)){$('doc-cargo').value=cargoIA(f);atualizarModelo(false);}}
+    }
+    for(const evento of ['change','blur'])$('doc-principal').addEventListener(evento,atualizarCargo);
+    $('doc-tipo').addEventListener('change',()=>{
+      $('doc-afastamento-bloco').hidden=!['prorrogacao','substituicao','contratacao'].includes(valor('doc-tipo'));
+      origemPeriodoIA='fim';duracaoPeriodoIA=null;sincronizarPeriodoIA('modelo');atualizarCargo();
+    });
+    $('doc-texto').addEventListener('input',()=>{if(!IA.escrevendo)IA.ultimoGerado=null;});
+    for(const id of IA_FORM)$(id)?.addEventListener('input',()=>{if(IA.ultimoGerado&&!IA.escrevendo&&id!=='doc-texto')informarIA('Dados alterados. Use “Complementar pedido” para recompor a redação ou confira o texto manualmente.','warn');});
+    sincronizarPeriodoIA('modelo');
+  }
+
   async function init() {
     const perfil = await App.carregarPerfilAtual();
     if (!perfil || perfil.ativo === false || !['administrador','secretaria'].includes(perfil.perfil)) {
@@ -764,7 +1289,11 @@ const DocumentosServidoresPage = (() => {
       return;
     }
     try {
-      S.funcionarios = await App.getAll('funcionarios');
+      S.funcionarios = (await App.getAll('funcionarios')).map(f => ({...f,
+        nome: String(f.nome || f.nome_completo || '').trim(),
+        matricula: String(f.matricula || f.matricula_funcional || f.registro || '').trim(),
+        cargo: String(f.cargo || f.cargo_funcao || f.cargoFuncao || f.funcao || '').trim()
+      }));
       S.funcionarios.sort((a,b) => normaliza(a.nome).localeCompare(normaliza(b.nome), 'pt-BR'));
     } catch(err) {
       App.layout('Documentos de Servidores','Falha na consulta de funcionários',
@@ -785,7 +1314,7 @@ const DocumentosServidoresPage = (() => {
     });
     for (const id of ['doc-principal','doc-secundario','doc-data','doc-numero','doc-destino','doc-assunto',
       'doc-cargo','doc-inicio','doc-fim','doc-prazo','doc-pedido','doc-motivo','doc-assinante','doc-cargo-assinante',
-      'doc-para','doc-ac','doc-setor','doc-saudacao','doc-despedida']) {
+      'doc-para','doc-ac','doc-setor','doc-saudacao','doc-despedida','doc-afastamento']) {
       $(id).addEventListener('input', () => atualizarModelo(false));
       $(id).addEventListener('change', () => atualizarModelo(false));
     }
@@ -805,6 +1334,7 @@ const DocumentosServidoresPage = (() => {
     $('doc-tipo').addEventListener('change',()=>{$('doc-word').textContent=ehMemo()?'Baixar Word (.docx oficial)':'Baixar Word (.doc)';});
     window.addEventListener('resize',()=>{if(ehMemo())ajustarVisualMemorando();});
     situacao(`${S.funcionarios.length} funcionários disponíveis para pesquisa. Selecione o tipo de documento.`, 'ok');
+    instalarAssistente();
   }
   return {init};
 })();
@@ -834,7 +1364,7 @@ const DocumentosServidoresPage = (() => {
     ],
     memorando: [
       ['prorrogacao', 'Prorrogação de contrato'],
-      ['substituicao', 'Substituição por licença (LTS)'],
+      ['substituicao', 'Substituição por afastamento'],
       ['contratacao', 'Contratação / reposição de vaga'],
       ['calendario', 'Alteração de calendário escolar'],
       ['zeladoria', 'Solicitação de zeladoria'],
@@ -1519,912 +2049,25 @@ Por ser verdade, firmamos a presente declaração.`;
 
 })();
 
-/* ===============================================================
-   CORREÇÃO: REQUERIMENTO DENTRO DE DECLARAÇÕES
-   E CÁLCULO AUTOMÁTICO DOS DIAS DE LICENÇA/PRORROGAÇÃO
-   Cole no FINAL de js/documentos-servidores.js.
-================================================================ */
-(function corrigirCategoriasEPeriodo() {
-  const inicializarAnterior = DocumentosServidoresPage.init;
-
-  DocumentosServidoresPage.init = async function (...args) {
-    await inicializarAnterior.apply(this, args);
-
-    const categoria = document.getElementById('ds-categoria');
-    const modelo = document.getElementById('ds-modelo');
-    const tipo = document.getElementById('doc-tipo');
-    const inicio = document.getElementById('doc-inicio');
-    const fim = document.getElementById('doc-fim');
-    const prazo = document.getElementById('doc-prazo');
-    const blocoPrazo = document.getElementById('doc-prazo-bloco');
-
-    if (!categoria || !modelo || !tipo || !inicio || !fim || !prazo) {
-      console.warn('Documentos: campos esperados não encontrados.');
-      return;
+/* Compatibilidade com as categorias existentes; períodos e cargos têm um único controlador. */
+(function finalizarCategoriasDocumentos(){
+  const anterior=DocumentosServidoresPage.init;
+  DocumentosServidoresPage.init=async function(...args){
+    await anterior.apply(this,args);
+    const categoria=document.getElementById('ds-categoria');
+    const modelo=document.getElementById('ds-modelo');
+    if(!categoria||!modelo)return;
+    for(const o of Array.from(categoria.options)){
+      if(o.value==='requerimento')o.remove();
+      if(o.value==='declaracao')o.textContent='Declarações';
+      if(o.value==='memorando')o.textContent='Memorandos';
     }
-
-    // 1) Somente duas categorias principais.
-    for (const opcao of Array.from(categoria.options)) {
-      if (opcao.value === 'requerimento') opcao.remove();
-      if (opcao.value === 'declaracao') opcao.textContent = 'Declarações';
-      if (opcao.value === 'memorando') opcao.textContent = 'Memorandos';
+    function ajustar(){
+      if(categoria.value==='declaracao'&&!Array.from(modelo.options).some(o=>o.value==='requerimento'))
+        modelo.add(new Option('Requerimento do servidor','requerimento'));
     }
-
-    function ajustarModelos() {
-      if (categoria.value === 'declaracao') {
-        if (!Array.from(modelo.options).some(o => o.value === 'requerimento')) {
-          modelo.add(new Option('Requerimento do servidor', 'requerimento'));
-        }
-      } else {
-        // O requerimento não deve aparecer nos modelos de memorando.
-        for (const opcao of Array.from(modelo.options)) {
-          if (opcao.value === 'requerimento') opcao.remove();
-        }
-      }
-    }
-
-    // O seletor original atualiza a lista primeiro.
-    // Depois adicionamos o requerimento em Declarações.
-    categoria.addEventListener('change', ajustarModelos);
-    ajustarModelos();
-
-    // Mantém o seletor antigo oculto.
-    const antigo = document.getElementById('doc-tipo');
-    const campoAntigo = antigo?.closest('.docs-field');
-
-    if (campoAntigo) {
-      campoAntigo.classList.add('ds-original-oculto-permanente');
-
-      if (!document.getElementById('ds-css-original-oculto-permanente')) {
-        const css = document.createElement('style');
-        css.id = 'ds-css-original-oculto-permanente';
-        css.textContent =
-          '.ds-original-oculto-permanente{display:none!important}';
-
-        document.head.appendChild(css);
-      }
-    }
-
-    const descricao = document.querySelector('.page-header p');
-
-    if (descricao) {
-      descricao.textContent =
-        'Escolha Declarações ou Memorandos e, em seguida, o modelo desejado.';
-    }
-
-    // 2) Contagem de dias corridos, incluindo início e fim.
-    let ultimoAutomatico = null;
-
-    const etiqueta = blocoPrazo?.querySelector('label');
-
-    const ajuda = document.createElement('small');
-    ajuda.style.cssText =
-      'display:block;margin-top:5px;color:#667085;font-size:12px';
-
-    ajuda.textContent =
-      'Selecione as duas datas para calcular automaticamente.';
-
-    blocoPrazo?.appendChild(ajuda);
-
-    function diaUTC(str) {
-      const partes = str.split('-').map(Number);
-
-      if (
-        partes.length !== 3 ||
-        partes.some(n => !Number.isFinite(n))
-      ) {
-        return NaN;
-      }
-
-      return Date.UTC(
-        partes[0],
-        partes[1] - 1,
-        partes[2]
-      );
-    }
-
-    function dispararMudanca() {
-      prazo.dispatchEvent(
-        new Event('input', { bubbles: true })
-      );
-    }
-
-    function atualizarPeriodo() {
-      const aplicavel = [
-        'substituicao',
-        'prorrogacao'
-      ].includes(tipo.value);
-
-      if (!aplicavel) return;
-
-      // Quando faltar alguma data, permite digitar manualmente.
-      if (!inicio.value || !fim.value) {
-        if (
-          ultimoAutomatico !== null &&
-          prazo.value === ultimoAutomatico
-        ) {
-          prazo.value = '';
-          dispararMudanca();
-        }
-
-        ultimoAutomatico = null;
-        prazo.readOnly = false;
-
-        if (etiqueta) {
-          etiqueta.textContent = 'Período em dias (opcional)';
-        }
-
-        ajuda.textContent =
-          'Selecione as duas datas para calcular automaticamente.';
-
-        return;
-      }
-
-      // Conta o dia inicial e o dia final.
-      const dias = Math.round(
-        (diaUTC(fim.value) - diaUTC(inicio.value)) / 86400000
-      ) + 1;
-
-      // Impede resultado negativo ou zero.
-      if (!Number.isFinite(dias) || dias <= 0) {
-        if (prazo.value === ultimoAutomatico) {
-          prazo.value = '';
-          dispararMudanca();
-        }
-
-        ultimoAutomatico = null;
-        prazo.readOnly = false;
-
-        ajuda.textContent =
-          'A data final deve ser igual ou posterior à inicial.';
-
-        ajuda.style.color = '#b42318';
-
-        return;
-      }
-
-      // Preenche automaticamente o período.
-      ultimoAutomatico = String(dias);
-
-      prazo.readOnly = true;
-      prazo.value = ultimoAutomatico;
-
-      if (etiqueta) {
-        etiqueta.textContent =
-          'Período em dias (automático)';
-      }
-
-      ajuda.style.color = '#067647';
-      ajuda.textContent =
-        `${dias} dia(s) corrido(s), contando início e fim.`;
-
-      // Atualiza o texto do memorando automaticamente.
-      dispararMudanca();
-    }
-
-    // Recalcula sempre que uma data for alterada.
-    for (const campo of [inicio, fim]) {
-      campo.addEventListener('input', atualizarPeriodo);
-      campo.addEventListener('change', atualizarPeriodo);
-    }
-
-    tipo.addEventListener('change', atualizarPeriodo);
-    modelo.addEventListener('change', atualizarPeriodo);
-
-    atualizarPeriodo();
+    categoria.addEventListener('change',ajustar);ajustar();
+    const descricao=document.querySelector('.page-header p');
+    if(descricao)descricao.textContent='Prepare seu pedido com a assistente ou selecione um modelo de declaração ou memorando.';
   };
-})();
-/* ============================================================
-   LTS: DATAS E PERÍODO EM DOIS SENTIDOS
-   Cole este bloco ao FINAL de js/documentos-servidores.js.
-   Compatível com a correção anterior de dias inclusivos.
-============================================================ */
-(function instalarLtsBidirecional() {
-  const iniciarAnterior = DocumentosServidoresPage.init;
-
-  DocumentosServidoresPage.init = async function (...args) {
-    await iniciarAnterior.apply(this, args);
-
-    const $ = id => document.getElementById(id);
-    const inicio = $('doc-inicio');
-    const fim = $('doc-fim');
-    const dias = $('doc-prazo');
-    const tipo = $('doc-tipo');
-    const modelo = $('ds-modelo');
-    const titular = $('doc-secundario');
-    const bloco = $('doc-prazo-bloco');
-
-    if (!inicio || !fim || !dias || !tipo || !bloco) return;
-
-    const DIA = 24 * 60 * 60 * 1000;
-    const etiqueta = bloco.querySelector('label');
-    const retorno = document.createElement('div');
-
-    retorno.id = 'ds-retorno-licenca';
-
-    retorno.style.cssText =
-      'margin-top:9px;padding:10px 12px;border-radius:8px;' +
-      'background:#eff6ff;color:#1e40af;font-size:13px;font-weight:600;';
-
-    bloco.appendChild(retorno);
-
-    let ocupado = false;
-    let ultimaOrigem = 'fim';
-    let diasMemorizados = null;
-    let fimAutomatico = '';
-
-    function utc(data) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(data || '')) return null;
-
-      const t = Date.parse(data + 'T00:00:00Z');
-
-      if (!Number.isFinite(t)) return null;
-
-      return new Date(t).toISOString().slice(0, 10) === data
-        ? t
-        : null;
-    }
-
-    function iso(t) {
-      return new Date(t).toISOString().slice(0, 10);
-    }
-
-    function br(data) {
-      return data
-        ? data.slice(8, 10) + '/' +
-          data.slice(5, 7) + '/' +
-          data.slice(0, 4)
-        : '—';
-    }
-
-    function numeroValido() {
-      const n = Number(dias.value);
-
-      return dias.value !== '' &&
-        Number.isInteger(n) &&
-        n >= 1 &&
-        n <= 3650
-          ? n
-          : null;
-    }
-
-    function aplicavel() {
-      return ['substituicao', 'prorrogacao'].includes(tipo.value);
-    }
-
-    function notificar(campo) {
-      campo.dispatchEvent(
-        new Event('input', { bubbles: true })
-      );
-    }
-
-    /* INÍCIO + DIAS = ÚLTIMO DIA DA LICENÇA */
-
-    function calcularFim(n) {
-      const t = utc(inicio.value);
-
-      if (t === null || !n) return false;
-
-      // O primeiro dia já é o dia 1 da LTS.
-      const novoFim = iso(t + (n - 1) * DIA);
-
-      if (fim.value !== novoFim) {
-        fim.value = novoFim;
-        notificar(fim);
-      }
-
-      fimAutomatico = novoFim;
-      dias.value = String(n);
-      diasMemorizados = n;
-
-      notificar(dias);
-
-      return true;
-    }
-
-    /* INÍCIO + ÚLTIMO DIA = TOTAL DE DIAS */
-
-    function calcularDias() {
-      const a = utc(inicio.value);
-      const b = utc(fim.value);
-
-      if (a === null || b === null) return false;
-
-      // +1: inclui o primeiro e o último dia.
-      const n = Math.round((b - a) / DIA) + 1;
-
-      if (n < 1 || n > 3650) return false;
-
-      dias.value = String(n);
-      diasMemorizados = n;
-
-      notificar(dias);
-
-      return true;
-    }
-
-    /* RETORNO PREVISTO = DIA SEGUINTE AO FIM */
-
-    function mostrarRetorno() {
-      if (!aplicavel()) {
-        retorno.hidden = true;
-        return;
-      }
-
-      retorno.hidden = false;
-
-      const ini = utc(inicio.value);
-      const ult = utc(fim.value);
-
-      if (ini === null || ult === null || ult < ini) {
-        retorno.textContent =
-          'Retorno: informe um início e um término válidos.';
-
-        retorno.style.color = '#b42318';
-        return;
-      }
-
-      const diaSeguinte = br(iso(ult + DIA));
-
-      const eLts =
-        tipo.value === 'substituicao' ||
-        (
-          tipo.value === 'prorrogacao' &&
-          !!titular?.value.trim()
-        );
-
-      if (eLts) {
-        retorno.textContent =
-          'Último dia de LTS: ' + br(fim.value) +
-          '  •  Retorno previsto: ' + diaSeguinte;
-      } else {
-        retorno.textContent =
-          'Último dia do período informado: ' +
-          br(fim.value) +
-          '  •  Dia seguinte: ' + diaSeguinte;
-      }
-
-      retorno.style.color = '#1e40af';
-    }
-
-    /* SINCRONIZAR OS TRÊS CAMPOS */
-
-    function sincronizar(origem) {
-      if (ocupado) return;
-
-      ocupado = true;
-
-      try {
-        // O código antigo bloqueava a edição dos dias.
-        // Agora o campo permanece editável.
-        dias.readOnly = false;
-
-        if (etiqueta) {
-          etiqueta.textContent =
-            'Período em dias (editável)';
-        }
-
-        if (!aplicavel()) {
-          retorno.hidden = true;
-          return;
-        }
-
-        if (origem === 'dias') {
-          ultimaOrigem = 'dias';
-
-          const n = numeroValido();
-
-          if (n !== null) {
-            diasMemorizados = n;
-            calcularFim(n);
-          } else if (!dias.value && fimAutomatico === fim.value) {
-            fim.value = '';
-            fimAutomatico = '';
-            diasMemorizados = null;
-
-            notificar(fim);
-          } else if (dias.value) {
-            retorno.hidden = false;
-            retorno.textContent =
-              'Informe um período inteiro de 1 a 3650 dias.';
-            retorno.style.color = '#b42318';
-            return;
-          }
-
-        } else if (origem === 'inicio') {
-          // Se o usuário definiu o período, preservamos
-          // essa duração ao trocar a data inicial.
-          if (
-            ultimaOrigem === 'dias' &&
-            diasMemorizados !== null
-          ) {
-            calcularFim(diasMemorizados);
-          } else if (fim.value) {
-            calcularDias();
-          } else if (numeroValido() !== null) {
-            calcularFim(numeroValido());
-          }
-
-        } else if (origem === 'fim') {
-          // O usuário alterou a data final:
-          // recalculamos a quantidade de dias.
-          ultimaOrigem = 'fim';
-          fimAutomatico = '';
-
-          if (
-            !calcularDias() &&
-            inicio.value &&
-            fim.value
-          ) {
-            dias.value = '';
-            diasMemorizados = null;
-            notificar(dias);
-          }
-
-        } else if (inicio.value && fim.value) {
-          calcularDias();
-        }
-
-        mostrarRetorno();
-
-      } finally {
-        // Garante que a quantidade continue editável.
-        dias.readOnly = false;
-        ocupado = false;
-      }
-    }
-
-    /* EVENTOS */
-
-    inicio.addEventListener(
-      'input',
-      () => sincronizar('inicio')
-    );
-
-    inicio.addEventListener(
-      'change',
-      () => sincronizar('inicio')
-    );
-
-    fim.addEventListener(
-      'input',
-      () => sincronizar('fim')
-    );
-
-    fim.addEventListener(
-      'change',
-      () => sincronizar('fim')
-    );
-
-    dias.addEventListener(
-      'input',
-      () => sincronizar('dias')
-    );
-
-    dias.addEventListener(
-      'change',
-      () => sincronizar('dias')
-    );
-
-    tipo.addEventListener(
-      'change',
-      () => sincronizar('modelo')
-    );
-
-    modelo?.addEventListener(
-      'change',
-      () => sincronizar('modelo')
-    );
-
-    titular?.addEventListener(
-      'input',
-      mostrarRetorno
-    );
-
-    sincronizar('modelo');
-  };
-})();
-/* =========================================================
-   AUTO PREENCHER "CARGO/FUNÇÃO A CONTRATAR"
-   COM O CARGO DO SERVIDOR SUBSTITUÍDO
-   Cole ao FINAL de js/documentos-servidores.js
-========================================================= */
-(function instalarAutoCargoSubstituicao() {
-  const initAnterior = DocumentosServidoresPage.init;
-
-  DocumentosServidoresPage.init = async function (...args) {
-    await initAnterior.apply(this, args);
-
-    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-
-    function normalizar(txt) {
-      return String(txt || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
-    }
-
-    function extrairMatricula(texto) {
-      const limpo = String(texto || '');
-      const match = limpo.match(/(\d{4,})/);
-      return match ? match[1] : '';
-    }
-
-    function encontrarCampoPorLabel(texto) {
-      const labels = $$('label');
-
-      for (const label of labels) {
-        if (normalizar(label.textContent).includes(normalizar(texto))) {
-          const forId = label.getAttribute('for');
-
-          if (forId) {
-            const el = document.getElementById(forId);
-            if (el) return el;
-          }
-
-          const container = label.parentElement;
-          if (!container) continue;
-
-          const campo = container.querySelector('input, select, textarea');
-          if (campo) return campo;
-        }
-      }
-
-      return null;
-    }
-
-    function obterSupabase() {
-      return (
-        window.supabaseClient ||
-        window.supabase ||
-        window.sb ||
-        null
-      );
-    }
-
-    let cacheFuncionarios = [];
-
-    async function carregarFuncionarios() {
-      if (cacheFuncionarios.length) return cacheFuncionarios;
-
-      const sb = obterSupabase();
-      if (!sb) return [];
-
-      try {
-        const { data, error } = await sb
-          .from('funcionarios')
-          .select('*')
-          .limit(5000);
-
-        if (error) throw error;
-
-        cacheFuncionarios = Array.isArray(data) ? data : [];
-        return cacheFuncionarios;
-      } catch (err) {
-        console.error('Erro ao carregar funcionários:', err);
-        return [];
-      }
-    }
-
-    function obterCargoFuncionario(funcionario) {
-      if (!funcionario) return '';
-
-      return (
-        funcionario.cargo_funcao ||
-        funcionario.cargoFuncao ||
-        funcionario.cargo ||
-        funcionario.funcao ||
-        funcionario.cargo_nome ||
-        funcionario.cargoNome ||
-        ''
-      );
-    }
-
-    async function aplicarNoFormulario() {
-      const campoServidor =
-        encontrarCampoPorLabel('Servidor interessado') ||
-        encontrarCampoPorLabel('Servidor substituído') ||
-        encontrarCampoPorLabel('Servidor a ser substituído');
-
-      const campoCargo =
-        encontrarCampoPorLabel('Cargo/função a contratar') ||
-        encontrarCampoPorLabel('Cargo / função a contratar');
-
-      if (!campoServidor || !campoCargo) return;
-
-      campoCargo.placeholder = 'Será preenchido automaticamente ao selecionar o servidor';
-
-      let temporizador = null;
-
-      async function preencherCargoAutomaticamente() {
-        const valor = String(campoServidor.value || '').trim();
-
-        if (!valor) return;
-
-        const funcionarios = await carregarFuncionarios();
-        if (!funcionarios.length) return;
-
-        const matricula = extrairMatricula(valor);
-        const nomeDigitado = normalizar(
-          valor.split('—')[0].split('-')[0].trim()
-        );
-
-        let encontrado = null;
-
-        if (matricula) {
-          encontrado = funcionarios.find((f) => {
-            const mat = String(
-              f.matricula ||
-              f.matricula_funcional ||
-              f.registro ||
-              ''
-            ).replace(/\D/g, '');
-
-            return mat === matricula;
-          });
-        }
-
-        if (!encontrado && nomeDigitado) {
-          encontrado =
-            funcionarios.find((f) => normalizar(f.nome) === nomeDigitado) ||
-            funcionarios.find((f) => normalizar(f.nome_completo) === nomeDigitado) ||
-            funcionarios.find((f) => normalizar(f.nome).includes(nomeDigitado)) ||
-            funcionarios.find((f) => nomeDigitado.includes(normalizar(f.nome)));
-        }
-
-        const cargo = obterCargoFuncionario(encontrado);
-
-        if (cargo) {
-          campoCargo.value = cargo;
-          campoCargo.dispatchEvent(new Event('input', { bubbles: true }));
-          campoCargo.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      }
-
-      campoServidor.addEventListener('change', preencherCargoAutomaticamente);
-      campoServidor.addEventListener('blur', preencherCargoAutomaticamente);
-
-      campoServidor.addEventListener('input', () => {
-        clearTimeout(temporizador);
-        temporizador = setTimeout(preencherCargoAutomaticamente, 300);
-      });
-
-      await preencherCargoAutomaticamente();
-    }
-
-    await aplicarNoFormulario();
-  };
-})();
-
-/* ============================================================
-   CARGO AUTOMÁTICO PELO CADASTRO DE FUNCIONÁRIOS
-
-   Busca os dados na MESMA tabela utilizada pela página
-   Funcionários, por meio de App.getAll("funcionarios").
-
-   Ao selecionar o servidor afastado por LTS:
-   - Identifica nome e matrícula.
-   - Consulta o cargo/função já cadastrado.
-   - Preenche automaticamente o cargo a contratar.
-   - Atualiza o texto e a prévia do memorando.
-
-   Não altera nem grava dados do servidor.
-============================================================ */
-
-(function integrarCargoAoCadastro() {
-
-  const iniciarAnterior = DocumentosServidoresPage.init;
-
-  DocumentosServidoresPage.init = async function (...args) {
-
-    await iniciarAnterior.apply(this, args);
-
-    const campoServidor = document.getElementById(
-      "doc-principal"
-    );
-
-    const campoCargo = document.getElementById(
-      "doc-cargo"
-    );
-
-    const campoTipo = document.getElementById(
-      "doc-tipo"
-    );
-
-    const campoModelo = document.getElementById(
-      "ds-modelo"
-    );
-
-    if (!campoServidor || !campoCargo || !campoTipo) {
-      return;
-    }
-
-    // Carrega os mesmos funcionários da página Funcionários.
-
-    let funcionarios = [];
-
-    try {
-      funcionarios = await App.getAll("funcionarios");
-    } catch (erro) {
-      console.error(
-        "Erro ao consultar o cadastro de funcionários:",
-        erro
-      );
-
-      return;
-    }
-
-    function normalizar(valor) {
-      return String(valor || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toUpperCase()
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function obterCargo(funcionario) {
-      return String(
-        funcionario?.cargo ||
-        funcionario?.cargo_funcao ||
-        ""
-      ).trim();
-    }
-
-    function localizarServidor() {
-
-      const selecionado = normalizar(
-        campoServidor.value
-      );
-
-      if (!selecionado) return null;
-
-      // Mesmo formato utilizado pela lista de servidores.
-      // Exemplo: NOME COMPLETO — Matrícula 123456
-
-      const encontrados = funcionarios.filter(
-        funcionario => {
-
-          const nome = normalizar(
-            funcionario.nome
-          );
-
-          const matricula = String(
-            funcionario.matricula || ""
-          ).trim();
-
-          const opcao = normalizar(
-            funcionario.nome +
-            (
-              matricula
-                ? " — Matrícula " + matricula
-                : ""
-            )
-          );
-
-          return (
-            selecionado === opcao ||
-            selecionado === nome ||
-            (
-              matricula &&
-              selecionado === normalizar(matricula)
-            )
-          );
-        }
-      );
-
-      // Não preenche automaticamente se houver
-      // dois servidores com identificação ambígua.
-
-      return encontrados.length === 1
-        ? encontrados[0]
-        : null;
-    }
-
-    function preencherCargo() {
-
-      const tipoAtual = campoTipo.value;
-
-      if (
-        tipoAtual !== "substituicao" &&
-        tipoAtual !== "contratacao"
-      ) {
-        return;
-      }
-
-      const funcionario = localizarServidor();
-
-      if (!funcionario) return;
-
-      const cargo = obterCargo(funcionario);
-
-      if (!cargo) return;
-
-      // Usa o cargo exatamente como está cadastrado.
-
-      if (campoCargo.value !== cargo) {
-
-        campoCargo.value = cargo;
-
-        // Atualiza a prévia e o memorando.
-
-        campoCargo.dispatchEvent(
-          new Event("input", {
-            bubbles: true
-          })
-        );
-
-        campoCargo.dispatchEvent(
-          new Event("change", {
-            bubbles: true
-          })
-        );
-      }
-    }
-
-    // Informa que o campo será preenchido automaticamente.
-
-    campoCargo.placeholder =
-      "Preenchido pelo cadastro do servidor";
-
-    const blocoCargo = document.getElementById(
-      "doc-cargo-bloco"
-    );
-
-    if (
-      blocoCargo &&
-      !document.getElementById("ds-ajuda-cargo")
-    ) {
-
-      const ajuda = document.createElement("small");
-
-      ajuda.id = "ds-ajuda-cargo";
-
-      ajuda.style.cssText = `
-        display:block;
-        margin-top:5px;
-        color:#667085;
-        font-size:12px;
-      `;
-
-      ajuda.textContent =
-        "Cargo preenchido automaticamente conforme o cadastro de Funcionários. Pode ser editado.";
-
-      blocoCargo.appendChild(ajuda);
-    }
-
-    // Preenche ao selecionar um servidor.
-
-    campoServidor.addEventListener(
-      "change",
-      preencherCargo
-    );
-
-    campoServidor.addEventListener(
-      "input",
-      preencherCargo
-    );
-
-    campoServidor.addEventListener(
-      "blur",
-      preencherCargo
-    );
-
-    // Preenche também ao trocar de modelo.
-
-    campoTipo.addEventListener(
-      "change",
-      preencherCargo
-    );
-
-    campoModelo?.addEventListener(
-      "change",
-      preencherCargo
-    );
-
-    preencherCargo();
-
-  };
-
 })();
