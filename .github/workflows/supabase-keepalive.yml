@@ -1,0 +1,45 @@
+
+name: Verificacao diaria do Supabase
+
+on:
+  schedule:
+    - cron: "17 7,13,19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verificar-supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Consultar banco de dados
+        env:
+          SUPABASE_URL: https://cujlebxqqposqomtfvdk.supabase.co
+          SUPABASE_KEY: sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx
+
+        run: |
+          set -euo pipefail
+
+          status=$(curl \
+            --silent \
+            --show-error \
+            --max-time 30 \
+            --output /dev/null \
+            --write-out "%{http_code}" \
+            --get "$SUPABASE_URL/rest/v1/funcionarios" \
+            --data-urlencode "select=id" \
+            --data-urlencode "limit=1" \
+            --header "apikey: $SUPABASE_KEY" \
+            --header "Accept: application/json")
+
+          echo "Resposta HTTP: $status"
+
+          if [ "$status" != "200" ] && [ "$status" != "206" ]; then
+            echo "Falha na verificacao do Supabase."
+            exit 1
+          fi
+
+          echo "Supabase respondeu normalmente."
