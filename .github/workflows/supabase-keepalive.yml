@@ -15,31 +15,37 @@ jobs:
     timeout-minutes: 3
 
     steps:
-      - name: Consultar banco de dados
+      - name: Consultar funcao de verificacao
         env:
           SUPABASE_URL: https://cujlebxqqposqomtfvdk.supabase.co
           SUPABASE_KEY: sb_publishable_qgZR9bAPNGjYoG-2i_Z5Jg_1Rg3UzBx
 
+        shell: bash
         run: |
           set -euo pipefail
+
+          echo "Iniciando verificacao do Supabase..."
 
           status=$(curl \
             --silent \
             --show-error \
+            --connect-timeout 10 \
             --max-time 30 \
             --output /dev/null \
             --write-out "%{http_code}" \
-            --get "$SUPABASE_URL/rest/v1/funcionarios" \
-            --data-urlencode "select=id" \
-            --data-urlencode "limit=1" \
+            "$SUPABASE_URL/rest/v1/rpc/keepalive_ping" \
             --header "apikey: $SUPABASE_KEY" \
-            --header "Accept: application/json")
+            --header "Accept: application/json") || {
+              echo "Erro de conexao com o Supabase."
+              exit 1
+            }
 
           echo "Resposta HTTP: $status"
 
-          if [ "$status" != "200" ] && [ "$status" != "206" ]; then
-            echo "Falha na verificacao do Supabase."
+          if [ "$status" = "200" ]; then
+            echo "Supabase respondeu normalmente."
+            echo "Verificacao concluida com sucesso."
+          else
+            echo "Falha na verificacao. HTTP: $status"
             exit 1
           fi
-
-          echo "Supabase respondeu normalmente."
