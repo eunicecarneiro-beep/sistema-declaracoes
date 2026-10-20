@@ -103,20 +103,6 @@ const App = (() => {
         label: "Documentos de Servidores"
       });
     }
-    if (perfil?.perfil === "administrador") {
-      nav.push({
-        key: "usuarios",
-        href: "usuarios.html",
-        icon: "👤",
-        label: "Usuários"
-      });
-      nav.push({
-        key: "acessos",
-        href: "acessos.html",
-        icon: "🔐",
-        label: "Acessos"
-      });
-    }
     return nav;
   }
   /* UTILITÁRIOS */
@@ -288,7 +274,7 @@ const App = (() => {
   const PERFIS = ["administrador", "secretaria", "consulta"];
   const ESCRITA = ["administrador", "secretaria"];
   const TABELAS = new Set(["funcionarios", "declaracoes", "faltas", "agenda", "usuarios_perfis", "acessos"]);
-  const RPCS = new Set(["ec_registrar_acesso", "ec_atualizar_acesso", "ec_atualizar_usuario", "ec_servidores_consulta"]);
+  const RPCS = new Set(["ec_registrar_acesso", "ec_atualizar_acesso", "ec_servidores_consulta"]);
   let renovacao = null;
   let verificacao = null;
   let perfilEm = 0;
@@ -450,12 +436,10 @@ const App = (() => {
     const recurso = path.split("?")[0].slice(1);
     if (recurso.startsWith("rpc/")) {
       if (!RPCS.has(recurso.slice(4))) throw new Error("Operação inválida.");
-      if (recurso === "rpc/ec_atualizar_usuario") await requireRoles(["administrador"]);
     } else {
       if (!TABELAS.has(recurso)) throw new Error("Tabela inválida.");
       if (["usuarios_perfis", "acessos"].includes(recurso)) {
-        await requireRoles(["administrador"]);
-        if (method !== "GET") throw new Error("Use as operações administrativas protegidas.");
+        throw new Error("A gestão de usuários e acessos foi desativada no site.");
       } else if (p.perfil === "consulta" && recurso !== "agenda") throw new Error("Seu perfil não tem acesso a estes dados.");
       if (method !== "GET") await requireRoles(method === "DELETE" ? ["administrador"] : ESCRITA);
     }
@@ -779,6 +763,10 @@ const App = (() => {
 /* A autenticação é aguardada também por todas as chamadas à API. */
 document.addEventListener("DOMContentLoaded", async () => {
   if ((location.pathname.split("/").pop() || "").toLowerCase() === "login.html") return;
+  if (["usuarios", "acessos"].includes(document.body.dataset.page)) {
+    location.replace("index.html");
+    return;
+  }
   const estilo = document.createElement("style");
   estilo.textContent = 'body[data-perfil="consulta"] [data-write],body:not([data-perfil="administrador"]) [data-admin]{display:none!important}';
   document.head.appendChild(estilo);
@@ -1249,9 +1237,6 @@ document.addEventListener("click", async e => {
       case "declaracao-anexo": await DeclaracoesPage.verAnexo(App.safeId(id, "declaracoes")); break;
       case "declaracao-excluir": await DeclaracoesPage.excluir(App.safeId(id, "declaracoes")); break;
       case "declaracao-anexo-atual": await NovaDeclaracaoPage.verAnexoAtual(); break;
-      case "usuario-salvar": await UsuariosPage.salvar(App.safeUUID(id)); break;
-      case "usuario-alternar": await UsuariosPage.alternar(App.safeUUID(id), b.dataset.ativo === "true"); break;
-      case "acessos-atualizar": await AcessosPage.init(); break;
     }
   } catch (erro) { App.toast(erro.message || "Operação não concluída.", "danger"); }
   finally { b.disabled = false; }

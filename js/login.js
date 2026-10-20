@@ -9,7 +9,7 @@ const LOGIN_DOMAIN = "eunicecarneiro.local";
 const LOGIN_PAGINAS = new Set([
   "index.html", "funcionarios.html", "funcionario.html", "novo-funcionario.html",
   "declaracoes.html", "nova-declaracao.html", "faltas.html", "agenda.html",
-  "relatorios.html", "documentos-servidores.html", "usuarios.html", "acessos.html"
+  "relatorios.html", "documentos-servidores.html"
 ]);
 let loginOcupado = false;
 function normalizarUsuario(v) {
