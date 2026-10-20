@@ -1,10 +1,10 @@
-/* ARQUIVO COMPLETO: js/documentos-servidores.js. Substitua o conteúdo inteiro.
-   Inclui a página, os modelos e o complemento da IA.
-   A função de servidor documentos-ia não foi recebida para revisão. */
+/* ARQUIVO COMPLETO: js/documentos-servidores.js. Substitua o conteÃºdo inteiro.
+   Modelos e exportaÃ§Ã£o originais; assistente local em JavaScript.
+   Sem API de IA, chave de IA, modelo para baixar ou dependÃªncia nova. */
 /* ====================================================================
-  DOCUMENTOS DE SERVIDORES — E.M. PROFª EUNICE CARNEIRO
-  Declarações, requerimentos e memorandos com dados do cadastro existente.
-  Não grava novos dados nem requer alterações no SQL do Supabase.
+  DOCUMENTOS DE SERVIDORES â€” E.M. PROFÂª EUNICE CARNEIRO
+  DeclaraÃ§Ãµes, requerimentos e memorandos com dados do cadastro existente.
+  NÃ£o grava novos dados nem requer alteraÃ§Ãµes no SQL do Supabase.
   Revise antes de imprimir, assinar ou protocolar.
 ==================================================================== */
 const DocumentosServidoresPage = (() => {
@@ -12,7 +12,7 @@ const DocumentosServidoresPage = (() => {
   const $ = id => document.getElementById(id);
 
   const BRASAO = "data:image/jpeg;base64,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";
-  const MEMO_CSS = '\n/* Página em A4 com o mesmo arranjo da referência da Secretaria. */\n.memo-sheet{box-sizing:border-box;width:210mm;min-height:297mm;padding:38mm 13mm 17mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.22;position:relative}\n.memo-header{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt;line-height:1.15;margin:0}\n.memo-header td{border:1px solid #222;padding:1.5mm 1mm;vertical-align:middle}\n.memo-header .memo-top td{height:19mm}\n.memo-header .memo-title td{height:4.2mm;text-align:center;font-weight:700;padding:.8mm}\n.memo-header .memo-address td{height:15.4mm}\n.memo-logo{text-align:center}\n.memo-logo img{display:block;width:16mm;height:15.5mm;object-fit:contain;margin:0 auto}\n.memo-school{text-align:center;line-height:1.18}\n.memo-school div{margin:0}\n.memo-school strong{font-size:14pt;font-weight:700;line-height:1.25;display:block}\n.memo-control{text-align:center;vertical-align:top!important;line-height:1.3}\n.memo-control .memo-num{margin-top:5mm}\n.memo-from{vertical-align:middle!important}\n.memo-to{vertical-align:top!important}\n.memo-to .memo-sector{margin-top:5mm}\n.memo-subject{margin:5.2mm 2.5mm 0;font-size:11pt;font-weight:700;line-height:1.3}\n.memo-content{margin:14mm 2.5mm 0;min-height:108.6mm;line-height:1.2;font-size:11pt}\n.memo-content .memo-greeting{margin:0 0 5.2mm}\n.memo-content .memo-paragraph{margin:0 0 5.2mm;text-align:left;white-space:pre-line}\n.memo-content .memo-farewell{margin:5.5mm 0 0}\n.memo-signature{width:112mm;max-width:100%;margin:0 auto;text-align:center;font-size:11pt;line-height:1.6;break-inside:avoid;page-break-inside:avoid}\n.memo-signature .memo-signature-line{border-top:1px solid #111;padding-top:1.8mm}\n.memo-viewport{position:relative;overflow:hidden;width:100%;background:#fff}\n.memo-viewport .memo-sheet{transform-origin:left top;box-shadow:none}\n@media print{\n  @page{size:A4;margin:0}\n  html,body{margin:0!important;padding:0!important;background:#fff!important}\n  .memo-viewport{overflow:visible!important;width:auto!important;height:auto!important}\n  .memo-viewport .memo-sheet{transform:none!important}\n  .memo-sheet{break-after:auto;page-break-after:auto;box-shadow:none!important}\n}\n';
+  const MEMO_CSS = '\n/* PÃ¡gina em A4 com o mesmo arranjo da referÃªncia da Secretaria. */\n.memo-sheet{box-sizing:border-box;width:210mm;min-height:297mm;padding:38mm 13mm 17mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.22;position:relative}\n.memo-header{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt;line-height:1.15;margin:0}\n.memo-header td{border:1px solid #222;padding:1.5mm 1mm;vertical-align:middle}\n.memo-header .memo-top td{height:19mm}\n.memo-header .memo-title td{height:4.2mm;text-align:center;font-weight:700;padding:.8mm}\n.memo-header .memo-address td{height:15.4mm}\n.memo-logo{text-align:center}\n.memo-logo img{display:block;width:16mm;height:15.5mm;object-fit:contain;margin:0 auto}\n.memo-school{text-align:center;line-height:1.18}\n.memo-school div{margin:0}\n.memo-school strong{font-size:14pt;font-weight:700;line-height:1.25;display:block}\n.memo-control{text-align:center;vertical-align:top!important;line-height:1.3}\n.memo-control .memo-num{margin-top:5mm}\n.memo-from{vertical-align:middle!important}\n.memo-to{vertical-align:top!important}\n.memo-to .memo-sector{margin-top:5mm}\n.memo-subject{margin:5.2mm 2.5mm 0;font-size:11pt;font-weight:700;line-height:1.3}\n.memo-content{margin:14mm 2.5mm 0;min-height:108.6mm;line-height:1.2;font-size:11pt}\n.memo-content .memo-greeting{margin:0 0 5.2mm}\n.memo-content .memo-paragraph{margin:0 0 5.2mm;text-align:left;white-space:pre-line}\n.memo-content .memo-farewell{margin:5.5mm 0 0}\n.memo-signature{width:112mm;max-width:100%;margin:0 auto;text-align:center;font-size:11pt;line-height:1.6;break-inside:avoid;page-break-inside:avoid}\n.memo-signature .memo-signature-line{border-top:1px solid #111;padding-top:1.8mm}\n.memo-viewport{position:relative;overflow:hidden;width:100%;background:#fff}\n.memo-viewport .memo-sheet{transform-origin:left top;box-shadow:none}\n@media print{\n  @page{size:A4;margin:0}\n  html,body{margin:0!important;padding:0!important;background:#fff!important}\n  .memo-viewport{overflow:visible!important;width:auto!important;height:auto!important}\n  .memo-viewport .memo-sheet{transform:none!important}\n  .memo-sheet{break-after:auto;page-break-after:auto;box-shadow:none!important}\n}\n';
   function ehMemo() {
     return valor('doc-tipo') !== 'declaracao' && valor('doc-tipo') !== 'requerimento';
   }
@@ -36,33 +36,33 @@ const DocumentosServidoresPage = (() => {
   }
   function corpoMemorando() {
     const sig = assinatura();
-    const numeracao = pad(valor('doc-numero'),'Nº DO MEMORANDO');
+    const numeracao = pad(valor('doc-numero'),'NÂº DO MEMORANDO');
     const anoMemo = valor('doc-data').slice(0,4) || String(new Date().getFullYear());
     const parags = limpa(valor('doc-texto')).split(/\n\s*\n/).filter(Boolean);
     return `<article class="memo-sheet">
       <table class="memo-header"><colgroup><col style="width:20%"><col style="width:30%"><col style="width:29%"><col style="width:21%"></colgroup>
         <tbody>
           <tr class="memo-top">
-            <td class="memo-logo"><img src="${BRASAO}" alt="Brasão da Prefeitura de Montes Claros"></td>
+            <td class="memo-logo"><img src="${BRASAO}" alt="BrasÃ£o da Prefeitura de Montes Claros"></td>
             <td colspan="2" class="memo-school">
               <div>PREFEITURA MUNICIPAL DE MONTES CLAROS</div>
-              <div>SECRETARIA MUNICIPAL DE EDUCAÇÃO</div>
-              <strong>E. M. PROFª EUNICE CARNEIRO</strong>
-              <div>Rua D, 300 – José Correia Machado</div>
-              <div>Montes Claros – MG – (38) 2211-8332</div>
+              <div>SECRETARIA MUNICIPAL DE EDUCAÃ‡ÃƒO</div>
+              <strong>E. M. PROFÂª EUNICE CARNEIRO</strong>
+              <div>Rua D, 300 â€“ JosÃ© Correia Machado</div>
+              <div>Montes Claros â€“ MG â€“ (38) 2211-8332</div>
             </td>
-            <td class="memo-control"><div>Data: ${esc(dt(valor('doc-data'))||'[DATA]')}</div><div class="memo-num">Nº ${esc(numeracao)}/${esc(anoMemo)}</div></td>
+            <td class="memo-control"><div>Data: ${esc(dt(valor('doc-data'))||'[DATA]')}</div><div class="memo-num">NÂº ${esc(numeracao)}/${esc(anoMemo)}</div></td>
           </tr>
           <tr class="memo-title"><td colspan="4">MEMORANDO</td></tr>
           <tr class="memo-address">
             <td colspan="2" class="memo-from">De: ${esc(pad(sig.nome,'REMETENTE'))}<div>${esc(pad(sig.cargo,'CARGO DO REMETENTE'))}</div></td>
-            <td colspan="2" class="memo-to">Para: ${esc(pad(valor('doc-para'),'DESTINATÁRIO'))}<div>A/C: ${esc(pad(valor('doc-ac'),'RESPONSÁVEL'))}</div><div class="memo-sector">${esc(pad(valor('doc-setor'),'SETOR'))}</div></td>
+            <td colspan="2" class="memo-to">Para: ${esc(pad(valor('doc-para'),'DESTINATÃRIO'))}<div>A/C: ${esc(pad(valor('doc-ac'),'RESPONSÃVEL'))}</div><div class="memo-sector">${esc(pad(valor('doc-setor'),'SETOR'))}</div></td>
           </tr>
         </tbody>
       </table>
       <div class="memo-subject">ASSUNTO: ${esc(pad(valor('doc-assunto'),'ASSUNTO'))}</div>
       <section class="memo-content">
-        <p class="memo-greeting">${esc(pad(valor('doc-saudacao'),'SAUDAÇÃO'))}</p>
+        <p class="memo-greeting">${esc(pad(valor('doc-saudacao'),'SAUDAÃ‡ÃƒO'))}</p>
         ${parags.map(p=>`<p class="memo-paragraph">${realcarNomes(p).replace(/\n/g,'<br>')}</p>`).join('')}
         <p class="memo-farewell">${esc(pad(valor('doc-despedida'),'DESPEDIDA'))}</p>
       </section>
@@ -85,54 +85,54 @@ const DocumentosServidoresPage = (() => {
   const limpa = value => String(value ?? '').trim();
   const normaliza = value => limpa(value).normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ');
-  const rotulo = f => `${f.nome}${f.matricula ? ` — Matrícula ${f.matricula}` : ''}`;
+  const rotulo = f => `${f.nome}${f.matricula ? ` â€” MatrÃ­cula ${f.matricula}` : ''}`;
   const pad = (valor, rot) => limpa(valor) || `[INFORMAR ${rot}]`;
   const dataLocal = () => {
     const x = new Date();
     return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
   };
   const tipos = [
-    ['declaracao', 'Declaração funcional do servidor'],
+    ['declaracao', 'DeclaraÃ§Ã£o funcional do servidor'],
     ['requerimento', 'Requerimento do servidor'],
-    ['prorrogacao', 'Memorando — prorrogação de contrato'],
-    ['substituicao', 'Memorando — substituição por licença (LTS)'],
-    ['contratacao', 'Memorando — contratação / reposição de vaga'],
-    ['calendario', 'Memorando — alteração de calendário escolar'],
-    ['zeladoria', 'Memorando — solicitação de zeladoria'],
-    ['transporte', 'Memorando — transporte para visita escolar'],
-    ['estagio', 'Memorando — análise de estágio de servidor(a)'],
-    ['avanco', 'Memorando — parecer sobre avanço de nível'],
+    ['prorrogacao', 'Memorando â€” prorrogaÃ§Ã£o de contrato'],
+    ['substituicao', 'Memorando â€” substituiÃ§Ã£o por afastamento'],
+    ['contratacao', 'Memorando â€” contrataÃ§Ã£o / reposiÃ§Ã£o de vaga'],
+    ['calendario', 'Memorando â€” alteraÃ§Ã£o de calendÃ¡rio escolar'],
+    ['zeladoria', 'Memorando â€” solicitaÃ§Ã£o de zeladoria'],
+    ['transporte', 'Memorando â€” transporte para visita escolar'],
+    ['estagio', 'Memorando â€” anÃ¡lise de estÃ¡gio de servidor(a)'],
+    ['avanco', 'Memorando â€” parecer sobre avanÃ§o de nÃ­vel'],
     ['memorando', 'Memorando personalizado (livre)']
   ];
 
-  // Destinatários retirados de memorandos reais. Confirme os nomes atuais antes do envio.
+  // DestinatÃ¡rios retirados de memorandos reais. Confirme os nomes atuais antes do envio.
   const ENDERECAMENTO = {
-    prorrogacao: ['Polyana Ferreira Da Silva', 'Coordenadoria de Gestão Pessoal'],
-    substituicao: ['Polyana Ferreira Da Silva', 'Coordenadoria de Gestão Pessoal'],
-    contratacao: ['Polyana Ferreira Da Silva', 'Coordenadoria de Gestão Pessoal'],
-    calendario: ['Domingas Darc Mendes', 'Inspeção Escolar – Secretaria Municipal de Educação'],
-    zeladoria: ['Girlene Miranda de Melo', 'Coordenadoria de Gerência Administrativa'],
-    transporte: ['Soraya Figueiredo', 'Coordenadoria de Infraestrutura, Transporte e Logística'],
-    estagio: ['Nilza Pereira Dias', 'Coordenadoria de Avaliação e Capacitação de Servidores'],
-    avanco: ['Ana Cristina Fonseca de Vasconcelos', 'Coordenadora de Educação Inclusiva – Analistas / SME'],
+    prorrogacao: ['Polyana Ferreira Da Silva', 'Coordenadoria de GestÃ£o Pessoal'],
+    substituicao: ['Polyana Ferreira Da Silva', 'Coordenadoria de GestÃ£o Pessoal'],
+    contratacao: ['Polyana Ferreira Da Silva', 'Coordenadoria de GestÃ£o Pessoal'],
+    calendario: ['Domingas Darc Mendes', 'InspeÃ§Ã£o Escolar â€“ Secretaria Municipal de EducaÃ§Ã£o'],
+    zeladoria: ['Girlene Miranda de Melo', 'Coordenadoria de GerÃªncia Administrativa'],
+    transporte: ['Soraya Figueiredo', 'Coordenadoria de Infraestrutura, Transporte e LogÃ­stica'],
+    estagio: ['Nilza Pereira Dias', 'Coordenadoria de AvaliaÃ§Ã£o e CapacitaÃ§Ã£o de Servidores'],
+    avanco: ['Ana Cristina Fonseca de Vasconcelos', 'Coordenadora de EducaÃ§Ã£o Inclusiva â€“ Analistas / SME'],
     memorando: ['', '']
   };
 
   const EXTRA_CAMPOS = [
     ['doc-qtd', 'Quantidade de profissionais solicitados', 'zeladoria', 'number', 'Ex.: 2'],
     ['doc-alunos-num', 'Quantidade de estudantes', 'transporte', 'number', 'Ex.: 40'],
-    ['doc-anos', 'Turmas ou anos escolares', 'transporte', 'text', 'Ex.: 1º e 2º anos'],
+    ['doc-anos', 'Turmas ou anos escolares', 'transporte', 'text', 'Ex.: 1Âº e 2Âº anos'],
     ['doc-turno', 'Turno', 'transporte', 'text', 'Ex.: matutino'],
-    ['doc-local', 'Local de destino', 'transporte', 'text', 'Ex.: Parque de Exposições'],
-    ['doc-hora-inicio', 'Início da visita', 'transporte', 'time', ''],
+    ['doc-local', 'Local de destino', 'transporte', 'text', 'Ex.: Parque de ExposiÃ§Ãµes'],
+    ['doc-hora-inicio', 'InÃ­cio da visita', 'transporte', 'time', ''],
     ['doc-hora-fim', 'Fim da visita', 'transporte', 'time', ''],
-    ['doc-saida', 'Horário de embarque', 'transporte', 'time', ''],
-    ['doc-retorno', 'Horário do retorno', 'transporte', 'time', ''],
-    ['doc-instituicao', 'Instituição / local do estágio (opcional)', 'estagio', 'text', ''],
-    ['doc-horario', 'Compatibilidade de horários (confirme)', 'estagio', 'text', 'Ex.: Fora da jornada de trabalho'],
-    ['doc-estudante', 'Nome do(a) estudante', 'avanco', 'text', 'Digite apenas se necessário'],
-    ['doc-turma-aluno', 'Turma / ano escolar', 'avanco', 'text', 'Ex.: 2º ano C'],
-    ['doc-anexos', 'Documentos anexos', 'avanco', 'text', 'Ex.: relatório pedagógico e requerimento']
+    ['doc-saida', 'HorÃ¡rio de embarque', 'transporte', 'time', ''],
+    ['doc-retorno', 'HorÃ¡rio do retorno', 'transporte', 'time', ''],
+    ['doc-instituicao', 'InstituiÃ§Ã£o / local do estÃ¡gio (opcional)', 'estagio', 'text', ''],
+    ['doc-horario', 'Compatibilidade de horÃ¡rios (confirme)', 'estagio', 'text', 'Ex.: Fora da jornada de trabalho'],
+    ['doc-estudante', 'Nome do(a) estudante', 'avanco', 'text', 'Digite apenas se necessÃ¡rio'],
+    ['doc-turma-aluno', 'Turma / ano escolar', 'avanco', 'text', 'Ex.: 2Âº ano C'],
+    ['doc-anexos', 'Documentos anexos', 'avanco', 'text', 'Ex.: relatÃ³rio pedagÃ³gico e requerimento']
   ];
 
   function definirDestinatario(tipo) {
@@ -144,7 +144,7 @@ const DocumentosServidoresPage = (() => {
 
   function periodoVisita() {
     const ini = valor('doc-hora-inicio'), fim = valor('doc-hora-fim');
-    return ini && fim ? `das ${ini} às ${fim}` : (ini ? `a partir de ${ini}` : 'em horário a informar');
+    return ini && fim ? `das ${ini} Ã s ${fim}` : (ini ? `a partir de ${ini}` : 'em horÃ¡rio a informar');
   }
 
   function valor(id) { return limpa($(id)?.value); }
@@ -157,7 +157,7 @@ const DocumentosServidoresPage = (() => {
     const s = dt(valorData);
     if (!s) return '[INFORMAR DATA]';
     const [a, m, d] = valorData.split('-').map(Number);
-    const mes = ['janeiro','fevereiro','março','abril','maio','junho',
+    const mes = ['janeiro','fevereiro','marÃ§o','abril','maio','junho',
       'julho','agosto','setembro','outubro','novembro','dezembro'][m - 1];
     return `${d} de ${mes} de ${a}`;
   }
@@ -168,8 +168,8 @@ const DocumentosServidoresPage = (() => {
     return matches.length === 1 ? matches[0] : null;
   }
   function nome(f, rot = 'NOME DO SERVIDOR') { return pad(f?.nome, rot); }
-  function matricula(f) { return pad(f?.matricula, 'MATRÍCULA'); }
-  function cargo(f) { return pad(f?.cargo || valor('doc-cargo'), 'CARGO/FUNÇÃO'); }
+  function matricula(f) { return pad(f?.matricula, 'MATRÃCULA'); }
+  function cargo(f) { return pad(f?.cargo || valor('doc-cargo'), 'CARGO/FUNÃ‡ÃƒO'); }
   function assinatura() {
     if (valor('doc-tipo') === 'requerimento') {
       const f = servidor('doc-principal');
@@ -181,11 +181,11 @@ const DocumentosServidoresPage = (() => {
     const tipo = valor('doc-tipo');
     const ehMemo = ['prorrogacao','substituicao','contratacao','memorando'].includes(tipo);
     const titulo = {
-      declaracao:'DECLARAÇÃO', requerimento:'REQUERIMENTO',
+      declaracao:'DECLARAÃ‡ÃƒO', requerimento:'REQUERIMENTO',
       prorrogacao:'MEMORANDO', substituicao:'MEMORANDO',
       contratacao:'MEMORANDO', memorando:'MEMORANDO'
     }[tipo] || 'DOCUMENTO';
-    const numero = ehMemo ? ` Nº ${valor('doc-numero') || '____'}/${valor('doc-data').slice(0, 4) || new Date().getFullYear()}` : '';
+    const numero = ehMemo ? ` NÂº ${valor('doc-numero') || '____'}/${valor('doc-data').slice(0, 4) || new Date().getFullYear()}` : '';
     return { titulo: titulo + numero, ehMemo };
   }
 
@@ -200,52 +200,53 @@ const DocumentosServidoresPage = (() => {
     const fim = pad(dt(valor('doc-fim')), 'DATA FINAL');
     const obs = valor('doc-motivo');
     const just = pad(obs, 'JUSTIFICATIVA / MOTIVO');
-    const cargoVaga = pad(valor('doc-cargo'), 'CARGO/FUNÇÃO');
+    const cargoVaga = pad(valor('doc-cargo'), 'CARGO/FUNÃ‡ÃƒO');
+    const afastamento = pad(valor('doc-afastamento'), 'MOTIVO DO AFASTAMENTO');
     switch (tipo) {
       case 'declaracao':
-        return `Declaramos, para os devidos fins, que ${n}, matrícula nº ${mat}, ${pad(cg, 'CARGO/FUNÇÃO')}, possui registro funcional nesta unidade escolar, E.M. Prof.ª Eunice Carneiro, conforme os dados constantes do cadastro da escola.${f?.vinculo ? ` O vínculo informado no cadastro é: ${f.vinculo}.` : ''}${f?.dataAdmissao ? ` A data de admissão registrada é ${dt(f.dataAdmissao) || f.dataAdmissao}.` : ''}\n\n${obs || 'A presente declaração é expedida a pedido do(a) interessado(a), para os fins que se fizerem necessários.'}\n\nPor ser expressão das informações registradas, firmamos a presente declaração, sujeita à conferência dos documentos funcionais.`;
+        return `Declaramos, para os devidos fins, que ${n}, matrÃ­cula nÂº ${mat}, ${pad(cg, 'CARGO/FUNÃ‡ÃƒO')}, possui registro funcional nesta unidade escolar, E.M. Prof.Âª Eunice Carneiro, conforme os dados constantes do cadastro da escola.${f?.vinculo ? ` O vÃ­nculo informado no cadastro Ã©: ${f.vinculo}.` : ''}${f?.dataAdmissao ? ` A data de admissÃ£o registrada Ã© ${dt(f.dataAdmissao) || f.dataAdmissao}.` : ''}\n\n${obs || 'A presente declaraÃ§Ã£o Ã© expedida a pedido do(a) interessado(a), para os fins que se fizerem necessÃ¡rios.'}\n\nPor ser expressÃ£o das informaÃ§Ãµes registradas, firmamos a presente declaraÃ§Ã£o, sujeita Ã  conferÃªncia dos documentos funcionais.`;
       case 'requerimento':
-        return `Eu, ${n}, matrícula nº ${mat}, ocupante do cargo/função de ${cg}, venho, respeitosamente, requerer o seguinte: ${pad(valor('doc-pedido'), 'OBJETO DO REQUERIMENTO')}.\n\n${just}\n\nDiante do exposto, solicito a análise do pedido e as providências administrativas cabíveis.\n\nNestes termos, peço deferimento.`;
+        return `Eu, ${n}, matrÃ­cula nÂº ${mat}, ocupante do cargo/funÃ§Ã£o de ${cg}, venho, respeitosamente, requerer o seguinte: ${pad(valor('doc-pedido'), 'OBJETO DO REQUERIMENTO')}.\n\n${just}\n\nDiante do exposto, solicito a anÃ¡lise do pedido e as providÃªncias administrativas cabÃ­veis.\n\nNestes termos, peÃ§o deferimento.`;
       case 'prorrogacao':
-        if (outro) return `Vimos, por meio deste, solicitar a prorrogação do contrato do(a) servidor(a) ${n}, matrícula nº ${mat}, ${cg}, que atua em substituição ao(à) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, afastado(a) em Licença para Tratamento de Saúde (LTS).\n\nConforme documentação do afastamento a ser conferida, ${nome(outro)} encontra-se em LTS${valor('doc-prazo') ? ` pelo período de ${valor('doc-prazo')} dias` : ''}${valor('doc-inicio') ? `, a partir de ${inicio}` : ''}.\n\nDiante da continuidade do afastamento, solicitamos a prorrogação do contrato de ${n}${valor('doc-fim') ? ` até ${fim}` : ' durante o período de substituição'}, a fim de ${just}.`;
-        return `Vimos, por meio deste, solicitar a prorrogação do contrato do(a) servidor(a) ${n}, matrícula nº ${mat}, ${cg}, que atua nesta unidade escolar.\n\nO término contratual informado está previsto para ${inicio}, e solicita-se a análise da prorrogação até ${fim}.\n\nA solicitação fundamenta-se na necessidade de ${just}, a fim de assegurar a continuidade das atividades da unidade escolar.`;
+        if (outro) return `Vimos, por meio deste, solicitar a prorrogaÃ§Ã£o do contrato do(a) servidor(a) ${n}, matrÃ­cula nÂº ${mat}, ${cg}, que atua em substituiÃ§Ã£o ao(Ã ) servidor(a) ${nome(outro)}, matrÃ­cula nÂº ${matricula(outro)}, com afastamento informado por ${afastamento}.\n\nConforme documentaÃ§Ã£o do afastamento a ser conferida, ${nome(outro)} tem afastamento informado por ${afastamento}${valor('doc-prazo') ? ` pelo perÃ­odo de ${valor('doc-prazo')} dias` : ''}${valor('doc-inicio') ? `, a partir de ${inicio}` : ''}.\n\nDiante da continuidade do afastamento, solicitamos a prorrogaÃ§Ã£o do contrato de ${n}${valor('doc-fim') ? ` atÃ© ${fim}` : ' durante o perÃ­odo de substituiÃ§Ã£o'}, a fim de ${just}.`;
+        return `Vimos, por meio deste, solicitar a prorrogaÃ§Ã£o do contrato do(a) servidor(a) ${n}, matrÃ­cula nÂº ${mat}, ${cg}, que atua nesta unidade escolar.\n\nO tÃ©rmino contratual informado estÃ¡ previsto para ${inicio}, e solicita-se a anÃ¡lise da prorrogaÃ§Ã£o atÃ© ${fim}.\n\nA solicitaÃ§Ã£o fundamenta-se na necessidade de ${just}, a fim de assegurar a continuidade das atividades da unidade escolar.`;
       case 'substituicao':
-        return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para exercer a função de ${cargoVaga}, em substituição ao(à) servidor(a) ${n}, matrícula nº ${mat}, que se encontra afastado(a) por licença para tratamento de saúde (LTS), conforme documentação administrativa a ser conferida.\n\nO afastamento informado tem início em ${inicio}${valor('doc-fim') ? `, com término previsto para ${fim}` : ''}${valor('doc-prazo') ? `, pelo período de ${valor('doc-prazo')} dias` : ''}.\n\n${outro ? `Caso seja cabível, indicamos para análise a continuidade ou contratação do(a) servidor(a) ${nome(outro)}, matrícula nº ${matricula(outro)}, sem prejuízo dos procedimentos legais de contratação.\n\n` : ''}A substituição se faz necessária para ${just}.\n\nSolicitamos as providências administrativas cabíveis, a fim de assegurar a continuidade do atendimento aos estudantes e das atividades pedagógicas.`;
+        return `Cumprimentando-os cordialmente, vimos solicitar a contrataÃ§Ã£o de um(a) profissional para exercer a funÃ§Ã£o de ${cargoVaga}, em substituiÃ§Ã£o ao(Ã ) servidor(a) ${n}, matrÃ­cula nÂº ${mat}, que se encontra com afastamento informado por ${afastamento}, conforme documentaÃ§Ã£o administrativa a ser conferida.\n\nO afastamento informado tem inÃ­cio em ${inicio}${valor('doc-fim') ? `, com tÃ©rmino previsto para ${fim}` : ''}${valor('doc-prazo') ? `, pelo perÃ­odo de ${valor('doc-prazo')} dias` : ''}.\n\n${outro ? `Caso seja cabÃ­vel, indicamos para anÃ¡lise a continuidade ou contrataÃ§Ã£o do(a) servidor(a) ${nome(outro)}, matrÃ­cula nÂº ${matricula(outro)}, sem prejuÃ­zo dos procedimentos legais de contrataÃ§Ã£o.\n\n` : ''}A substituiÃ§Ã£o se faz necessÃ¡ria para ${just}.\n\nSolicitamos as providÃªncias administrativas cabÃ­veis, a fim de assegurar a continuidade do atendimento aos estudantes e das atividades pedagÃ³gicas.`;
       case 'contratacao':
-        return `Cumprimentando-os cordialmente, vimos solicitar a contratação de um(a) profissional para o cargo/função de ${cargoVaga}, tendo em vista a necessidade de reposição de pessoal nesta unidade escolar.\n\n${f ? `A necessidade decorre da situação funcional do(a) servidor(a) ${n}, matrícula nº ${mat}.` : 'A vaga e a situação funcional que motivam o pedido deverão ser confirmadas nos registros da unidade escolar.'} ${valor('doc-inicio') ? `A data informada para a ocorrência é ${inicio}.` : ''}\n\nJustificativa: ${just}.\n\nDiante da necessidade de manter a continuidade das atividades e o atendimento aos alunos, solicitamos a análise e autorização das providências de contratação cabíveis.`;
+        return `Cumprimentando-os cordialmente, vimos solicitar a contrataÃ§Ã£o de um(a) profissional para o cargo/funÃ§Ã£o de ${cargoVaga}, tendo em vista a necessidade de reposiÃ§Ã£o de pessoal nesta unidade escolar.\n\n${f ? `A necessidade decorre da situaÃ§Ã£o funcional do(a) servidor(a) ${n}, matrÃ­cula nÂº ${mat}.` : 'A vaga e a situaÃ§Ã£o funcional que motivam o pedido deverÃ£o ser confirmadas nos registros da unidade escolar.'} ${valor('doc-inicio') ? `A data informada para a ocorrÃªncia Ã© ${inicio}.` : ''}\n\nJustificativa: ${just}.\n\nDiante da necessidade de manter a continuidade das atividades e o atendimento aos alunos, solicitamos a anÃ¡lise e autorizaÃ§Ã£o das providÃªncias de contrataÃ§Ã£o cabÃ­veis.`;
       case 'calendario': {
         const anterior = pad(dt(valor('doc-inicio')), 'DATA ORIGINAL');
         const proposta = pad(dt(valor('doc-fim')), 'DATA PROPOSTA');
-        return `Solicitamos autorização para alterar a data do sábado letivo originalmente previsto para ${anterior}, propondo sua realização em ${proposta}.\n\nA solicitação fundamenta-se em: ${just}. Ressaltamos que a alteração deverá respeitar o calendário escolar aprovado, os dias letivos e a carga horária anual obrigatória.\n\nCertos da atenção e da análise dessa Coordenadoria, aguardamos manifestação quanto à alteração solicitada.`;
+        return `Solicitamos autorizaÃ§Ã£o para alterar a data do sÃ¡bado letivo originalmente previsto para ${anterior}, propondo sua realizaÃ§Ã£o em ${proposta}.\n\nA solicitaÃ§Ã£o fundamenta-se em: ${just}. Ressaltamos que a alteraÃ§Ã£o deverÃ¡ respeitar o calendÃ¡rio escolar aprovado, os dias letivos e a carga horÃ¡ria anual obrigatÃ³ria.\n\nCertos da atenÃ§Ã£o e da anÃ¡lise dessa Coordenadoria, aguardamos manifestaÃ§Ã£o quanto Ã  alteraÃ§Ã£o solicitada.`;
       }
       case 'zeladoria': {
         const qtd = pad(valor('doc-qtd'), 'QUANTIDADE DE SERVIDORES');
         const adicional = valor('doc-pedido');
-        return `Vimos, respeitosamente, solicitar a disponibilização de ${qtd} profissional(is) de servente de zeladoria para atender às necessidades desta unidade escolar.${adicional ? ` Solicitamos também ${adicional}.` : ''}\n\nJustificamos o pedido em razão de ${just}. A medida se faz necessária para assegurar a higienização adequada dos ambientes e a continuidade dos serviços de apoio escolar.\n\nSolicitamos a análise da demanda e a adoção das providências administrativas cabíveis.`;
+        return `Vimos, respeitosamente, solicitar a disponibilizaÃ§Ã£o de ${qtd} profissional(is) de servente de zeladoria para atender Ã s necessidades desta unidade escolar.${adicional ? ` Solicitamos tambÃ©m ${adicional}.` : ''}\n\nJustificamos o pedido em razÃ£o de ${just}. A medida se faz necessÃ¡ria para assegurar a higienizaÃ§Ã£o adequada dos ambientes e a continuidade dos serviÃ§os de apoio escolar.\n\nSolicitamos a anÃ¡lise da demanda e a adoÃ§Ã£o das providÃªncias administrativas cabÃ­veis.`;
       }
       case 'transporte': {
-        const q = pad(valor('doc-alunos-num'), 'NÚMERO DE ESTUDANTES');
+        const q = pad(valor('doc-alunos-num'), 'NÃšMERO DE ESTUDANTES');
         const turmas = pad(valor('doc-anos'), 'TURMAS / ANOS');
         const destino = pad(valor('doc-local'), 'DESTINO');
         const dia = pad(dt(valor('doc-inicio')), 'DATA DA VISITA');
         const turno = pad(valor('doc-turno'), 'TURNO');
-        const embarque = pad(valor('doc-saida'), 'HORÁRIO DE EMBARQUE');
-        const retorno = pad(valor('doc-retorno'), 'HORÁRIO DO RETORNO');
-        return `Vimos, por meio deste, solicitar a disponibilização de transporte escolar para ${q} estudante(s) das turmas ${turmas}, no dia ${dia}, no turno ${turno}, com destino a ${destino}, para realização de atividade pedagógica extraclasse.\n\nA visita está prevista para o período ${periodoVisita()}. Solicitamos embarque na escola a partir de ${embarque} e retorno previsto a partir de ${retorno}.\n\nA atividade tem por finalidade ${just}. Agradecemos a atenção e aguardamos a análise da solicitação.`;
+        const embarque = pad(valor('doc-saida'), 'HORÃRIO DE EMBARQUE');
+        const retorno = pad(valor('doc-retorno'), 'HORÃRIO DO RETORNO');
+        return `Vimos, por meio deste, solicitar a disponibilizaÃ§Ã£o de transporte escolar para ${q} estudante(s) das turmas ${turmas}, no dia ${dia}, no turno ${turno}, com destino a ${destino}, para realizaÃ§Ã£o de atividade pedagÃ³gica extraclasse.\n\nA visita estÃ¡ prevista para o perÃ­odo ${periodoVisita()}. Solicitamos embarque na escola a partir de ${embarque} e retorno previsto a partir de ${retorno}.\n\nA atividade tem por finalidade ${just}. Agradecemos a atenÃ§Ã£o e aguardamos a anÃ¡lise da solicitaÃ§Ã£o.`;
       }
       case 'estagio': {
         const instituicao = valor('doc-instituicao');
         const horario = valor('doc-horario');
-        return `Vimos, por meio deste, solicitar análise e parecer dessa Coordenadoria quanto à possibilidade de o(a) servidor(a) ${n}, matrícula nº ${mat}, ocupante da função de ${cg}, realizar estágio supervisionado${instituicao ? ` na instituição ${instituicao}` : ''}.\n\n${horario ? `Informações apresentadas sobre a compatibilidade dos horários: ${horario}. ` : ''}Justificativa e demais esclarecimentos: ${just}.\n\nSolicitamos orientação sobre os requisitos e procedimentos aplicáveis, antes de qualquer autorização pela unidade escolar. Colocamo-nos à disposição para encaminhar os documentos complementares necessários.`;
+        return `Vimos, por meio deste, solicitar anÃ¡lise e parecer dessa Coordenadoria quanto Ã  possibilidade de o(a) servidor(a) ${n}, matrÃ­cula nÂº ${mat}, ocupante da funÃ§Ã£o de ${cg}, realizar estÃ¡gio supervisionado${instituicao ? ` na instituiÃ§Ã£o ${instituicao}` : ''}.\n\n${horario ? `InformaÃ§Ãµes apresentadas sobre a compatibilidade dos horÃ¡rios: ${horario}. ` : ''}Justificativa e demais esclarecimentos: ${just}.\n\nSolicitamos orientaÃ§Ã£o sobre os requisitos e procedimentos aplicÃ¡veis, antes de qualquer autorizaÃ§Ã£o pela unidade escolar. Colocamo-nos Ã  disposiÃ§Ã£o para encaminhar os documentos complementares necessÃ¡rios.`;
       }
       case 'avanco': {
         const aluno = pad(valor('doc-estudante'), 'NOME DO(A) ESTUDANTE');
         const turma = pad(valor('doc-turma-aluno'), 'ANO / TURMA');
         const anexos = valor('doc-anexos');
-        return `Vimos, por meio deste, solicitar análise e parecer da Coordenadoria de Educação Inclusiva acerca do pedido de avaliação para possível avanço de nível do(a) estudante ${aluno}, matriculado(a) no(a) ${turma}.\n\nContextualização apresentada pela unidade escolar: ${just}. O encaminhamento não pressupõe o deferimento do avanço, ficando sujeito à avaliação técnica e aos procedimentos pertinentes.\n\n${anexos ? `Encaminhamos em anexo: ${anexos}. ` : ''}Solicitamos orientação e parecer quanto às providências educacionais cabíveis.`;
+        return `Vimos, por meio deste, solicitar anÃ¡lise e parecer da Coordenadoria de EducaÃ§Ã£o Inclusiva acerca do pedido de avaliaÃ§Ã£o para possÃ­vel avanÃ§o de nÃ­vel do(a) estudante ${aluno}, matriculado(a) no(a) ${turma}.\n\nContextualizaÃ§Ã£o apresentada pela unidade escolar: ${just}. O encaminhamento nÃ£o pressupÃµe o deferimento do avanÃ§o, ficando sujeito Ã  avaliaÃ§Ã£o tÃ©cnica e aos procedimentos pertinentes.\n\n${anexos ? `Encaminhamos em anexo: ${anexos}. ` : ''}Solicitamos orientaÃ§Ã£o e parecer quanto Ã s providÃªncias educacionais cabÃ­veis.`;
       }
       case 'memorando':
-        return `${pad(valor('doc-pedido'), 'DESCRIÇÃO DA SOLICITAÇÃO')}\n\n${just}\n\nDiante do exposto, solicitamos a análise e as providências administrativas cabíveis.`;
+        return `${pad(valor('doc-pedido'), 'DESCRIÃ‡ÃƒO DA SOLICITAÃ‡ÃƒO')}\n\n${just}\n\nDiante do exposto, solicitamos a anÃ¡lise e as providÃªncias administrativas cabÃ­veis.`;
       default:
         return '';
     }
@@ -254,31 +255,31 @@ const DocumentosServidoresPage = (() => {
   function camposDinamicos() {
     const tipo = valor('doc-tipo');
     const dicas = {
-      declaracao: 'Declaração funcional. Confirme os registros antes da assinatura.',
-      requerimento: 'Requerimento em primeira pessoa, assinado pelo próprio servidor.',
-      prorrogacao: 'Prorrogação de contrato: confirme o término, o período solicitado e eventual LTS.',
-      substituicao: 'Contratação de substituto em LTS. Verifique o afastamento e a função.',
-      contratacao: 'Solicitação de contratação por vacância ou necessidade de pessoal.',
-      calendario: 'Modelo do Memorando 13: alteração de sábado letivo, sujeita à autorização.',
-      zeladoria: 'Modelo do Memorando 12: solicitação de serventes de zeladoria.',
-      transporte: 'Modelo do Memorando 16: transporte para visita pedagógica.',
-      estagio: 'Modelo do Memorando 7: pedido de parecer sobre estágio supervisionado.',
-      avanco: 'Modelo do Memorando 25: solicitação de análise e parecer sobre possível avanço de nível. Dados de estudantes não são salvos.',
-      memorando: 'Modelo personalizado: escolha destinatário, assunto, pedido e justificativa; todo o texto pode ser editado.'
+      declaracao: 'DeclaraÃ§Ã£o funcional. Confirme os registros antes da assinatura.',
+      requerimento: 'Requerimento em primeira pessoa, assinado pelo prÃ³prio servidor.',
+      prorrogacao: 'ProrrogaÃ§Ã£o de contrato: confirme o tÃ©rmino, o perÃ­odo solicitado e eventual LTS.',
+      substituicao: 'SubstituiÃ§Ã£o por afastamento. Informe a situaÃ§Ã£o confirmada e a funÃ§Ã£o.',
+      contratacao: 'SolicitaÃ§Ã£o de contrataÃ§Ã£o por vacÃ¢ncia ou necessidade de pessoal.',
+      calendario: 'Modelo do Memorando 13: alteraÃ§Ã£o de sÃ¡bado letivo, sujeita Ã  autorizaÃ§Ã£o.',
+      zeladoria: 'Modelo do Memorando 12: solicitaÃ§Ã£o de serventes de zeladoria.',
+      transporte: 'Modelo do Memorando 16: transporte para visita pedagÃ³gica.',
+      estagio: 'Modelo do Memorando 7: pedido de parecer sobre estÃ¡gio supervisionado.',
+      avanco: 'Modelo do Memorando 25: solicitaÃ§Ã£o de anÃ¡lise e parecer sobre possÃ­vel avanÃ§o de nÃ­vel. Dados de estudantes nÃ£o sÃ£o salvos.',
+      memorando: 'Modelo personalizado: escolha destinatÃ¡rio, assunto, pedido e justificativa; todo o texto pode ser editado.'
     };
     $('doc-dica').textContent = dicas[tipo] || '';
     const semServidor = ['calendario','zeladoria','transporte','avanco','memorando'].includes(tipo);
     $('doc-principal-bloco').hidden = semServidor;
     $('doc-principal-legenda').textContent = ({
-      substituicao: 'Servidor afastado por LTS',
+      substituicao: 'Servidor afastado',
       requerimento: 'Servidor requerente',
       contratacao: 'Servidor desligado / vaga (opcional)',
-      estagio: 'Servidor solicitante de estágio'
+      estagio: 'Servidor solicitante de estÃ¡gio'
     })[tipo] || 'Servidor interessado';
     $('doc-secundario-bloco').hidden = !['substituicao','prorrogacao'].includes(tipo);
     $('doc-secundario-legenda').textContent = tipo === 'prorrogacao'
-      ? 'Servidor titular afastado por LTS (opcional)'
-      : 'Profissional sugerido para substituição (opcional)';
+      ? 'Servidor titular afastado (opcional)'
+      : 'Profissional sugerido para substituiÃ§Ã£o (opcional)';
     $('doc-destino-simples').hidden = ehMemo();
     $('doc-memorando-cabecalho').hidden = !ehMemo();
     $('doc-inicio-bloco').hidden = !['prorrogacao','substituicao','contratacao','calendario','transporte'].includes(tipo);
@@ -288,29 +289,29 @@ const DocumentosServidoresPage = (() => {
     $('doc-pedido-bloco').hidden = !['memorando','requerimento','zeladoria'].includes(tipo);
     $('doc-numero-bloco').hidden = !ehMemo();
     $('doc-motivo-legenda').textContent = ({
-      declaracao: 'Finalidade da declaração',
-      requerimento: 'Fundamentação do requerimento',
-      calendario: 'Motivo da alteração do calendário',
-      zeladoria: 'Necessidades de limpeza e manutenção',
-      transporte: 'Objetivo pedagógico da visita',
-      estagio: 'Contexto e justificativa do pedido de estágio',
-      avanco: 'Contextualização pedagógica (evite detalhes médicos sensíveis)',
-      memorando: 'Justificativa / fundamentação'
-    })[tipo] || 'Justificativa da solicitação';
+      declaracao: 'Finalidade da declaraÃ§Ã£o',
+      requerimento: 'FundamentaÃ§Ã£o do requerimento',
+      calendario: 'Motivo da alteraÃ§Ã£o do calendÃ¡rio',
+      zeladoria: 'Necessidades de limpeza e manutenÃ§Ã£o',
+      transporte: 'Objetivo pedagÃ³gico da visita',
+      estagio: 'Contexto e justificativa do pedido de estÃ¡gio',
+      avanco: 'ContextualizaÃ§Ã£o pedagÃ³gica (evite detalhes mÃ©dicos sensÃ­veis)',
+      memorando: 'Justificativa / fundamentaÃ§Ã£o'
+    })[tipo] || 'Justificativa da solicitaÃ§Ã£o';
     $('doc-inicio-legenda').textContent = ({
-      prorrogacao: 'Início da LTS ou término do contrato',
-      substituicao: 'Início da licença (LTS)',
-      contratacao: 'Data da vacância / rescisão',
-      calendario: 'Data original do sábado letivo',
+      prorrogacao: 'InÃ­cio do perÃ­odo informado',
+      substituicao: 'InÃ­cio do afastamento',
+      contratacao: 'Data da vacÃ¢ncia / rescisÃ£o',
+      calendario: 'Data original do sÃ¡bado letivo',
       transporte: 'Data da visita'
     })[tipo] || 'Data inicial';
     $('doc-fim-legenda').textContent = ({
-      prorrogacao: 'Prorrogar até (se definido)',
-      substituicao: 'Fim previsto da licença',
+      prorrogacao: 'Prorrogar atÃ© (se definido)',
+      substituicao: 'Fim previsto do afastamento',
       calendario: 'Nova data proposta'
     })[tipo] || 'Data final';
     $('doc-pedido-legenda').textContent = tipo === 'zeladoria'
-      ? 'Solicitação adicional (opcional; ex.: ampliação de carga horária)'
+      ? 'SolicitaÃ§Ã£o adicional (opcional; ex.: ampliaÃ§Ã£o de carga horÃ¡ria)'
       : 'Pedido / objeto do documento';
     for (const [id,,fieldTipo] of EXTRA_CAMPOS) {
       $(id + '-bloco').hidden = fieldTipo !== tipo;
@@ -319,16 +320,16 @@ const DocumentosServidoresPage = (() => {
 
   function assuntoPadrao(tipo) {
     return {
-      declaracao:'Declaração funcional',
+      declaracao:'DeclaraÃ§Ã£o funcional',
       requerimento:'Requerimento administrativo',
-      prorrogacao:'Solicitação de prorrogação de contrato',
-      substituicao:'Solicitação de contratação para substituição por LTS',
-      contratacao:'Solicitação de contratação de servidor(a)',
-      calendario:'Solicitação de alteração de data de sábado letivo no calendário escolar',
-      zeladoria:'Solicitação de serventes de zeladoria',
-      transporte:'Solicitação de transporte para estudantes',
-      estagio:'Solicitação de parecer sobre estágio supervisionado',
-      avanco:'Solicitação de análise e parecer sobre avanço de nível',
+      prorrogacao:'SolicitaÃ§Ã£o de prorrogaÃ§Ã£o de contrato',
+      substituicao:'SolicitaÃ§Ã£o de contrataÃ§Ã£o para substituiÃ§Ã£o',
+      contratacao:'SolicitaÃ§Ã£o de contrataÃ§Ã£o de servidor(a)',
+      calendario:'SolicitaÃ§Ã£o de alteraÃ§Ã£o de data de sÃ¡bado letivo no calendÃ¡rio escolar',
+      zeladoria:'SolicitaÃ§Ã£o de serventes de zeladoria',
+      transporte:'SolicitaÃ§Ã£o de transporte para estudantes',
+      estagio:'SolicitaÃ§Ã£o de parecer sobre estÃ¡gio supervisionado',
+      avanco:'SolicitaÃ§Ã£o de anÃ¡lise e parecer sobre avanÃ§o de nÃ­vel',
       memorando:''
     }[tipo] || '';
   }
@@ -337,9 +338,9 @@ const DocumentosServidoresPage = (() => {
     if (force || !S.textoEditado) {
       $('doc-texto').value = modeloTexto();
       S.textoEditado = false;
-      $('doc-edicao').textContent = 'Texto gerado automaticamente; você pode editar antes de emitir.';
+      $('doc-edicao').textContent = 'Texto gerado automaticamente; vocÃª pode editar antes de emitir.';
     } else {
-      $('doc-edicao').textContent = 'Texto editado manualmente. Use “Atualizar texto” para recompor com os dados do formulário.';
+      $('doc-edicao').textContent = 'Texto editado manualmente. Use â€œAtualizar textoâ€ para recompor com os dados do formulÃ¡rio.';
     }
     visualizar();
   }
@@ -362,9 +363,9 @@ const DocumentosServidoresPage = (() => {
     return `
       <div class="docs-letterhead">
         <b>PREFEITURA MUNICIPAL DE MONTES CLAROS</b>
-        <b>SECRETARIA MUNICIPAL DE EDUCAÇÃO</b>
+        <b>SECRETARIA MUNICIPAL DE EDUCAÃ‡ÃƒO</b>
         <b>ESCOLA MUNICIPAL PROFESSORA EUNICE CARNEIRO</b>
-        <small>Montes Claros – Minas Gerais</small>
+        <small>Montes Claros â€“ Minas Gerais</small>
       </div>
       <div class="docs-doc-title">${esc(cab.titulo)}</div>
       <div class="docs-place-date">Montes Claros/MG, ${esc(dataExtenso(valor('doc-data')))}.</div>
@@ -392,18 +393,18 @@ const DocumentosServidoresPage = (() => {
     const tipo = valor('doc-tipo');
     const requerServidor = ['declaracao','requerimento','prorrogacao','substituicao','estagio'].includes(tipo);
     const avisos = [];
-    if (requerServidor && !servidor('doc-principal')) avisos.push('Selecione um servidor válido na lista.');
+    if (requerServidor && !servidor('doc-principal')) avisos.push('Selecione um servidor vÃ¡lido na lista.');
     if (!valor('doc-data')) avisos.push('Informe a data do documento.');
-    if (tipo === 'prorrogacao' && (!valor('doc-inicio') || (!valor('doc-fim') && !servidor('doc-secundario')))) avisos.push('Informe data inicial e data final ou selecione a pessoa afastada para prorrogação por LTS.');
-    if (tipo === 'substituicao' && !valor('doc-inicio')) avisos.push('Informe o início da licença.');
+    if (tipo === 'prorrogacao' && (!valor('doc-inicio') || (!valor('doc-fim') && !servidor('doc-secundario')))) avisos.push('Informe data inicial e data final ou selecione a pessoa afastada para prorrogaÃ§Ã£o por LTS.');
+    if (tipo === 'substituicao' && !valor('doc-inicio')) avisos.push('Informe o inÃ­cio da licenÃ§a.');
     if (['substituicao','contratacao'].includes(tipo) && !valor('doc-cargo')) avisos.push('Informe o cargo a contratar.');
     if (['memorando','requerimento'].includes(tipo) && !valor('doc-pedido')) avisos.push('Informe o pedido do documento.');
     if (['memorando','requerimento','prorrogacao','substituicao','contratacao','calendario','zeladoria','transporte','estagio','avanco'].includes(tipo) && !valor('doc-motivo')) avisos.push('Informe a justificativa.');
     if (tipo !== 'requerimento' && (!valor('doc-assinante') || !valor('doc-cargo-assinante'))) avisos.push('Confira os dados do assinante.');
-    if (/\[INFORMAR [^\]]+\]/i.test(valor('doc-texto'))) avisos.push('O texto ainda contém campos [INFORMAR ...].');
-    if (!valor('doc-texto')) avisos.push('O texto está vazio.');
+    if (/\[INFORMAR [^\]]+\]/i.test(valor('doc-texto'))) avisos.push('O texto ainda contÃ©m campos [INFORMAR ...].');
+    if (!valor('doc-texto')) avisos.push('O texto estÃ¡ vazio.');
     if (tipo === 'calendario' && (!valor('doc-inicio') || !valor('doc-fim'))) avisos.push('Informe data original e nova data proposta.');
-    if (tipo === 'zeladoria' && (!valor('doc-qtd') || Number(valor('doc-qtd')) < 1)) avisos.push('Informe o número de profissionais solicitados.');
+    if (tipo === 'zeladoria' && (!valor('doc-qtd') || Number(valor('doc-qtd')) < 1)) avisos.push('Informe o nÃºmero de profissionais solicitados.');
     if (tipo === 'transporte') {
       for (const [id,rot] of [['doc-alunos-num','Quantidade de estudantes'],['doc-anos','Turmas'],['doc-inicio','Data da visita'],['doc-turno','Turno'],['doc-local','Destino'],['doc-saida','Embarque'],['doc-retorno','Retorno']]) {
         if (!valor(id)) avisos.push('Preencha: ' + rot + '.');
@@ -411,7 +412,7 @@ const DocumentosServidoresPage = (() => {
     }
     if (tipo === 'avanco' && (!valor('doc-estudante') || !valor('doc-turma-aluno'))) avisos.push('Informe estudante e turma para solicitar o parecer.');
     if (ehMemo()) {
-      for(const [id,rot] of [['doc-numero','Número do memorando'],['doc-para','Para'],['doc-ac','A/C'],['doc-setor','Coordenadoria/Setor'],['doc-assunto','Assunto'],['doc-saudacao','Saudação'],['doc-despedida','Despedida']]) {
+      for(const [id,rot] of [['doc-numero','NÃºmero do memorando'],['doc-para','Para'],['doc-ac','A/C'],['doc-setor','Coordenadoria/Setor'],['doc-assunto','Assunto'],['doc-saudacao','SaudaÃ§Ã£o'],['doc-despedida','Despedida']]) {
         if(!valor(id)) avisos.push('Preencha: '+rot+'.');
       }
     }
@@ -471,13 +472,13 @@ const DocumentosServidoresPage = (() => {
     win.document.querySelectorAll('[data-doc-close]').forEach(button => {
       button.addEventListener('click', () => win.close());
     });
-    situacao('Documento aberto para revisão final e impressão. Use “Salvar como PDF” no navegador.', 'ok');
+    situacao('Documento aberto para revisÃ£o final e impressÃ£o. Use â€œSalvar como PDFâ€ no navegador.', 'ok');
   }
   async function copiar() {
-    const text = ehMemo() ? `MEMORANDO Nº ${valor('doc-numero')}/${valor('doc-data').slice(0,4)}\nData: ${dt(valor('doc-data'))}\nDe: ${assinatura().nome} — ${assinatura().cargo}\nPara: ${valor('doc-para')}\nA/C: ${valor('doc-ac')}\n${valor('doc-setor')}\nASSUNTO: ${valor('doc-assunto')}\n\n${valor('doc-saudacao')}\n\n${valor('doc-texto')}\n\n${valor('doc-despedida')}\n\n${assinatura().nome}\n${assinatura().cargo}` : `${cabecalho().titulo}\nMontes Claros/MG, ${dataExtenso(valor('doc-data'))}\n${valor('doc-destino')}\nAssunto: ${valor('doc-assunto')}\n\n${valor('doc-texto')}\n\n${assinatura().nome}\n${assinatura().cargo}`;
+    const text = ehMemo() ? `MEMORANDO NÂº ${valor('doc-numero')}/${valor('doc-data').slice(0,4)}\nData: ${dt(valor('doc-data'))}\nDe: ${assinatura().nome} â€” ${assinatura().cargo}\nPara: ${valor('doc-para')}\nA/C: ${valor('doc-ac')}\n${valor('doc-setor')}\nASSUNTO: ${valor('doc-assunto')}\n\n${valor('doc-saudacao')}\n\n${valor('doc-texto')}\n\n${valor('doc-despedida')}\n\n${assinatura().nome}\n${assinatura().cargo}` : `${cabecalho().titulo}\nMontes Claros/MG, ${dataExtenso(valor('doc-data'))}\n${valor('doc-destino')}\nAssunto: ${valor('doc-assunto')}\n\n${valor('doc-texto')}\n\n${assinatura().nome}\n${assinatura().cargo}`;
     try {
       await navigator.clipboard.writeText(text);
-      situacao('Texto copiado. Você pode colá-lo no 1Doc, Word ou e-mail.', 'ok');
+      situacao('Texto copiado. VocÃª pode colÃ¡-lo no 1Doc, Word ou e-mail.', 'ok');
     } catch {
       const t = $('doc-texto'); t.focus(); t.select();
       situacao('Selecionei o texto; pressione Ctrl+C para copiar.', 'warn');
@@ -485,7 +486,7 @@ const DocumentosServidoresPage = (() => {
   }
 
   // Exportador DOCX nativo. Reaproveita o arquivo Word fornecido pela escola:
-  // preserva sua tabela, brasão, estilos, margens e estrutura do documento.
+  // preserva sua tabela, brasÃ£o, estilos, margens e estrutura do documento.
   const MODELO_WORD = "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";
   const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
   const textCodec = new TextEncoder();
@@ -504,12 +505,12 @@ const DocumentosServidoresPage = (() => {
     const dv = new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
     let end = bytes.length-22;
     while(end>=0 && read32(dv,end)!==0x06054b50) end--;
-    if(end<0)throw new Error('Modelo Word não é um ZIP válido.');
+    if(end<0)throw new Error('Modelo Word nÃ£o Ã© um ZIP vÃ¡lido.');
     const total=read16(dv,end+10), start=read32(dv,end+16);
     let at=start;
     const files=new Map();
     for(let i=0;i<total;i++) {
-      if(read32(dv,at)!==0x02014b50)throw new Error('ZIP do modelo está corrompido.');
+      if(read32(dv,at)!==0x02014b50)throw new Error('ZIP do modelo estÃ¡ corrompido.');
       const method=read16(dv,at+10);
       const size=read32(dv,at+20);
       const nameLen=read16(dv,at+28);
@@ -517,16 +518,16 @@ const DocumentosServidoresPage = (() => {
       const commentLen=read16(dv,at+32);
       const local=read32(dv,at+42);
       const name=readText.decode(bytes.subarray(at+46,at+46+nameLen));
-      if(read32(dv,local)!==0x04034b50)throw new Error('Cabeçalho do arquivo inválido.');
+      if(read32(dv,local)!==0x04034b50)throw new Error('CabeÃ§alho do arquivo invÃ¡lido.');
       const pos=local+30+read16(dv,local+26)+read16(dv,local+28);
       const comp=bytes.slice(pos,pos+size);
       let data;
       if(method===0){data=comp;}
       else if(method===8){
-        if(typeof DecompressionStream==='undefined')throw new Error('Navegador sem suporte à descompactação Word. Use Chrome atualizado.');
+        if(typeof DecompressionStream==='undefined')throw new Error('Navegador sem suporte Ã  descompactaÃ§Ã£o Word. Use Chrome atualizado.');
         const stream=new Blob([comp]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
         data=new Uint8Array(await new Response(stream).arrayBuffer());
-      } else throw new Error('Método ZIP não suportado: '+method);
+      } else throw new Error('MÃ©todo ZIP nÃ£o suportado: '+method);
       files.set(name,data);
       at+=46+nameLen+extraLen+commentLen;
     }
@@ -615,7 +616,7 @@ const DocumentosServidoresPage = (() => {
   }
   function preencherDocxXML(xml){
     const doc=new DOMParser().parseFromString(xml,'application/xml');
-    if(doc.getElementsByTagName('parsererror').length)throw new Error('XML do modelo Word inválido.');
+    if(doc.getElementsByTagName('parsererror').length)throw new Error('XML do modelo Word invÃ¡lido.');
     const sig=assinatura();
     const replacements={
       '{{DATA}}':dt(valor('doc-data')),
@@ -637,7 +638,7 @@ const DocumentosServidoresPage = (() => {
     }
     const paras=limpa(valor('doc-texto')).split(/\n\s*\n/).filter(Boolean);
     const target=[1,2,3].map(i=>markParagraph(doc,`{{CORPO${i}}}`));
-    if(target.some(p=>!p))throw new Error('Parágrafos do modelo Word ausentes.');
+    if(target.some(p=>!p))throw new Error('ParÃ¡grafos do modelo Word ausentes.');
     let anchor=target[2];
     if(paras.length>3){
       for(let i=3;i<paras.length;i++){
@@ -661,7 +662,7 @@ const DocumentosServidoresPage = (() => {
       situacao('Preparando o Word com o modelo original da escola...','');
       const files=await unzipOriginal(base64Bytes(MODELO_WORD));
       const original=files.get('word/document.xml');
-      if(!original)throw new Error('Documento do modelo não encontrado.');
+      if(!original)throw new Error('Documento do modelo nÃ£o encontrado.');
       const resultado=preencherDocxXML(readText.decode(original));
       files.set('word/document.xml',textCodec.encode(resultado));
       const blob=zipStored(files);
@@ -670,8 +671,8 @@ const DocumentosServidoresPage = (() => {
       a.download=`MEMORANDO_${valor('doc-numero')}_${valor('doc-data').slice(0,4)}.docx`;
       document.body.appendChild(a);a.click();a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),60000);
-      situacao('Word .docx gerado a partir do modelo original. Confira dados, assinatura e quebras de página antes do protocolo.','ok');
-    }catch(err){situacao('Não foi possível gerar o .docx: '+err.message,'error');}
+      situacao('Word .docx gerado a partir do modelo original. Confira dados, assinatura e quebras de pÃ¡gina antes do protocolo.','ok');
+    }catch(err){situacao('NÃ£o foi possÃ­vel gerar o .docx: '+err.message,'error');}
   }
 
   function baixarWord() {
@@ -685,12 +686,12 @@ const DocumentosServidoresPage = (() => {
     a.download = `DOCUMENTO_SERVIDOR_${valor('doc-data') || dataLocal()}.doc`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    situacao('Arquivo .doc HTML gerado. Para preservar o memorando exatamente como aparece, prefira Imprimir / Salvar PDF; o Word pode reorganizar o layout e não incorporar o brasão.', 'ok');
+    situacao('Arquivo .doc HTML gerado. Para preservar o memorando exatamente como aparece, prefira Imprimir / Salvar PDF; o Word pode reorganizar o layout e nÃ£o incorporar o brasÃ£o.', 'ok');
   }
 
   function interface() {
     return `<div class="page-header"><div><h2>Documentos de Servidores</h2>
-      <p>Modelos para a Secretaria: pessoal, calendário, zeladoria, transporte, estágio, inclusão e memorando livre.</p></div>
+      <p>Modelos para a Secretaria: pessoal, calendÃ¡rio, zeladoria, transporte, estÃ¡gio, inclusÃ£o e memorando livre.</p></div>
       <span class="docs-badge">Conferir antes de assinar</span></div>
     <div class="docs-layout">
       <section class="docs-panel"><h3>1. Preencher o documento</h3>
@@ -699,40 +700,40 @@ const DocumentosServidoresPage = (() => {
             <select id="doc-tipo">${tipos.map(([v,n])=>`<option value="${v}">${esc(n)}</option>`).join('')}</select></div>
           <div class="docs-field full"><div class="docs-typehint" id="doc-dica"></div></div>
           <div class="docs-field full" id="doc-principal-bloco"><label id="doc-principal-legenda">Servidor interessado</label>
-            <input list="doc-funcionarios" id="doc-principal" autocomplete="off" placeholder="Digite o nome ou matrícula e selecione uma opção"></div>
+            <input list="doc-funcionarios" id="doc-principal" autocomplete="off" placeholder="Digite o nome ou matrÃ­cula e selecione uma opÃ§Ã£o"></div>
           <div class="docs-field full" id="doc-secundario-bloco" hidden><label id="doc-secundario-legenda">Profissional sugerido / substituto (opcional)</label>
-            <input list="doc-funcionarios" id="doc-secundario" autocomplete="off" placeholder="Pesquise pelo nome ou matrícula"></div>
+            <input list="doc-funcionarios" id="doc-secundario" autocomplete="off" placeholder="Pesquise pelo nome ou matrÃ­cula"></div>
           <datalist id="doc-funcionarios">${S.funcionarios.map(f=>`<option value="${esc(rotulo(f))}"></option>`).join('')}</datalist>
           <div class="docs-field"><label>Data do documento</label><input id="doc-data" type="date" value="${dataLocal()}"></div>
-          <div class="docs-field" id="doc-numero-bloco"><label>Número do memorando (opcional)</label>
+          <div class="docs-field" id="doc-numero-bloco"><label>NÃºmero do memorando (opcional)</label>
             <input id="doc-numero" placeholder="Ex.: 025"></div>
-          <div class="docs-field full" id="doc-destino-simples"><label>Destinatário / A/C</label>
-            <input id="doc-destino" value="Inspeção Escolar"></div>
+          <div class="docs-field full" id="doc-destino-simples"><label>DestinatÃ¡rio / A/C</label>
+            <input id="doc-destino" value="InspeÃ§Ã£o Escolar"></div>
           <div class="docs-field full" id="doc-memorando-cabecalho" hidden>
             <div class="docs-grid">
               <div class="docs-field full"><label>Para (nome completo)</label>
                 <input id="doc-para" value="Charles Gutemberg Alencar Soares"></div>
-              <div class="docs-field full"><label>A/C (responsável)</label>
+              <div class="docs-field full"><label>A/C (responsÃ¡vel)</label>
                 <input id="doc-ac" value="Polyana Ferreira Da Silva"></div>
               <div class="docs-field full"><label>Coordenadoria / Setor</label>
-                <input id="doc-setor" value="Coordenadoria de Gestão Pessoal"></div>
-              <div class="docs-field"><label>Saudação</label><input id="doc-saudacao" value="Prezada Senhora,"></div>
+                <input id="doc-setor" value="Coordenadoria de GestÃ£o Pessoal"></div>
+              <div class="docs-field"><label>SaudaÃ§Ã£o</label><input id="doc-saudacao" value="Prezada Senhora,"></div>
               <div class="docs-field"><label>Despedida</label><input id="doc-despedida" value="Atenciosamente,"></div>
             </div>
           </div>
           <div class="docs-field full"><label>Assunto</label><input id="doc-assunto"></div>
-          <div class="docs-field" id="doc-cargo-bloco" hidden><label>Cargo/função a contratar</label>
+          <div class="docs-field" id="doc-cargo-bloco" hidden><label>Cargo/funÃ§Ã£o a contratar</label>
             <input id="doc-cargo" placeholder="Ex.: Professor(a) PEB I"></div>
           <div class="docs-field" id="doc-inicio-bloco" hidden><label id="doc-inicio-legenda">Data inicial</label>
             <input id="doc-inicio" type="date"></div>
           <div class="docs-field" id="doc-fim-bloco" hidden><label id="doc-fim-legenda">Data final</label>
             <input id="doc-fim" type="date"></div>
-          <div class="docs-field" id="doc-prazo-bloco" hidden><label>Período em dias (opcional)</label>
+          <div class="docs-field" id="doc-prazo-bloco" hidden><label>PerÃ­odo em dias (opcional)</label>
             <input id="doc-prazo" type="number" min="1" placeholder="Ex.: 60"></div>
           <div class="docs-field full" id="doc-pedido-bloco" hidden><label id="doc-pedido-legenda">Pedido / objeto do requerimento</label>
-            <textarea id="doc-pedido" placeholder="Descreva objetivamente o que está sendo solicitado."></textarea></div>
-          <div class="docs-field full"><label id="doc-motivo-legenda">Justificativa / observações</label>
-            <textarea id="doc-motivo" placeholder="Ex.: assegurar a continuidade das atividades pedagógicas e do atendimento aos alunos."></textarea></div>
+            <textarea id="doc-pedido" placeholder="Descreva objetivamente o que estÃ¡ sendo solicitado."></textarea></div>
+          <div class="docs-field full"><label id="doc-motivo-legenda">Justificativa / observaÃ§Ãµes</label>
+            <textarea id="doc-motivo" placeholder="Ex.: assegurar a continuidade das atividades pedagÃ³gicas e do atendimento aos alunos."></textarea></div>
           ${EXTRA_CAMPOS.map(([id,label,kind,inputType,placeholder])=>`
             <div class="docs-field ${['doc-local','doc-instituicao','doc-horario','doc-estudante','doc-anexos'].includes(id)?'full':''}" id="${id}-bloco" hidden>
               <label>${esc(label)}</label>
@@ -744,7 +745,7 @@ const DocumentosServidoresPage = (() => {
           <div class="docs-field"><label>Cargo do assinante</label>
             <input id="doc-cargo-assinante" value="Diretor de Unidade Escolar"></div>
         </div>
-        <h4>2. Texto do documento (editável)</h4>
+        <h4>2. Texto do documento (editÃ¡vel)</h4>
         <div class="docs-field"><textarea id="doc-texto" style="min-height:290px"></textarea>
           <small class="docs-hint" id="doc-edicao"></small></div>
         <div class="docs-actions">
@@ -753,15 +754,15 @@ const DocumentosServidoresPage = (() => {
         </div>
       </section>
       <section class="docs-panel">
-        <div class="docs-previewbar"><h3>Pré-visualização do documento</h3><span class="docs-badge">Folha A4</span></div>
+        <div class="docs-previewbar"><h3>PrÃ©-visualizaÃ§Ã£o do documento</h3><span class="docs-badge">Folha A4</span></div>
         <div id="doc-preview" class="docs-page"></div>
         <div class="docs-actions">
           <button type="button" class="btn btn-primary" id="doc-imprimir">Imprimir / Salvar PDF</button>
           <button type="button" class="btn btn-secondary" id="doc-word">Baixar Word (.doc)</button>
         </div>
         <div id="doc-status" role="status" class="docs-status"></div>
-        <p class="docs-hint">Os textos são modelos administrativos. Confira datas, situação funcional,
-        cargo e informações do processo antes do protocolo ou assinatura. Nenhum documento é salvo automaticamente no banco.</p>
+        <p class="docs-hint">Os textos sÃ£o modelos administrativos. Confira datas, situaÃ§Ã£o funcional,
+        cargo e informaÃ§Ãµes do processo antes do protocolo ou assinatura. Nenhum documento Ã© salvo automaticamente no banco.</p>
       </section>
     </div>`;
   }
@@ -778,11 +779,11 @@ const DocumentosServidoresPage = (() => {
       S.funcionarios = await App.getAll('funcionarios');
       S.funcionarios.sort((a,b) => normaliza(a.nome).localeCompare(normaliza(b.nome), 'pt-BR'));
     } catch(err) {
-      App.layout('Documentos de Servidores','Falha na consulta de funcionários',
-        `<div class="docs-panel">Não foi possível carregar os funcionários: ${esc(err.message)}</div>`);
+      App.layout('Documentos de Servidores','Falha na consulta de funcionÃ¡rios',
+        `<div class="docs-panel">NÃ£o foi possÃ­vel carregar os funcionÃ¡rios: ${esc(err.message)}</div>`);
       return;
     }
-    App.layout('Documentos de Servidores', 'Declarações • Requerimentos • Memorandos', interface());
+    App.layout('Documentos de Servidores', 'DeclaraÃ§Ãµes â€¢ Requerimentos â€¢ Memorandos', interface());
     $('doc-assunto').value = assuntoPadrao('declaracao');
     ensureMemoStyle();
     camposDinamicos();
@@ -806,7 +807,7 @@ const DocumentosServidoresPage = (() => {
     }
     $('doc-texto').addEventListener('input', () => {
       S.textoEditado = true;
-      $('doc-edicao').textContent = 'Texto personalizado; a edição será mantida até clicar em Atualizar texto.';
+      $('doc-edicao').textContent = 'Texto personalizado; a ediÃ§Ã£o serÃ¡ mantida atÃ© clicar em Atualizar texto.';
       visualizar();
     });
     $('doc-atualizar').onclick = () => atualizarModelo(true);
@@ -815,14 +816,14 @@ const DocumentosServidoresPage = (() => {
     $('doc-word').onclick = baixarWord;
     $('doc-tipo').addEventListener('change',()=>{$('doc-word').textContent=ehMemo()?'Baixar Word (.docx oficial)':'Baixar Word (.doc)';});
     window.addEventListener('resize',()=>{if(ehMemo())ajustarVisualMemorando();});
-    situacao(`${S.funcionarios.length} funcionários disponíveis para pesquisa. Selecione o tipo de documento.`, 'ok');
+    situacao(`${S.funcionarios.length} funcionÃ¡rios disponÃ­veis para pesquisa. Selecione o tipo de documento.`, 'ok');
   }
   return {init};
 })();
 
 /* ============================================================
-   MELHORIA DA TELA — CATEGORIAS E DECLARAÇÃO DE COMPARECIMENTO
-   Mantém as funções originais e todos os modelos anteriores.
+   MELHORIA DA TELA â€” CATEGORIAS E DECLARAÃ‡ÃƒO DE COMPARECIMENTO
+   MantÃ©m as funÃ§Ãµes originais e todos os modelos anteriores.
 ============================================================ */
 
 (function instalarTelaSimplificada() {
@@ -836,21 +837,21 @@ const DocumentosServidoresPage = (() => {
 
   const grupos = {
     declaracao: [
-      ['declaracao', 'Declaração funcional do servidor'],
-      ['comparecimento-responsavel', 'Comparecimento de pai, mãe ou responsável']
+      ['declaracao', 'DeclaraÃ§Ã£o funcional do servidor'],
+      ['comparecimento-responsavel', 'Comparecimento de pai, mÃ£e ou responsÃ¡vel']
     ],
     requerimento: [
       ['requerimento', 'Requerimento do servidor']
     ],
     memorando: [
-      ['prorrogacao', 'Prorrogação de contrato'],
-      ['substituicao', 'Substituição por licença (LTS)'],
-      ['contratacao', 'Contratação / reposição de vaga'],
-      ['calendario', 'Alteração de calendário escolar'],
-      ['zeladoria', 'Solicitação de zeladoria'],
+      ['prorrogacao', 'ProrrogaÃ§Ã£o de contrato'],
+      ['substituicao', 'SubstituiÃ§Ã£o por afastamento'],
+      ['contratacao', 'ContrataÃ§Ã£o / reposiÃ§Ã£o de vaga'],
+      ['calendario', 'AlteraÃ§Ã£o de calendÃ¡rio escolar'],
+      ['zeladoria', 'SolicitaÃ§Ã£o de zeladoria'],
       ['transporte', 'Transporte para visita escolar'],
-      ['estagio', 'Parecer sobre estágio de servidor(a)'],
-      ['avanco', 'Parecer sobre avanço de nível'],
+      ['estagio', 'Parecer sobre estÃ¡gio de servidor(a)'],
+      ['avanco', 'Parecer sobre avanÃ§o de nÃ­vel'],
       ['memorando', 'Personalizado (texto livre)']
     ]
   };
@@ -876,18 +877,18 @@ const DocumentosServidoresPage = (() => {
     return `
       <div class="docs-field full" id="ds-pais-bloco" hidden>
         <div class="docs-typehint">
-          Declaração para apresentar ao empregador, comprovando o
-          comparecimento de pai, mãe ou responsável à escola.
-          Preencha somente informações confirmadas pela secretaria.
+          DeclaraÃ§Ã£o para apresentar ao empregador, comprovando o
+          comparecimento de pai, mÃ£e ou responsÃ¡vel Ã  escola.
+          Preencha somente informaÃ§Ãµes confirmadas pela secretaria.
         </div>
 
         <div class="docs-grid" style="margin-top:14px">
           <div class="docs-field full">
-            <label>Nome completo do(a) responsável *</label>
+            <label>Nome completo do(a) responsÃ¡vel *</label>
             <input
               id="ds-nome"
               autocomplete="off"
-              placeholder="Nome do pai, da mãe ou responsável"
+              placeholder="Nome do pai, da mÃ£e ou responsÃ¡vel"
             >
           </div>
 
@@ -896,7 +897,7 @@ const DocumentosServidoresPage = (() => {
             <input
               id="ds-estudante"
               autocomplete="off"
-              placeholder="Deixe em branco se não for necessário informar"
+              placeholder="Deixe em branco se nÃ£o for necessÃ¡rio informar"
             >
           </div>
 
@@ -909,9 +910,9 @@ const DocumentosServidoresPage = (() => {
             <label>Finalidade (opcional)</label>
             <select id="ds-motivo">
               <option value="">Assuntos escolares</option>
-              <option value="reunião pedagógica">Reunião pedagógica</option>
+              <option value="reuniÃ£o pedagÃ³gica">ReuniÃ£o pedagÃ³gica</option>
               <option value="atendimento na secretaria">Atendimento na secretaria</option>
-              <option value="atendimento com a direção">Atendimento com a direção</option>
+              <option value="atendimento com a direÃ§Ã£o">Atendimento com a direÃ§Ã£o</option>
               <option value="retirada do(a) estudante">Retirada do(a) estudante</option>
               <option value="outros assuntos escolares">Outros assuntos escolares</option>
             </select>
@@ -923,12 +924,12 @@ const DocumentosServidoresPage = (() => {
           </div>
 
           <div class="docs-field">
-            <label>Saída *</label>
+            <label>SaÃ­da *</label>
             <input id="ds-saida" type="time">
           </div>
 
           <div class="docs-field full">
-            <label>Nome de quem assinará *</label>
+            <label>Nome de quem assinarÃ¡ *</label>
             <input
               id="ds-assinante"
               value="Anderson Santos Silva"
@@ -936,7 +937,7 @@ const DocumentosServidoresPage = (() => {
           </div>
 
           <div class="docs-field full">
-            <label>Cargo de quem assinará *</label>
+            <label>Cargo de quem assinarÃ¡ *</label>
             <input
               id="ds-cargo"
               value="Diretor de Unidade Escolar"
@@ -947,19 +948,19 @@ const DocumentosServidoresPage = (() => {
   }
 
   function textoPais() {
-    const resp = valor('ds-nome') || '[NOME DO(A) RESPONSÁVEL]';
+    const resp = valor('ds-nome') || '[NOME DO(A) RESPONSÃVEL]';
     const aluno = valor('ds-estudante');
     const dia = dataBr(valor('ds-data'));
     const ini = valor('ds-entrada') || '[ENTRADA]';
-    const fim = valor('ds-saida') || '[SAÍDA]';
+    const fim = valor('ds-saida') || '[SAÃDA]';
     const motivo = valor('ds-motivo');
     const objetivo = motivo || 'tratar de assuntos escolares';
 
-    return `Declaramos, para os devidos fins e especialmente para apresentação no local de trabalho, que ${resp} compareceu à Escola Municipal Professora Eunice Carneiro, no dia ${dia}, no período das ${ini} às ${fim}, para ${objetivo}${aluno ? ', em assunto relacionado ao(à) estudante ' + aluno : ''}.
+    return `Declaramos, para os devidos fins e especialmente para apresentaÃ§Ã£o no local de trabalho, que ${resp} compareceu Ã  Escola Municipal Professora Eunice Carneiro, no dia ${dia}, no perÃ­odo das ${ini} Ã s ${fim}, para ${objetivo}${aluno ? ', em assunto relacionado ao(Ã ) estudante ' + aluno : ''}.
 
-A presente declaração refere-se exclusivamente ao comparecimento registrado na unidade escolar, não representando, por si só, abono de jornada de trabalho.
+A presente declaraÃ§Ã£o refere-se exclusivamente ao comparecimento registrado na unidade escolar, nÃ£o representando, por si sÃ³, abono de jornada de trabalho.
 
-Por ser verdade, firmamos a presente declaração.`;
+Por ser verdade, firmamos a presente declaraÃ§Ã£o.`;
   }
 
   function conteudoPais() {
@@ -974,13 +975,13 @@ Por ser verdade, firmamos a presente declaração.`;
     return `
       <div class="docs-letterhead">
         <b>PREFEITURA MUNICIPAL DE MONTES CLAROS</b>
-        <b>SECRETARIA MUNICIPAL DE EDUCAÇÃO</b>
+        <b>SECRETARIA MUNICIPAL DE EDUCAÃ‡ÃƒO</b>
         <b>ESCOLA MUNICIPAL PROFESSORA EUNICE CARNEIRO</b>
-        <small>Rua D, 300 – José Correia Machado – Montes Claros/MG</small>
+        <small>Rua D, 300 â€“ JosÃ© Correia Machado â€“ Montes Claros/MG</small>
       </div>
 
       <div class="docs-doc-title">
-        DECLARAÇÃO DE COMPARECIMENTO
+        DECLARAÃ‡ÃƒO DE COMPARECIMENTO
       </div>
 
       <div class="docs-place-date">
@@ -1020,7 +1021,7 @@ Por ser verdade, firmamos a presente declaração.`;
 
     $('doc-edicao').textContent = estado.editado
       ? 'Texto personalizado. Clique em Atualizar texto para refazer o modelo.'
-      : 'Texto gerado automaticamente. Você pode ajustá-lo antes de emitir.';
+      : 'Texto gerado automaticamente. VocÃª pode ajustÃ¡-lo antes de emitir.';
 
     mostrarPais();
   }
@@ -1029,7 +1030,7 @@ Por ser verdade, firmamos a presente declaração.`;
     const erros = [];
 
     if (!valor('ds-nome')) {
-      erros.push('Nome do responsável');
+      erros.push('Nome do responsÃ¡vel');
     }
 
     if (!valor('ds-data')) {
@@ -1037,11 +1038,11 @@ Por ser verdade, firmamos a presente declaração.`;
     }
 
     if (!valor('ds-entrada')) {
-      erros.push('Horário de entrada');
+      erros.push('HorÃ¡rio de entrada');
     }
 
     if (!valor('ds-saida')) {
-      erros.push('Horário de saída');
+      erros.push('HorÃ¡rio de saÃ­da');
     }
 
     if (
@@ -1049,11 +1050,11 @@ Por ser verdade, firmamos a presente declaração.`;
       valor('ds-entrada') &&
       valor('ds-saida') < valor('ds-entrada')
     ) {
-      erros.push('Saída não pode ser anterior à entrada');
+      erros.push('SaÃ­da nÃ£o pode ser anterior Ã  entrada');
     }
 
     if (!valor('ds-assinante') || !valor('ds-cargo')) {
-      erros.push('Identificação de quem assinará');
+      erros.push('IdentificaÃ§Ã£o de quem assinarÃ¡');
     }
 
     if (
@@ -1071,7 +1072,7 @@ Por ser verdade, firmamos a presente declaração.`;
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Declaração de comparecimento</title>
+<title>DeclaraÃ§Ã£o de comparecimento</title>
 
 <style>
   @page {
@@ -1306,7 +1307,7 @@ Por ser verdade, firmamos a presente declaração.`;
       atualizarPais(true);
 
       mensagem(
-        'Preencha o comparecimento e confira os horários.'
+        'Preencha o comparecimento e confira os horÃ¡rios.'
       );
     } else {
       mensagem(
@@ -1338,7 +1339,7 @@ Por ser verdade, firmamos a presente declaração.`;
       <label>O que deseja emitir?</label>
 
       <select id="ds-categoria">
-        <option value="declaracao">Declaração</option>
+        <option value="declaracao">DeclaraÃ§Ã£o</option>
         <option value="requerimento">Requerimento</option>
         <option value="memorando">Memorando</option>
       </select>`;
@@ -1396,7 +1397,7 @@ Por ser verdade, firmamos a presente declaração.`;
         ? atualizarPais(true)
         : estado.atualizarOriginal();
 
-    // Atualiza a prévia específica da declaração para pais.
+    // Atualiza a prÃ©via especÃ­fica da declaraÃ§Ã£o para pais.
     $('doc-texto').addEventListener(
       'input',
       () => {
@@ -1448,7 +1449,7 @@ Por ser verdade, firmamos a presente declaração.`;
 
     if (descricao) {
       descricao.textContent =
-        'Declarações, requerimentos e memorandos — escolha a categoria e depois o modelo.';
+        'DeclaraÃ§Ãµes, requerimentos e memorandos â€” escolha a categoria e depois o modelo.';
     }
 
     opcoesGrupo(
@@ -1467,15 +1468,15 @@ Por ser verdade, firmamos a presente declaração.`;
 })();
 
 /* ========================================================
-   CORREÇÃO DEFINITIVA DA EXIBIÇÃO DOS SELETORES
+   CORREÃ‡ÃƒO DEFINITIVA DA EXIBIÃ‡ÃƒO DOS SELETORES
 
    Remove visualmente o campo antigo "Tipo de documento".
-   Mantém apenas:
+   MantÃ©m apenas:
    1. O que deseja emitir?
    2. Modelo
 
-   Os valores antigos permanecem disponíveis internamente
-   para não prejudicar a geração dos documentos.
+   Os valores antigos permanecem disponÃ­veis internamente
+   para nÃ£o prejudicar a geraÃ§Ã£o dos documentos.
 ======================================================== */
 
 (function corrigirSeletoresDuplicados() {
@@ -1494,14 +1495,14 @@ Por ser verdade, firmamos a presente declaração.`;
 
     if (!blocoAntigo) return;
 
-    // Identifica o bloco antigo para mantê-lo oculto,
-    // mesmo quando o usuário troca de categoria ou modelo.
+    // Identifica o bloco antigo para mantÃª-lo oculto,
+    // mesmo quando o usuÃ¡rio troca de categoria ou modelo.
 
     blocoAntigo.classList.add(
       "ds-seletor-antigo-oculto"
     );
 
-    // Evita a duplicação da regra CSS.
+    // Evita a duplicaÃ§Ã£o da regra CSS.
 
     if (!document.getElementById("ds-correcao-seletor-css")) {
 
@@ -1518,7 +1519,7 @@ Por ser verdade, firmamos a presente declaração.`;
       document.head.appendChild(estilo);
     }
 
-    // Ajusta a descrição do módulo.
+    // Ajusta a descriÃ§Ã£o do mÃ³dulo.
 
     const descricao = document.querySelector(
       ".page-header p"
@@ -1526,7 +1527,7 @@ Por ser verdade, firmamos a presente declaração.`;
 
     if (descricao) {
       descricao.textContent =
-        "Escolha Declarações ou Memorandos e selecione o modelo desejado.";
+        "Escolha DeclaraÃ§Ãµes ou Memorandos e selecione o modelo desejado.";
     }
 
   };
@@ -1534,8 +1535,8 @@ Por ser verdade, firmamos a presente declaração.`;
 })();
 
 /* ===============================================================
-   CORREÇÃO: REQUERIMENTO DENTRO DE DECLARAÇÕES
-   E CÁLCULO AUTOMÁTICO DOS DIAS DE LICENÇA/PRORROGAÇÃO
+   CORREÃ‡ÃƒO: REQUERIMENTO DENTRO DE DECLARAÃ‡Ã•ES
+   E CÃLCULO AUTOMÃTICO DOS DIAS DE LICENÃ‡A/PRORROGAÃ‡ÃƒO
 ================================================================ */
 (function corrigirCategoriasEPeriodo() {
   const inicializarAnterior = DocumentosServidoresPage.init;
@@ -1552,14 +1553,14 @@ Por ser verdade, firmamos a presente declaração.`;
     const blocoPrazo = document.getElementById('doc-prazo-bloco');
 
     if (!categoria || !modelo || !tipo || !inicio || !fim || !prazo) {
-      console.warn('Documentos: campos esperados não encontrados.');
+      console.warn('Documentos: campos esperados nÃ£o encontrados.');
       return;
     }
 
     // 1) Somente duas categorias principais.
     for (const opcao of Array.from(categoria.options)) {
       if (opcao.value === 'requerimento') opcao.remove();
-      if (opcao.value === 'declaracao') opcao.textContent = 'Declarações';
+      if (opcao.value === 'declaracao') opcao.textContent = 'DeclaraÃ§Ãµes';
       if (opcao.value === 'memorando') opcao.textContent = 'Memorandos';
     }
 
@@ -1569,7 +1570,7 @@ Por ser verdade, firmamos a presente declaração.`;
           modelo.add(new Option('Requerimento do servidor', 'requerimento'));
         }
       } else {
-        // O requerimento não deve aparecer nos modelos de memorando.
+        // O requerimento nÃ£o deve aparecer nos modelos de memorando.
         for (const opcao of Array.from(modelo.options)) {
           if (opcao.value === 'requerimento') opcao.remove();
         }
@@ -1577,11 +1578,11 @@ Por ser verdade, firmamos a presente declaração.`;
     }
 
     // O seletor original atualiza a lista primeiro.
-    // Depois adicionamos o requerimento em Declarações.
+    // Depois adicionamos o requerimento em DeclaraÃ§Ãµes.
     categoria.addEventListener('change', ajustarModelos);
     ajustarModelos();
 
-    // Mantém o seletor antigo oculto.
+    // MantÃ©m o seletor antigo oculto.
     const antigo = document.getElementById('doc-tipo');
     const campoAntigo = antigo?.closest('.docs-field');
 
@@ -1602,10 +1603,10 @@ Por ser verdade, firmamos a presente declaração.`;
 
     if (descricao) {
       descricao.textContent =
-        'Escolha Declarações ou Memorandos e, em seguida, o modelo desejado.';
+        'Escolha DeclaraÃ§Ãµes ou Memorandos e, em seguida, o modelo desejado.';
     }
 
-    // 2) Contagem de dias corridos, incluindo início e fim.
+    // 2) Contagem de dias corridos, incluindo inÃ­cio e fim.
     let ultimoAutomatico = null;
 
     const etiqueta = blocoPrazo?.querySelector('label');
@@ -1664,7 +1665,7 @@ Por ser verdade, firmamos a presente declaração.`;
         prazo.readOnly = false;
 
         if (etiqueta) {
-          etiqueta.textContent = 'Período em dias (opcional)';
+          etiqueta.textContent = 'PerÃ­odo em dias (opcional)';
         }
 
         ajuda.textContent =
@@ -1689,14 +1690,14 @@ Por ser verdade, firmamos a presente declaração.`;
         prazo.readOnly = false;
 
         ajuda.textContent =
-          'A data final deve ser igual ou posterior à inicial.';
+          'A data final deve ser igual ou posterior Ã  inicial.';
 
         ajuda.style.color = '#b42318';
 
         return;
       }
 
-      // Preenche automaticamente o período.
+      // Preenche automaticamente o perÃ­odo.
       ultimoAutomatico = String(dias);
 
       prazo.readOnly = true;
@@ -1704,12 +1705,12 @@ Por ser verdade, firmamos a presente declaração.`;
 
       if (etiqueta) {
         etiqueta.textContent =
-          'Período em dias (automático)';
+          'PerÃ­odo em dias (automÃ¡tico)';
       }
 
       ajuda.style.color = '#067647';
       ajuda.textContent =
-        `${dias} dia(s) corrido(s), contando início e fim.`;
+        `${dias} dia(s) corrido(s), contando inÃ­cio e fim.`;
 
       // Atualiza o texto do memorando automaticamente.
       dispararMudanca();
@@ -1728,9 +1729,9 @@ Por ser verdade, firmamos a presente declaração.`;
   };
 })();
 /* ============================================================
-   LTS: DATAS E PERÍODO EM DOIS SENTIDOS
+   LTS: DATAS E PERÃODO EM DOIS SENTIDOS
    Cole este bloco ao FINAL de js/documentos-servidores.js.
-   Compatível com a correção anterior de dias inclusivos.
+   CompatÃ­vel com a correÃ§Ã£o anterior de dias inclusivos.
 ============================================================ */
 (function instalarLtsBidirecional() {
   const iniciarAnterior = DocumentosServidoresPage.init;
@@ -1787,7 +1788,7 @@ Por ser verdade, firmamos a presente declaração.`;
         ? data.slice(8, 10) + '/' +
           data.slice(5, 7) + '/' +
           data.slice(0, 4)
-        : '—';
+        : 'â€”';
     }
 
     function numeroValido() {
@@ -1811,14 +1812,14 @@ Por ser verdade, firmamos a presente declaração.`;
       );
     }
 
-    /* INÍCIO + DIAS = ÚLTIMO DIA DA LICENÇA */
+    /* INÃCIO + DIAS = ÃšLTIMO DIA DA LICENÃ‡A */
 
     function calcularFim(n) {
       const t = utc(inicio.value);
 
       if (t === null || !n) return false;
 
-      // O primeiro dia já é o dia 1 da LTS.
+      // O primeiro dia jÃ¡ Ã© o dia 1 da LTS.
       const novoFim = iso(t + (n - 1) * DIA);
 
       if (fim.value !== novoFim) {
@@ -1835,7 +1836,7 @@ Por ser verdade, firmamos a presente declaração.`;
       return true;
     }
 
-    /* INÍCIO + ÚLTIMO DIA = TOTAL DE DIAS */
+    /* INÃCIO + ÃšLTIMO DIA = TOTAL DE DIAS */
 
     function calcularDias() {
       const a = utc(inicio.value);
@@ -1843,7 +1844,7 @@ Por ser verdade, firmamos a presente declaração.`;
 
       if (a === null || b === null) return false;
 
-      // +1: inclui o primeiro e o último dia.
+      // +1: inclui o primeiro e o Ãºltimo dia.
       const n = Math.round((b - a) / DIA) + 1;
 
       if (n < 1 || n > 3650) return false;
@@ -1871,7 +1872,7 @@ Por ser verdade, firmamos a presente declaração.`;
 
       if (ini === null || ult === null || ult < ini) {
         retorno.textContent =
-          'Retorno: informe um início e um término válidos.';
+          'Retorno: informe um inÃ­cio e um tÃ©rmino vÃ¡lidos.';
 
         retorno.style.color = '#b42318';
         return;
@@ -1888,19 +1889,19 @@ Por ser verdade, firmamos a presente declaração.`;
 
       if (eLts) {
         retorno.textContent =
-          'Último dia de LTS: ' + br(fim.value) +
-          '  •  Retorno previsto: ' + diaSeguinte;
+          'Ãšltimo dia do perÃ­odo informado: ' + br(fim.value) +
+          '  â€¢  Dia seguinte ao perÃ­odo: ' + diaSeguinte;
       } else {
         retorno.textContent =
-          'Último dia do período informado: ' +
+          'Ãšltimo dia do perÃ­odo informado: ' +
           br(fim.value) +
-          '  •  Dia seguinte: ' + diaSeguinte;
+          '  â€¢  Dia seguinte: ' + diaSeguinte;
       }
 
       retorno.style.color = '#1e40af';
     }
 
-    /* SINCRONIZAR OS TRÊS CAMPOS */
+    /* SINCRONIZAR OS TRÃŠS CAMPOS */
 
     function sincronizar(origem) {
       if (ocupado) return;
@@ -1908,13 +1909,13 @@ Por ser verdade, firmamos a presente declaração.`;
       ocupado = true;
 
       try {
-        // O código antigo bloqueava a edição dos dias.
-        // Agora o campo permanece editável.
+        // O cÃ³digo antigo bloqueava a ediÃ§Ã£o dos dias.
+        // Agora o campo permanece editÃ¡vel.
         dias.readOnly = false;
 
         if (etiqueta) {
           etiqueta.textContent =
-            'Período em dias (editável)';
+            'PerÃ­odo em dias (editÃ¡vel)';
         }
 
         if (!aplicavel()) {
@@ -1939,14 +1940,14 @@ Por ser verdade, firmamos a presente declaração.`;
           } else if (dias.value) {
             retorno.hidden = false;
             retorno.textContent =
-              'Informe um período inteiro de 1 a 3650 dias.';
+              'Informe um perÃ­odo inteiro de 1 a 3650 dias.';
             retorno.style.color = '#b42318';
             return;
           }
 
         } else if (origem === 'inicio') {
-          // Se o usuário definiu o período, preservamos
-          // essa duração ao trocar a data inicial.
+          // Se o usuÃ¡rio definiu o perÃ­odo, preservamos
+          // essa duraÃ§Ã£o ao trocar a data inicial.
           if (
             ultimaOrigem === 'dias' &&
             diasMemorizados !== null
@@ -1959,7 +1960,7 @@ Por ser verdade, firmamos a presente declaração.`;
           }
 
         } else if (origem === 'fim') {
-          // O usuário alterou a data final:
+          // O usuÃ¡rio alterou a data final:
           // recalculamos a quantidade de dias.
           ultimaOrigem = 'fim';
           fimAutomatico = '';
@@ -1981,7 +1982,7 @@ Por ser verdade, firmamos a presente declaração.`;
         mostrarRetorno();
 
       } finally {
-        // Garante que a quantidade continue editável.
+        // Garante que a quantidade continue editÃ¡vel.
         dias.readOnly = false;
         ocupado = false;
       }
@@ -2038,8 +2039,8 @@ Por ser verdade, firmamos a presente declaração.`;
   };
 })();
 /* =========================================================
-   AUTO PREENCHER "CARGO/FUNÇÃO A CONTRATAR"
-   COM O CARGO DO SERVIDOR SUBSTITUÍDO
+   AUTO PREENCHER "CARGO/FUNÃ‡ÃƒO A CONTRATAR"
+   COM O CARGO DO SERVIDOR SUBSTITUÃDO
    Cole ao FINAL de js/documentos-servidores.js
 ========================================================= */
 (function instalarAutoCargoSubstituicao() {
@@ -2115,7 +2116,7 @@ Por ser verdade, firmamos a presente declaração.`;
         cacheFuncionarios = Array.isArray(data) ? data : [];
         return cacheFuncionarios;
       } catch (err) {
-        console.error('Erro ao carregar funcionários:', err);
+        console.error('Erro ao carregar funcionÃ¡rios:', err);
         return [];
       }
     }
@@ -2137,16 +2138,16 @@ Por ser verdade, firmamos a presente declaração.`;
     async function aplicarNoFormulario() {
       const campoServidor =
         encontrarCampoPorLabel('Servidor interessado') ||
-        encontrarCampoPorLabel('Servidor substituído') ||
-        encontrarCampoPorLabel('Servidor a ser substituído');
+        encontrarCampoPorLabel('Servidor substituÃ­do') ||
+        encontrarCampoPorLabel('Servidor a ser substituÃ­do');
 
       const campoCargo =
-        encontrarCampoPorLabel('Cargo/função a contratar') ||
-        encontrarCampoPorLabel('Cargo / função a contratar');
+        encontrarCampoPorLabel('Cargo/funÃ§Ã£o a contratar') ||
+        encontrarCampoPorLabel('Cargo / funÃ§Ã£o a contratar');
 
       if (!campoServidor || !campoCargo) return;
 
-      campoCargo.placeholder = 'Será preenchido automaticamente ao selecionar o servidor';
+      campoCargo.placeholder = 'SerÃ¡ preenchido automaticamente ao selecionar o servidor';
 
       let temporizador = null;
 
@@ -2160,7 +2161,7 @@ Por ser verdade, firmamos a presente declaração.`;
 
         const matricula = extrairMatricula(valor);
         const nomeDigitado = normalizar(
-          valor.split('—')[0].split('-')[0].trim()
+          valor.split('â€”')[0].split('-')[0].trim()
         );
 
         let encontrado = null;
@@ -2211,18 +2212,18 @@ Por ser verdade, firmamos a presente declaração.`;
 })();
 
 /* ============================================================
-   CARGO AUTOMÁTICO PELO CADASTRO DE FUNCIONÁRIOS
+   CARGO AUTOMÃTICO PELO CADASTRO DE FUNCIONÃRIOS
 
-   Busca os dados na MESMA tabela utilizada pela página
-   Funcionários, por meio de App.getAll("funcionarios").
+   Busca os dados na MESMA tabela utilizada pela pÃ¡gina
+   FuncionÃ¡rios, por meio de App.getAll("funcionarios").
 
    Ao selecionar o servidor afastado por LTS:
-   - Identifica nome e matrícula.
-   - Consulta o cargo/função já cadastrado.
+   - Identifica nome e matrÃ­cula.
+   - Consulta o cargo/funÃ§Ã£o jÃ¡ cadastrado.
    - Preenche automaticamente o cargo a contratar.
-   - Atualiza o texto e a prévia do memorando.
+   - Atualiza o texto e a prÃ©via do memorando.
 
-   Não altera nem grava dados do servidor.
+   NÃ£o altera nem grava dados do servidor.
 ============================================================ */
 
 (function integrarCargoAoCadastro() {
@@ -2253,7 +2254,7 @@ Por ser verdade, firmamos a presente declaração.`;
       return;
     }
 
-    // Carrega os mesmos funcionários da página Funcionários.
+    // Carrega os mesmos funcionÃ¡rios da pÃ¡gina FuncionÃ¡rios.
 
     let funcionarios = [];
 
@@ -2261,7 +2262,7 @@ Por ser verdade, firmamos a presente declaração.`;
       funcionarios = await App.getAll("funcionarios");
     } catch (erro) {
       console.error(
-        "Erro ao consultar o cadastro de funcionários:",
+        "Erro ao consultar o cadastro de funcionÃ¡rios:",
         erro
       );
 
@@ -2294,7 +2295,7 @@ Por ser verdade, firmamos a presente declaração.`;
       if (!selecionado) return null;
 
       // Mesmo formato utilizado pela lista de servidores.
-      // Exemplo: NOME COMPLETO — Matrícula 123456
+      // Exemplo: NOME COMPLETO â€” MatrÃ­cula 123456
 
       const encontrados = funcionarios.filter(
         funcionario => {
@@ -2311,7 +2312,7 @@ Por ser verdade, firmamos a presente declaração.`;
             funcionario.nome +
             (
               matricula
-                ? " — Matrícula " + matricula
+                ? " â€” MatrÃ­cula " + matricula
                 : ""
             )
           );
@@ -2327,8 +2328,8 @@ Por ser verdade, firmamos a presente declaração.`;
         }
       );
 
-      // Não preenche automaticamente se houver
-      // dois servidores com identificação ambígua.
+      // NÃ£o preenche automaticamente se houver
+      // dois servidores com identificaÃ§Ã£o ambÃ­gua.
 
       return encontrados.length === 1
         ? encontrados[0]
@@ -2354,13 +2355,13 @@ Por ser verdade, firmamos a presente declaração.`;
 
       if (!cargo) return;
 
-      // Usa o cargo exatamente como está cadastrado.
+      // Usa o cargo exatamente como estÃ¡ cadastrado.
 
       if (campoCargo.value !== cargo) {
 
         campoCargo.value = cargo;
 
-        // Atualiza a prévia e o memorando.
+        // Atualiza a prÃ©via e o memorando.
 
         campoCargo.dispatchEvent(
           new Event("input", {
@@ -2376,7 +2377,7 @@ Por ser verdade, firmamos a presente declaração.`;
       }
     }
 
-    // Informa que o campo será preenchido automaticamente.
+    // Informa que o campo serÃ¡ preenchido automaticamente.
 
     campoCargo.placeholder =
       "Preenchido pelo cadastro do servidor";
@@ -2402,7 +2403,7 @@ Por ser verdade, firmamos a presente declaração.`;
       `;
 
       ajuda.textContent =
-        "Cargo preenchido automaticamente conforme o cadastro de Funcionários. Pode ser editado.";
+        "Cargo preenchido automaticamente conforme o cadastro de FuncionÃ¡rios. Pode ser editado.";
 
       blocoCargo.appendChild(ajuda);
     }
@@ -2424,7 +2425,7 @@ Por ser verdade, firmamos a presente declaração.`;
       preencherCargo
     );
 
-    // Preenche também ao trocar de modelo.
+    // Preenche tambÃ©m ao trocar de modelo.
 
     campoTipo.addEventListener(
       "change",
@@ -2443,7 +2444,567 @@ Por ser verdade, firmamos a presente declaração.`;
 })();
 
 
-/* Integração da IA, incluída uma única vez. */
+/* ASSISTENTE DOCUMENTAL LOCAL â€” JavaScript, sem API de IA.
+   RedaÃ§Ã£o por regras e modelos; nÃ£o Ã© um modelo de linguagem treinado.
+   NÃ£o faz requisiÃ§Ãµes, nÃ£o executa comandos do pedido e nÃ£o grava dados. */
+const AssistenteDocumentalLocal = (() => {
+  'use strict';
+  const TIPOS = ['declaracao', 'requerimento', 'prorrogacao', 'substituicao',
+    'contratacao', 'calendario', 'zeladoria', 'transporte', 'estagio', 'avanco',
+    'memorando', 'comparecimento-responsavel'];
+  const ASSUNTOS = {
+    declaracao: 'DeclaraÃ§Ã£o funcional', requerimento: 'Requerimento administrativo',
+    prorrogacao: 'SolicitaÃ§Ã£o de prorrogaÃ§Ã£o de contrato',
+    substituicao: 'SolicitaÃ§Ã£o de substituiÃ§Ã£o de servidor(a)',
+    contratacao: 'SolicitaÃ§Ã£o de contrataÃ§Ã£o de profissional',
+    calendario: 'SolicitaÃ§Ã£o de alteraÃ§Ã£o do calendÃ¡rio escolar',
+    zeladoria: 'SolicitaÃ§Ã£o de profissionais de zeladoria',
+    transporte: 'SolicitaÃ§Ã£o de transporte para atividade escolar',
+    estagio: 'SolicitaÃ§Ã£o de parecer sobre estÃ¡gio supervisionado',
+    avanco: 'SolicitaÃ§Ã£o de anÃ¡lise sobre avanÃ§o de nÃ­vel',
+    memorando: 'SolicitaÃ§Ã£o administrativa',
+    'comparecimento-responsavel': 'DeclaraÃ§Ã£o de comparecimento'
+  };
+  const ALIASES = {
+    'doc-numero': ['numero do memorando', 'numero do documento', 'memorando numero', 'numero'],
+    'doc-data': ['data do documento', 'data de emissao', 'emissao'],
+    'doc-assunto': ['assunto'], 'doc-cargo': ['cargo a contratar', 'cargo funcao', 'cargo', 'funcao'],
+    'doc-inicio': ['data inicial', 'data de inicio', 'data original', 'inicio', 'data da visita'],
+    'doc-fim': ['data final', 'data de termino', 'nova data', 'fim', 'termino'],
+    'doc-prazo': ['quantidade de dias', 'prazo em dias', 'duracao em dias', 'prazo'],
+    'doc-afastamento': ['motivo do afastamento', 'situacao da vaga', 'afastamento', 'licenca'],
+    'doc-pedido': ['solicitacao adicional', 'pedido', 'solicitacao', 'objeto'],
+    'doc-motivo': ['justificativa', 'fundamentacao', 'objetivo pedagogico', 'motivo', 'finalidade'],
+    'doc-para': ['destinatario', 'para'], 'doc-ac': ['a/c', 'aos cuidados de'],
+    'doc-setor': ['coordenadoria', 'setor'],
+    'doc-qtd': ['quantidade de profissionais', 'quantidade de serventes'],
+    'doc-alunos-num': ['quantidade de alunos', 'quantidade de estudantes', 'numero de estudantes'],
+    'doc-anos': ['turmas', 'anos escolares'], 'doc-turno': ['turno'],
+    'doc-local': ['local de destino', 'destino da visita', 'local', 'destino'],
+    'doc-hora-inicio': ['inicio da visita', 'hora inicial da visita'],
+    'doc-hora-fim': ['fim da visita', 'hora final da visita'],
+    'doc-saida': ['horario de embarque', 'embarque', 'saida da escola'],
+    'doc-retorno': ['horario de retorno', 'retorno'],
+    'doc-instituicao': ['instituicao do estagio', 'instituicao'],
+    'doc-horario': ['compatibilidade de horarios', 'horario do estagio'],
+    'doc-estudante': ['nome do estudante', 'nome do aluno', 'estudante', 'aluno'],
+    'doc-turma-aluno': ['turma do estudante', 'turma do aluno', 'turma'],
+    'doc-anexos': ['documentos anexos', 'anexos'],
+    'ds-nome': ['nome do responsavel', 'responsavel', 'nome da mae', 'nome do pai'],
+    'ds-estudante': ['estudante no comparecimento'],
+    'ds-data': ['data do comparecimento', 'data da reuniao'],
+    'ds-entrada': ['horario de entrada', 'entrada'], 'ds-saida': ['horario de saida', 'saida'],
+    '@tipo': ['tipo de documento', 'tipo', 'modelo'],
+    '@principal': ['servidor principal', 'servidor interessado', 'requerente', 'servidor', 'principal'],
+    '@titular': ['servidor titular', 'servidor afastado', 'titular', 'afastado'],
+    '@substituto': ['servidor substituto', 'profissional sugerido', 'substituto', 'contratado']
+  };
+  const CAMPOS = new Set(Object.keys(ALIASES).filter(x => !x.startsWith('@')));
+  const DATAS = new Set(['doc-data', 'doc-inicio', 'doc-fim', 'ds-data']);
+  const HORAS = new Set(['doc-hora-inicio', 'doc-hora-fim', 'doc-saida',
+    'doc-retorno', 'ds-entrada', 'ds-saida']);
+  const NUMEROS = new Set(['doc-qtd', 'doc-alunos-num', 'doc-prazo']);
+  const MESES = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const UNIDADES = { um: 1, uma: 1, dois: 2, duas: 2, tres: 3, quatro: 4, cinco: 5,
+    seis: 6, sete: 7, oito: 8, nove: 9, dez: 10, onze: 11, doze: 12, treze: 13,
+    catorze: 14, quatorze: 14, quinze: 15, dezesseis: 16, dezassete: 17,
+    dezessete: 17, dezoito: 18, dezenove: 19, vinte: 20, trinta: 30, quarenta: 40,
+    cinquenta: 50, sessenta: 60, setenta: 70, oitenta: 80, noventa: 90, cem: 100,
+    cento: 100, duzentos: 200, trezentos: 300, quatrocentos: 400, quinhentos: 500,
+    seiscentos: 600, setecentos: 700, oitocentos: 800, novecentos: 900, mil: 1000 };
+  const DIA = 86400000;
+  const limpo = x => String(x ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '').trim();
+  const norm = x => limpo(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const chave = x => norm(x).replace(/[^a-z0-9]+/g, ' ').trim();
+  const rx = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const frase = x => {
+    const s = limpo(x).replace(/[ \t]+/g, ' ').replace(/[.;:,]+$/, '');
+    return s ? s[0].toLocaleUpperCase('pt-BR') + s.slice(1) + '.' : '';
+  };
+  function textoSeguro(x, max, rotulo) {
+    if (typeof x !== 'string' || x.length > max) throw new Error('Confira o tamanho de ' + rotulo + '.');
+    if (/<\/?[a-z]|```/i.test(x)) throw new Error('Use somente texto, sem HTML ou blocos de cÃ³digo, em ' + rotulo + '.');
+    return limpo(x);
+  }
+  function dataValida(s) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number(s.slice(0, 4)) < 1900 || Number(s.slice(0, 4)) > 2199) return false;
+    const t = Date.parse(s + 'T12:00:00Z');
+    return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === s;
+  }
+  const iso = (a, m, d) => `${a}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const br = s => dataValida(s) ? `${s.slice(8)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : s;
+  const somarDias = (s, n) => new Date(Date.parse(s + 'T12:00:00Z') + n * DIA).toISOString().slice(0, 10);
+  function hojeBrasil() {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date()).map(x => [x.type, x.value]));
+    return `${p.year}-${p.month}-${p.day}`;
+  }
+  function datasNoTexto(texto, hoje) {
+    const n = norm(texto), lista = [];
+    const adicionar = (m, valor) => {
+      if (!dataValida(valor)) throw new Error('Data invÃ¡lida: ' + m[0] + '. Confira dia, mÃªs e ano.');
+      lista.push({ valor, inicio: m.index, fim: m.index + m[0].length, texto: m[0] });
+    };
+    for (const m of n.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)) adicionar(m, iso(m[1], m[2], m[3]));
+    for (const m of n.matchAll(/\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b/g)) adicionar(m, iso(m[3], m[2], m[1]));
+    const meses = new RegExp('\\b(\\d{1,2})\\s+de\\s+(' + MESES.join('|') + ')\\s+de\\s+(\\d{4})\\b', 'g');
+    for (const m of n.matchAll(meses)) adicionar(m, iso(m[3], MESES.indexOf(m[2]) + 1, m[1]));
+    if (dataValida(hoje)) for (const m of n.matchAll(/\b(hoje|amanha|ontem)\b/g)) {
+      adicionar(m, somarDias(hoje, m[1] === 'amanha' ? 1 : m[1] === 'ontem' ? -1 : 0));
+    }
+    return lista.sort((a, b) => a.inicio - b.inicio);
+  }
+  function numero(texto, max = 100000) {
+    const t = norm(texto).replace(/\s+dias?(?:\s+corridos?)?$/, '').trim();
+    let n;
+    if (/^\d+$/.test(t)) n = Number(t);
+    else {
+      const p = t.split(/\s+/).filter(x => x !== 'e');
+      if (!p.length || p.some(x => !Object.hasOwn(UNIDADES, x))) return '';
+      let total = 0, grupo = 0, anterior = 3, milhares = false;
+      for (const x of p) {
+        const v = UNIDADES[x];
+        if (v === 1000) {
+          if (milhares) return '';
+          total += (grupo || 1) * 1000; grupo = 0; anterior = 3; milhares = true;
+        } else {
+          const ordem = v >= 100 ? 2 : v >= 20 ? 1 : 0;
+          if (ordem >= anterior) return '';
+          grupo += v; anterior = ordem;
+        }
+      }
+      n = total + grupo;
+    }
+    return Number.isInteger(n) && n >= 1 && n <= max ? String(n) : '';
+  }
+  function hora(texto) {
+    const n = norm(texto).replace(/^(?:as|a partir das|das)\s+/, '');
+    const m = n.match(/^(\d{1,2})(?:(?::|h)(\d{2})?)?(?:\s*horas?)?$/);
+    if (!m || Number(m[1]) > 23 || Number(m[2] || 0) > 59) return '';
+    return m[1].padStart(2, '0') + ':' + (m[2] || '00');
+  }
+  function rotulos(texto) {
+    const n = norm(texto);
+    const mapa = new Map(Object.entries(ALIASES).flatMap(([campo, nomes]) => nomes.map(nome => [nome, campo])));
+    const re = new RegExp('(?:^|[\\n;]|[.!?]\\s+|\\s{2,})\\s*(' + [...mapa.keys()].sort((a, b) => b.length - a.length).map(rx).join('|') + ')\\s*:\\s*', 'g');
+    const achados = [...n.matchAll(re)], saida = {}, intervalos = [];
+    achados.forEach((m, i) => {
+      const inicio = m.index + m[0].length;
+      const fim = i + 1 < achados.length ? achados[i + 1].index : texto.length;
+      const trecho = texto.slice(inicio, fim).split('\n')[0].trim().replace(/;$/, '').trim();
+      saida[mapa.get(m[1])] = trecho;
+      intervalos.push([m.index, Math.min(fim, inicio + texto.slice(inicio, fim).split('\n')[0].length)]);
+    });
+    return { valores: saida, intervalos };
+  }
+  function tipoDoPedido(texto, atual) {
+    const n = norm(texto);
+    const genero = /^(?:(?:por favor[,]?)\s+)?(?:(?:faca|crie|elabore|prepare|redija|gere|quero)\s+)?(?:um[ae]?\s+)?(declaracao|requerimento)\b/.exec(n)?.[1];
+    if (genero === 'requerimento') return { tipo: genero, reconhecido: true };
+    if (genero === 'declaracao' && !/(?:comparecimento|declaracao)[^\n.;]{0,90}\b(?:responsavel|mae|pai|genitor)/.test(n)) return { tipo: genero, reconhecido: true };
+    const regras = [
+      ['comparecimento-responsavel', /(?:comparecimento|declaracao)[^\n.;]{0,90}\b(?:responsavel|mae|pai|genitor)|\b(?:responsavel|mae|pai)\b[^\n.;]{0,90}comparec/],
+      ['prorrogacao', /\bprorrog|\brenova\w*[^\n.;]{0,45}contrat/],
+      ['calendario', /\bcalendario|\bsabado letivo|\balter\w*[^\n.;]{0,30}dia letivo/],
+      ['transporte', /\btransporte|\bonibus|\bexcursao/],
+      ['zeladoria', /\bzeladoria|\bserventes?\b/],
+      ['estagio', /\bestagio\b/],
+      ['avanco', /\bavanco de nivel|\baceleracao[^\n.;]{0,35}(?:aluno|estudante)/],
+      ['substituicao', /\bsubstituicao\b|\bsubstituir(?=[^\n.;]{0,90}(?:servidor|profissional|licenca|afastamento))|\bcontratar[^\n.;]{0,100}substituir|\bcobrir[^\n.;]{0,35}(?:licenca|afastamento)/],
+      ['contratacao', /\bcontrata|\breposicao de (?:vaga|pessoal)|\bvacancia/],
+      ['requerimento', /\brequerimento|\brequerer\b/],
+      ['declaracao', /\bdeclaracao|\bdeclarar\b/],
+      ['memorando', /\bmemorando\b/]
+    ];
+    for (const [tipo, re] of regras) {
+      const m = re.exec(n);
+      if (m && !/\b(?:nao|sem)\s+(?:(?:faca|fazer|quero|solicitar|ha|houve)\s+){0,2}$/.test(n.slice(Math.max(0, m.index - 40), m.index))) return { tipo, reconhecido: true };
+    }
+    return { tipo: TIPOS.includes(atual) ? atual : 'memorando', reconhecido: false };
+  }
+  function selecionarPessoas(texto, cadastro, valores, tipo, idsAtuais, avisar, perguntar) {
+    const s = ' ' + chave(texto) + ' ';
+    const lista = cadastro.map(f => ({ id: limpo(f.id), nome: limpo(f.nome || f.nome_completo),
+      matricula: limpo(f.matricula), cargo: limpo(f.cargo || f.cargo_funcao) })).filter(f => f.id && f.nome);
+    const porId = id => lista.find(f => f.id === id) || null;
+    function localizar(trecho, campo) {
+      const t = chave(trecho);
+      if (!t) return null;
+      const tokens = ' ' + t + ' ';
+      let candidatos = lista.filter(f => tokens.includes(' ' + chave(f.nome) + ' '));
+      const mats = [...norm(trecho).matchAll(/\bmatricula\s*(?:n[ÂºoÂ°.]?\s*)?[:#-]?\s*([a-z0-9][a-z0-9./-]*)/g)].map(m => m[1]);
+      if (/^[\d./-]+$/.test(limpo(trecho))) mats.push(norm(trecho));
+      if (mats.length) {
+        const pelaMat = lista.filter(f => mats.includes(norm(f.matricula)));
+        if (candidatos.length && pelaMat.length && !pelaMat.some(f => candidatos.some(c => c.id === f.id))) {
+          perguntar(campo, 'O nome e a matrÃ­cula informados nÃ£o correspondem. Confira o cadastro.');
+          return null;
+        }
+        candidatos = candidatos.length ? candidatos.filter(f => pelaMat.some(c => c.id === f.id)) : pelaMat;
+      }
+      if (!candidatos.length) {
+        const ignorar = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
+        const dados = t.split(' ').filter(x => !ignorar.has(x));
+        if (dados.length >= 2) candidatos = lista.filter(f => {
+          const partes = chave(f.nome).split(' ').filter(x => !ignorar.has(x));
+          return dados.length <= partes.length && dados.every(x => partes.includes(x));
+        });
+        if (candidatos.length === 1) avisar('Nome parcial identificado como ' + candidatos[0].nome + '; confira a seleÃ§Ã£o.');
+      }
+      const unicos = [...new Map(candidatos.map(f => [f.id, f])).values()];
+      if (unicos.length === 1) return unicos[0];
+      if (unicos.length > 1) perguntar(campo, 'HÃ¡ mais de um servidor compatÃ­vel. Selecione o nome com a matrÃ­cula no cadastro.');
+      else perguntar(campo, 'NÃ£o foi possÃ­vel identificar esse servidor. Informe o nome completo e a matrÃ­cula ou selecione no formulÃ¡rio.');
+      return null;
+    }
+    const obrigatorio = ['declaracao', 'requerimento', 'prorrogacao', 'substituicao', 'contratacao', 'estagio'].includes(tipo);
+    let principal = porId(idsAtuais.principal), secundario = porId(idsAtuais.secundario);
+    const campoPrim = 'doc-principal', campoSec = 'doc-secundario';
+    const prim = valores['@principal'] || (tipo === 'substituicao' ? valores['@titular'] : tipo === 'prorrogacao' ? valores['@substituto'] : '');
+    const sec = tipo === 'substituicao' ? valores['@substituto'] : tipo === 'prorrogacao' ? valores['@titular'] : '';
+    if (prim) principal = localizar(prim, campoPrim);
+    if (sec) secundario = localizar(sec, campoSec);
+    const mencoes = lista.filter(f => s.includes(' ' + chave(f.nome) + ' '));
+    const n = norm(texto);
+    if (!prim && ['declaracao', 'requerimento'].includes(tipo)) {
+      const m = /\b(?:declaracao(?: funcional)?|requerimento)\s+(?:para|do|da|de)\s+([^.;\n]+?)(?=,\s*(?:que|pois)|[.;\n]|$)/.exec(n);
+      if (m) principal = localizar(m[1], campoPrim);
+    }
+    if (['substituicao', 'prorrogacao'].includes(tipo)) {
+      const m = /\b(?:em substituicao (?:ao|a|do|da)|substituir|servidor(?:a)? afastad[oa])\s*[:,-]?\s*([^.;\n]+)/.exec(n);
+      if (m && !/\b(?:nao|sem)\s+(?:(?:ira|vai|ha|houve)\s+)?$/.test(n.slice(Math.max(0, m.index - 25), m.index))) {
+        const alvo = localizar(m[1], tipo === 'substituicao' ? campoPrim : campoSec);
+        if (tipo === 'substituicao' && !prim) principal = alvo;
+        if (tipo === 'prorrogacao' && !sec) secundario = alvo;
+      }
+      if (tipo === 'prorrogacao' && !prim) {
+        const m2 = /\bcontrato\s+(?:d[oa]\s+)?(?:(?:servidor|servidora|profissional)\s+)?([^.;\n]+?)(?=\s+em substituicao|[.;\n]|$)/.exec(n);
+        if (m2) principal = localizar(m2[1], campoPrim);
+      }
+      if (tipo === 'substituicao' && !sec) {
+        const m2 = /\b(?:indicamos|indicar|sugerimos|sugerir|contratar)\s+(?:(?:o|a)\s+)?(?:(?:servidor|servidora|profissional)\s+)?([^.;\n]+?)(?=\s+para substituir|\s+em substituicao|[.;\n]|$)/.exec(n);
+        if (m2) secundario = localizar(m2[1], campoSec);
+      }
+    }
+    if (!principal && !prim && obrigatorio) {
+      const restantes = mencoes.filter(f => f.id !== secundario?.id);
+      if (restantes.length === 1) principal = localizar(restantes[0].nome, campoPrim);
+      else if (restantes.length > 1) {
+        if (new Set(restantes.map(f => chave(f.nome))).size === 1) principal = localizar(restantes[0].nome, campoPrim);
+        else perguntar(campoPrim, 'Identifique quem Ã© o servidor principal e quem Ã© o titular ou substituto.');
+      }
+      else {
+        const m = /\bmatricula\s*(?:n[ÂºoÂ°.]?\s*)?[:#-]?\s*([a-z0-9][a-z0-9./-]*)/.exec(n);
+        if (m && !sec) principal = localizar('matricula ' + m[1], campoPrim);
+      }
+    }
+    if (principal && secundario && principal.id === secundario.id) throw new Error('O servidor principal e o secundÃ¡rio devem ser pessoas diferentes.');
+    return { principal, secundario };
+  }
+  function revisar(texto, acao, cadastro = []) {
+    let t = textoSeguro(texto, 24000, 'texto do documento');
+    if (!t) throw new Error('Escreva ou prepare o documento antes de revisar.');
+    const protecoes = [];
+    const guardar = valor => { const i = protecoes.push(valor) - 1; return `\uE000${String.fromCharCode(0xE100 + (i >>> 8), 0xE100 + (i & 255))}\uE001`; };
+    // Protege nomes, identificadores, datas, quantidades e trechos entre aspas.
+    const nomes = cadastro.map(f => limpo(f.nome || f.nome_completo)).filter(Boolean).sort((a, b) => b.length - a.length);
+    if (nomes.length) t = t.replace(new RegExp(nomes.map(rx).join('|'), 'gi'), guardar);
+    t = t.replace(/\[[^\]]*\]|\{\{[^}]*\}\}|https?:\/\/\S+|\b[^\s@]+@[^\s@]+\.[^\s@]+\b|[â€œ"][^â€"\n]+[â€"]|\b\d[\d./:,-]*\b/g, guardar);
+    const trocas = [
+      [/\bvenho,?\s+por meio deste,?\s+requerer\b/gi, 'requeiro'],
+      [/\bvimos,?\s+por meio deste,?\s+solicitar\b/gi, 'solicitamos'],
+      [/\bvimos,?\s+respeitosamente,?\s+solicitar\b/gi, 'solicitamos'],
+      [/\ba fim de\b/gi, 'para'], [/\bcom a finalidade de\b/gi, 'para'],
+      [/\bno sentido de\b/gi, 'para'], [/\bneste momento atual\b/gi, 'neste momento'],
+      [/\batravez\b/gi, 'atravÃ©s'], [/\bexcessao\b/gi, 'exceÃ§Ã£o'],
+      [/\bnescessidade\b/gi, 'necessidade'], [/\bsolicitaÃ§ao\b/gi, 'solicitaÃ§Ã£o']
+    ];
+    if (acao === 'formalizar') trocas.push([/\ba gente solicita\b/gi, 'solicitamos'],
+      [/\ba gente precisa de\b/gi, 'necessitamos de'], [/\bpra\b/gi, 'para'], [/\bpro\b/gi, 'para o']);
+    for (const [re, v] of trocas) t = t.replace(re, v);
+    t = t.replace(/[ \t]+/g, ' ').replace(/ +([,;.!?])/g, '$1').replace(/\n{3,}/g, '\n\n');
+    let partes = t.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+    if (acao === 'resumir') partes = [...new Set(partes)];
+    t = partes.map(p => p[0]?.toLocaleUpperCase('pt-BR') + p.slice(1)).join('\n\n');
+    t = t.replace(/\uE000([\s\S])([\s\S])\uE001/g, (m, a, b) => protecoes[((a.charCodeAt(0) - 0xE100) << 8) + b.charCodeAt(0) - 0xE100] ?? m);
+    if (acao === 'resumir') t = [...new Set(t.split(/\n\s*\n/))].join('\n\n');
+    return t;
+  }
+  function preparar(entrada) {
+    if (!entrada || typeof entrada !== 'object') throw new Error('Pedido invÃ¡lido.');
+    const acao = entrada.acao || 'gerar';
+    if (!['gerar', 'complementar', 'melhorar', 'resumir', 'formalizar'].includes(acao)) throw new Error('AÃ§Ã£o nÃ£o reconhecida.');
+    const pedido = textoSeguro(entrada.pedido || '', 12000, 'pedido');
+    const referencia = textoSeguro(entrada.referencia || '', 16000, 'referÃªncia');
+    const cadastro = Array.isArray(entrada.funcionarios) ? entrada.funcionarios : [];
+    const contexto = entrada.contexto || {}, base = contexto.campos || {};
+    const avisos = [], perguntas = [], dados = Object.create(null), alterados = new Set();
+    const avisar = s => { if (!avisos.includes(s) && avisos.length < 12) avisos.push(s); };
+    const perguntar = (campo, pergunta) => {
+      if (!perguntas.some(q => q.campo === campo && q.pergunta === pergunta) && perguntas.length < 12) perguntas.push({ campo, pergunta });
+    };
+    const retornar = (tipo, texto, pessoas, resumo) => {
+      const paragrafos = texto.split(/\n\s*\n/).map(limpo).filter(Boolean);
+      if (!paragrafos.length || paragrafos.length > 18 || paragrafos.some(p => p.length > 12000) || paragrafos.reduce((s, p) => s + p.length, 0) > 24000) throw new Error('O texto ficou longo. Reduza o pedido ou a referÃªncia antes de preparar.');
+      const campos = Object.fromEntries(Object.entries(dados).filter(([id]) => CAMPOS.has(id)));
+      for (const id of ['doc-para', 'doc-ac', 'doc-setor']) if (!alterados.has(id)) delete campos[id];
+      const idAtual = id => cadastro.some(f => limpo(f.id) === id) ? id : '';
+      return { tipo, campos, principal_id: Object.hasOwn(pessoas, 'principal') ? pessoas.principal?.id || '' : idAtual(entrada.principal_id || ''),
+        secundario_id: Object.hasOwn(pessoas, 'secundario') ? pessoas.secundario?.id || '' : idAtual(entrada.secundario_id || ''),
+        paragrafos, perguntas, avisos, resumo };
+    };
+    for (const [id, valor] of Object.entries(base)) if (CAMPOS.has(id) && typeof valor === 'string') dados[id] = textoSeguro(valor, 16000, 'campo ' + id);
+    if (['melhorar', 'resumir', 'formalizar'].includes(acao)) {
+      const original = textoSeguro(entrada.modelo_base || '', 24000, 'texto do documento');
+      const texto = revisar(original, acao, cadastro);
+      avisar(acao === 'resumir' ? 'A reduÃ§Ã£o Ã© conservadora: preserva as informaÃ§Ãµes e encurta expressÃµes de redaÃ§Ã£o.' : 'A revisÃ£o local aplica ajustes limitados de redaÃ§Ã£o. Confira a gramÃ¡tica e os fatos.');
+      if (texto === original) avisar('NÃ£o encontrei ajustes automÃ¡ticos seguros para esse texto. VocÃª pode editÃ¡-lo no formulÃ¡rio.');
+      return retornar(TIPOS.includes(contexto.tipo) ? contexto.tipo : 'memorando', texto, {}, 'RevisÃ£o local concluÃ­da.');
+    }
+    if (!pedido) throw new Error('Descreva o documento ou o complemento.');
+    const extraido = rotulos(pedido), valores = extraido.valores;
+    const semRotulos = pedido.split('').map((c, i) => extraido.intervalos.some(([a, b]) => i >= a && i < b) ? (c === '\n' ? '\n' : ' ') : c).join('').trim();
+    const natural = norm(semRotulos);
+    const tipoExplicito = valores['@tipo'] ? tipoDoPedido(valores['@tipo'], contexto.tipo) : null;
+    const escolha = tipoExplicito?.reconhecido ? tipoExplicito : tipoDoPedido(semRotulos, contexto.tipo);
+    let tipo = acao === 'complementar' ? contexto.tipo : escolha.tipo;
+    if (acao === 'gerar' && !escolha.reconhecido) {
+      tipo = 'memorando';
+      avisar('NÃ£o reconheci um modelo especÃ­fico. Preparei um memorando livre com o texto fornecido; confira a adaptaÃ§Ã£o.');
+    }
+    if (!TIPOS.includes(tipo)) tipo = 'memorando';
+    if (acao === 'complementar' && escolha.reconhecido && escolha.tipo !== tipo && escolha.tipo !== 'memorando') avisar('O complemento manteve o modelo atual. Use Preparar documento para iniciar outro tipo.');
+    const hoje = dataValida(entrada.hoje || '') ? entrada.hoje : hojeBrasil();
+    function gravar(id, valor) {
+      let v = limpo(valor);
+      if (!v) return;
+      if (DATAS.has(id)) {
+        const d = datasNoTexto(v, hoje);
+        if (d.length !== 1) throw new Error('Informe uma data completa e vÃ¡lida em ' + id + '.');
+        v = d[0].valor;
+      }
+      if (HORAS.has(id)) { v = hora(v); if (!v) throw new Error('HorÃ¡rio invÃ¡lido em ' + id + '. Use HH:MM.'); }
+      if (NUMEROS.has(id)) { v = numero(v, id === 'doc-prazo' ? 3650 : 100000); if (!v) throw new Error('Quantidade invÃ¡lida em ' + id + '.'); }
+      if (id === 'doc-numero') {
+        if (!/^\d{1,8}(?:\s*\/\s*\d{4})?$/.test(v)) throw new Error('Informe o nÃºmero do memorando com atÃ© 8 algarismos e, opcionalmente, o ano.');
+        const ano = v.match(/\/\s*(\d{4})$/)?.[1];
+        if (ano && ano !== (dados['doc-data'] || hoje).slice(0, 4)) avisar('Confira o ano do memorando e a data de emissÃ£o.');
+        v = v.split('/')[0].trim();
+      }
+      dados[id] = v; alterados.add(id);
+    }
+    for (const [id, v] of Object.entries(valores)) if (CAMPOS.has(id)) gravar(id, v);
+    const datas = datasNoTexto(semRotulos, hoje);
+    if (/\b(?:hoje|amanha|ontem)\b/.test(natural)) avisar('Datas relativas foram interpretadas no horÃ¡rio de BrasÃ­lia. Confira as datas preenchidas.');
+    if (/\b\d{1,2}\/\d{1,2}(?![\d/])\b/.test(natural.replace(/\b\d{1,2}\/\d{1,2}\/\d{4}\b/g, ''))) avisar('HÃ¡ uma data sem ano. Informe dia, mÃªs e ano para evitar ambiguidade.');
+    if (tipo === 'comparecimento-responsavel') {
+      if (!alterados.has('ds-data') && datas.length === 1) gravar('ds-data', datas[0].valor);
+      else if (datas.length > 1) perguntar('ds-data', 'Informe a data do comparecimento no campo prÃ³prio.');
+    } else if (['prorrogacao', 'substituicao', 'calendario', 'contratacao', 'transporte'].includes(tipo)) {
+      if (datas.length <= 2) {
+        for (let i = 0; i < datas.length; i++) {
+          const d = datas[i], antes = natural.slice(Math.max(0, d.inicio - 55), d.inicio);
+          let id = /(?:ate|termino(?: previsto)?(?: em)?|fim(?: em)?|prorrogar ate)\s*$/.test(antes) ? 'doc-fim' : 'doc-inicio';
+          if (tipo === 'calendario' && i === 1) id = 'doc-fim';
+          else if (i === 1 && tipo !== 'transporte') id = 'doc-fim';
+          if (!alterados.has(id)) gravar(id, d.valor);
+        }
+      } else perguntar('doc-inicio', 'O pedido contÃ©m vÃ¡rias datas. Identifique Data inicial e Data final com esses rÃ³tulos.');
+    }
+    const palavrasNumeros = Object.keys(UNIDADES).sort((a, b) => b.length - a.length).join('|');
+    const numeroPalavra = '(?:\\d+|(?:' + palavrasNumeros + ')(?:\\s+(?:e\\s+)?(?:' + palavrasNumeros + ')){0,7})';
+    const prazo = new RegExp('\\b(?:por|durante|periodo de|prazo de)\\s+(' + numeroPalavra + ')\\s+dias?(?!\\w)', 'g');
+    const prazos = [...natural.matchAll(prazo)];
+    const uteis = /\bdias? uteis\b|\bmeses\b|\bmes\b/.test(natural) || /\buteis\b|\bmes(?:es)?\b/.test(norm(valores['doc-prazo'] || ''));
+    if (uteis) avisar('NÃ£o calculei dias Ãºteis ou meses automaticamente. Informe as datas completas; feriados e regras do perÃ­odo precisam de conferÃªncia.');
+    if (!alterados.has('doc-prazo') && prazos.length === 1 && !uteis && ['prorrogacao', 'substituicao'].includes(tipo)) gravar('doc-prazo', prazos[0][1]);
+    else if (prazos.length > 1) perguntar('doc-prazo', 'HÃ¡ mais de um prazo no pedido. Informe o perÃ­odo solicitado no campo prÃ³prio.');
+    if (['prorrogacao', 'substituicao'].includes(tipo)) {
+      const inicio = dados['doc-inicio'], dias = Number(dados['doc-prazo']);
+      if (alterados.has('doc-prazo') && !alterados.has('doc-fim') && dataValida(inicio) && !uteis) {
+        dados['doc-fim'] = somarDias(inicio, dias - 1);
+        avisar('PerÃ­odo calculado em dias corridos, incluindo o primeiro e o Ãºltimo dia.');
+      }
+      const fim = dados['doc-fim'];
+      if (dataValida(inicio) && dataValida(fim)) {
+        const n = Math.round((Date.parse(fim + 'T12:00:00Z') - Date.parse(inicio + 'T12:00:00Z')) / DIA) + 1;
+        if (n < 1 || n > 3650) throw new Error('Confira a ordem das datas e o limite de 3650 dias.');
+        if (alterados.has('doc-prazo') && dias !== n) throw new Error('O prazo informado nÃ£o corresponde Ã s duas datas. Confira o perÃ­odo.');
+        dados['doc-prazo'] = String(n);
+      }
+    }
+    const intervaloHora = /\b(?:das|de)\s*(\d{1,2}(?:(?::|h)\d{2})?h?)\s*(?:as|a|ate(?: as)?)\s*(\d{1,2}(?:(?::|h)\d{2})?h?)\b/.exec(natural);
+    if (intervaloHora) {
+      const ids = tipo === 'comparecimento-responsavel' ? ['ds-entrada', 'ds-saida'] : ['doc-hora-inicio', 'doc-hora-fim'];
+      if (['comparecimento-responsavel', 'transporte'].includes(tipo)) ids.forEach((id, i) => { if (!alterados.has(id)) gravar(id, intervaloHora[i + 1]); });
+    }
+    if (tipo === 'transporte') {
+      const q = new RegExp('\\b(' + numeroPalavra + ')\\s+(?:alunos?|estudantes?)\\b').exec(natural);
+      if (q && !alterados.has('doc-alunos-num')) gravar('doc-alunos-num', q[1]);
+      for (const [id, re] of [['doc-saida', /\b(?:embarque|saida)(?: da escola)?\s*(?:as|a partir das|:)?\s*(\d{1,2}(?:(?::|h)\d{2})?h?)\b/], ['doc-retorno', /\bretorno\s*(?:previsto)?\s*(?:as|a partir das|:)?\s*(\d{1,2}(?:(?::|h)\d{2})?h?)\b/]]) {
+        const m = re.exec(natural); if (m && !alterados.has(id)) gravar(id, m[1]);
+      }
+      const turno = /\b(matutino|vespertino|noturno|integral)\b/.exec(natural);
+      if (turno && !alterados.has('doc-turno')) gravar('doc-turno', turno[1]);
+      const destino = /\b(?:com destino (?:a|ao)|para (?:o|a) (?:museu|parque)|visita (?:ao|a))\s*([^.;\n]+?)(?=,|\s+(?:no dia|em \d|com \d|das \d|para realizar)|$)/.exec(natural);
+      if (destino && !alterados.has('doc-local')) {
+        const inicio = destino.index + destino[0].length - destino[1].length;
+        gravar('doc-local', semRotulos.slice(inicio, inicio + destino[1].length));
+      }
+    }
+    if (tipo === 'zeladoria' && !alterados.has('doc-qtd')) {
+      const m = new RegExp('\\b(' + numeroPalavra + ')\\s+(?:serventes?|profissionais|zeladores?)\\b').exec(natural);
+      if (m) gravar('doc-qtd', m[1]);
+    }
+    if (!dados['doc-afastamento']) {
+      for (const [re, nome] of [[/\breadaptacao\b/, 'readaptaÃ§Ã£o'], [/\blicenca[ -]maternidade\b/, 'licenÃ§a-maternidade'],
+        [/\blicenca para tratamento de saude\b|\blts\b/, 'licenÃ§a para tratamento de saÃºde (LTS)'], [/\blicenca[ -]paternidade\b/, 'licenÃ§a-paternidade']]) {
+        const m = re.exec(natural);
+        if (m && !/\b(?:nao|sem)\b[^.;\n]{0,35}$/.test(natural.slice(Math.max(0, m.index - 45), m.index))) { gravar('doc-afastamento', nome); break; }
+      }
+    }
+    const pessoas = selecionarPessoas(semRotulos, cadastro, valores, tipo, {
+      principal: entrada.principal_id || '', secundario: entrada.secundario_id || ''
+    }, avisar, perguntar);
+    if (pessoas.principal && !dados['doc-cargo']) dados['doc-cargo'] = pessoas.principal.cargo;
+    if (tipo === 'comparecimento-responsavel' && !dados['ds-nome']) {
+      const m = /\b(?:respons[aÃ¡]vel|m[aÃ£]e|pai)\s+([\p{L}][\p{L}'â€™ -]+?)(?=\s+(?:compareceu|esteve|no dia|das|em \d)|[,.;\n]|$)/iu.exec(semRotulos);
+      if (m) gravar('ds-nome', m[1]);
+    }
+    if (tipo === 'comparecimento-responsavel' && dados['doc-estudante']) dados['ds-estudante'] = dados['doc-estudante'];
+    const justificativa = /(?:\bjustificativa\s*:?|\bporque\s+|\bpois\s+|\bpara garantir\s+|\ba fim de\s+)([^\n]+)$/i.exec(semRotulos);
+    if (!alterados.has('doc-motivo') && justificativa) {
+      const prefixo = /^para garantir/i.test(justificativa[0]) ? 'garantir ' : '';
+      gravar('doc-motivo', prefixo + justificativa[1].replace(/[.;]+$/, ''));
+    }
+    if (referencia) avisar('A referÃªncia foi mantida como informaÃ§Ã£o complementar; o assistente local nÃ£o verifica a veracidade desse texto.');
+    const precisar = (id, nome) => {
+      if (dados[id]) return dados[id];
+      perguntar(id, 'Informe: ' + nome + '.');
+      return '[INFORMAR ' + nome.toLocaleUpperCase('pt-BR') + ']';
+    };
+    const servidor = f => {
+      if (!f) { perguntar('doc-principal', 'Selecione o servidor correto no cadastro.'); return '[INFORMAR SERVIDOR E MATRÃCULA]'; }
+      if (!f.matricula) perguntar('doc-principal', 'Confira a matrÃ­cula no cadastro do servidor.');
+      if (!f.cargo) perguntar('doc-cargo', 'Confira o cargo/funÃ§Ã£o do servidor.');
+      return `${f.nome}, matrÃ­cula nÂº ${f.matricula || '[INFORMAR MATRÃCULA]'}${f.cargo ? ', ' + f.cargo : ''}`;
+    };
+    const periodo = () => {
+      const ini = precisar('doc-inicio', tipo === 'calendario' ? 'data original' : 'data inicial');
+      const fim = precisar('doc-fim', tipo === 'calendario' ? 'nova data proposta' : 'data final');
+      return `de ${br(ini)} a ${br(fim)}${dados['doc-prazo'] ? ` (${dados['doc-prazo']} dias corridos, incluindo inÃ­cio e fim)` : ''}`;
+    };
+    const motivo = () => frase(precisar('doc-motivo', tipo === 'transporte' ? 'objetivo pedagÃ³gico' : 'justificativa'));
+    const pedidoLivre = () => {
+      if (dados['doc-pedido']) return dados['doc-pedido'];
+      let s = semRotulos.replace(/^\s*(?:por favor[, ]*|preciso que\s+)?(?:faca|faÃ§a|crie|elabore|prepare|redija|gere)\s+(?:um[ae]?\s+)?(?:memorando|requerimento|documento|oficio|ofÃ­cio)\s*(?:personalizado|livre)?\s*(?:para\s+)?/i, '').trim();
+      s = s.replace(/\s*(?:Justificativa\s*:|porque\s+|pois\s+)[\s\S]*$/i, '').trim();
+      if (!s || /^(?:memorando|documento|requerimento)[.!]?$/i.test(s)) return precisar('doc-pedido', 'pedido');
+      return s;
+    };
+    const solicitar = s => {
+      const atos = [
+        [/^(?:comunique|comunicar|comunicando|comunico)\s+/i, 'Comunicamos '],
+        [/^(?:informe|informar|informando|informo)\s+/i, 'Informamos '],
+        [/^(?:encaminhe|encaminhar|encaminhando|encaminho)\s+/i, 'Encaminhamos '],
+        [/^(?:convocar|convoque|convocando|convoco)\s+/i, 'Convocamos ']
+      ];
+      for (const [re, v] of atos) if (re.test(limpo(s))) return frase(limpo(s).replace(re, v));
+      const t = limpo(s).replace(/^(?:solicite|solicitar|solicitando|solicito|pedir|peca|peÃ§a)\s+/i, '');
+      if (t !== s) return frase('Solicitamos ' + t);
+      if (/^solicitamos\b/i.test(t)) return frase(t);
+      if (/^(?:a|o|que|os|as|um|uma)\s+/i.test(t)) return frase('Solicitamos ' + t);
+      return frase('Apresentamos a seguinte demanda para anÃ¡lise: ' + t);
+    };
+    let partes;
+    switch (tipo) {
+      case 'declaracao':
+        partes = [`Declaramos, para os devidos fins, que ${servidor(pessoas.principal)} consta no cadastro funcional desta unidade escolar, E.M. Prof.Âª Eunice Carneiro.`,
+          dados['doc-motivo'] ? 'Finalidade informada: ' + frase(dados['doc-motivo']) : 'A presente declaraÃ§Ã£o Ã© expedida a pedido da pessoa interessada, com base nas informaÃ§Ãµes do cadastro e sujeita Ã  conferÃªncia dos registros funcionais.'];
+        break;
+      case 'requerimento':
+        dados['doc-pedido'] = pedidoLivre();
+        partes = [`Eu, ${servidor(pessoas.principal)}, venho, respeitosamente, apresentar o seguinte requerimento: ${frase(dados['doc-pedido'])}`,
+          motivo(), 'Solicito a anÃ¡lise do pedido e as providÃªncias administrativas cabÃ­veis.', 'Nestes termos, peÃ§o deferimento.'];
+        break;
+      case 'prorrogacao':
+        partes = [`Solicitamos a anÃ¡lise da prorrogaÃ§Ã£o do contrato de ${servidor(pessoas.principal)}, para o perÃ­odo ${periodo()}.`];
+        if (pessoas.secundario) partes.push(`A atuaÃ§Ã£o em substituiÃ§Ã£o refere-se a ${servidor(pessoas.secundario)}. SituaÃ§Ã£o informada para o afastamento: ${frase(precisar('doc-afastamento', 'motivo do afastamento'))}`);
+        partes.push('Justificativa: ' + motivo(), 'Solicitamos a anÃ¡lise e as providÃªncias administrativas cabÃ­veis.');
+        break;
+      case 'substituicao':
+        partes = [`Solicitamos a contrataÃ§Ã£o de profissional para o cargo/funÃ§Ã£o de ${precisar('doc-cargo', 'cargo/funÃ§Ã£o a contratar')}, em substituiÃ§Ã£o a ${servidor(pessoas.principal)}.`,
+          `SituaÃ§Ã£o informada para o afastamento: ${frase(precisar('doc-afastamento', 'motivo do afastamento'))} PerÃ­odo informado: ${periodo()}.`];
+        if (pessoas.secundario) partes.push(`Indicamos para anÃ¡lise o nome de ${servidor(pessoas.secundario)}, sujeito aos procedimentos administrativos de contrataÃ§Ã£o.`);
+        partes.push('Justificativa: ' + motivo(), 'Solicitamos a anÃ¡lise e as providÃªncias cabÃ­veis.');
+        break;
+      case 'contratacao':
+        partes = [`Solicitamos a anÃ¡lise da contrataÃ§Ã£o de profissional para o cargo/funÃ§Ã£o de ${precisar('doc-cargo', 'cargo/funÃ§Ã£o a contratar')}, para atendimento Ã  demanda desta unidade escolar.`];
+        if (pessoas.principal) partes.push('Servidor relacionado Ã  situaÃ§Ã£o da vaga: ' + frase(servidor(pessoas.principal)));
+        if (dados['doc-inicio']) partes.push('Data informada para a ocorrÃªncia: ' + br(dados['doc-inicio']) + '.');
+        if (dados['doc-afastamento']) partes.push('SituaÃ§Ã£o informada da vaga: ' + frase(dados['doc-afastamento']));
+        partes.push('Justificativa: ' + motivo(), 'Solicitamos a anÃ¡lise da demanda e as providÃªncias administrativas cabÃ­veis.');
+        break;
+      case 'calendario':
+        partes = [`Solicitamos autorizaÃ§Ã£o para alterar a data prevista no calendÃ¡rio escolar, ${br(precisar('doc-inicio', 'data original'))}, propondo sua realizaÃ§Ã£o em ${br(precisar('doc-fim', 'nova data proposta'))}.`,
+          'Justificativa: ' + motivo(), 'A proposta fica sujeita Ã  anÃ¡lise e Ã  autorizaÃ§Ã£o do setor responsÃ¡vel, com conferÃªncia do calendÃ¡rio e da carga horÃ¡ria.'];
+        break;
+      case 'zeladoria':
+        partes = [`Solicitamos a disponibilizaÃ§Ã£o de ${precisar('doc-qtd', 'quantidade de profissionais')} profissional(is) de zeladoria para atender Ã s necessidades desta unidade escolar.`,
+          'Justificativa: ' + motivo()];
+        if (dados['doc-pedido']) partes.push('SolicitaÃ§Ã£o adicional: ' + frase(dados['doc-pedido']));
+        partes.push('Solicitamos a anÃ¡lise da demanda e as providÃªncias cabÃ­veis.');
+        break;
+      case 'transporte':
+        partes = [`Solicitamos transporte para ${precisar('doc-alunos-num', 'quantidade de estudantes')} estudante(s) das turmas ${precisar('doc-anos', 'turmas/anos')}, no dia ${br(precisar('doc-inicio', 'data da visita'))}, com destino a ${precisar('doc-local', 'local de destino')}${dados['doc-turno'] ? ', no turno ' + dados['doc-turno'] : ''}.`,
+          `Embarque na escola Ã s ${precisar('doc-saida', 'horÃ¡rio de embarque')}, com retorno previsto Ã s ${precisar('doc-retorno', 'horÃ¡rio de retorno')}.`];
+        if (dados['doc-hora-inicio'] || dados['doc-hora-fim']) partes.push(`A visita estÃ¡ prevista das ${precisar('doc-hora-inicio', 'inÃ­cio da visita')} Ã s ${precisar('doc-hora-fim', 'fim da visita')}.`);
+        partes.push('Objetivo pedagÃ³gico: ' + motivo(), 'Solicitamos a anÃ¡lise e a confirmaÃ§Ã£o da disponibilidade do transporte.');
+        break;
+      case 'estagio':
+        partes = [`Solicitamos anÃ¡lise e parecer sobre a possibilidade de ${servidor(pessoas.principal)} realizar estÃ¡gio supervisionado${dados['doc-instituicao'] ? ' na instituiÃ§Ã£o ' + dados['doc-instituicao'] : ''}.`,
+          'Justificativa e contexto: ' + motivo()];
+        if (dados['doc-horario']) partes.push('InformaÃ§Ã£o apresentada sobre horÃ¡rios: ' + frase(dados['doc-horario']));
+        partes.push('Solicitamos orientaÃ§Ã£o sobre os requisitos, a compatibilidade de horÃ¡rios e os procedimentos aplicÃ¡veis, antes de eventual autorizaÃ§Ã£o.');
+        break;
+      case 'avanco':
+        partes = [`Solicitamos anÃ¡lise e parecer sobre o pedido de avaliaÃ§Ã£o para possÃ­vel avanÃ§o de nÃ­vel de ${precisar('doc-estudante', 'nome do estudante')}, matriculado(a) na turma ${precisar('doc-turma-aluno', 'turma/ano')}.`,
+          'ContextualizaÃ§Ã£o fornecida: ' + motivo()];
+        if (dados['doc-anexos']) partes.push('Documentos informados como anexos: ' + frase(dados['doc-anexos']));
+        partes.push('O encaminhamento fica sujeito Ã  avaliaÃ§Ã£o tÃ©cnica e Ã  anÃ¡lise do setor responsÃ¡vel.');
+        break;
+      case 'comparecimento-responsavel': {
+        const entradaHora = precisar('ds-entrada', 'horÃ¡rio de entrada'), saidaHora = precisar('ds-saida', 'horÃ¡rio de saÃ­da');
+        if (dados['ds-entrada'] && dados['ds-saida'] && saidaHora <= entradaHora) throw new Error('A saÃ­da do comparecimento deve ser posterior Ã  entrada.');
+        const aluno = dados['ds-estudante'] || limpo(base['ds-estudante']);
+        partes = [`Declaramos, para os devidos fins, que ${precisar('ds-nome', 'nome do responsÃ¡vel')} compareceu Ã  Escola Municipal Professora Eunice Carneiro, no dia ${br(precisar('ds-data', 'data do comparecimento'))}, no perÃ­odo das ${entradaHora} Ã s ${saidaHora}, para tratar de assuntos escolares${aluno ? ', relacionados ao(Ã ) estudante ' + aluno : ''}.`,
+          'A presente declaraÃ§Ã£o refere-se ao comparecimento informado, sujeito Ã  conferÃªncia nos registros da unidade escolar.'];
+        if (dados['doc-motivo']) partes.push('Finalidade informada: ' + frase(dados['doc-motivo']));
+        break;
+      }
+      default:
+        dados['doc-pedido'] = pedidoLivre();
+        partes = [solicitar(dados['doc-pedido']), motivo(), 'Solicitamos a anÃ¡lise e as providÃªncias administrativas cabÃ­veis.'];
+    }
+    const marcador = 'InformaÃ§Ãµes complementares fornecidas:\n';
+    if (referencia) partes.push(marcador + referencia);
+    else if (acao === 'complementar') {
+      const original = limpo(entrada.modelo_base), indice = original.indexOf(marcador);
+      if (indice >= 0) partes.push(original.slice(indice));
+    }
+    dados['doc-assunto'] ||= ASSUNTOS[tipo];
+    if (tipo === 'memorando' && !alterados.has('doc-assunto')) avisar('O assunto genÃ©rico pode ser ajustado no formulÃ¡rio.');
+    if (perguntas.length) avisar('HÃ¡ dados a preencher ou confirmar. Os campos pendentes permanecem destacados no texto.');
+    avisar('Confira se todos os detalhes do pedido constam no rascunho. InformaÃ§Ãµes fora das regras podem precisar de ediÃ§Ã£o manual.');
+    return retornar(tipo, partes.join('\n\n'), pessoas, 'Rascunho preparado no navegador.');
+  }
+  return Object.freeze({ preparar, revisar, versao: '20261020-local-1' });
+})();
+
+
+/* IntegraÃ§Ã£o do assistente local, incluÃ­da uma Ãºnica vez. */
 (function instalarIADeDocumentos() {
   'use strict';
   if (
@@ -2522,7 +3083,7 @@ Por ser verdade, firmamos a presente declaração.`;
           .some(o => o.value === tipo);
         if (!existe) {
           throw new Error(
-            'Este modelo não está disponível no site.'
+            'Este modelo nÃ£o estÃ¡ disponÃ­vel no site.'
           );
         }
         $('ds-modelo').value = tipo;
@@ -2535,7 +3096,7 @@ Por ser verdade, firmamos a presente declaração.`;
         .some(o => o.value === tipo);
       if (!existe) {
         throw new Error(
-          'Este modelo não está disponível no site.'
+          'Este modelo nÃ£o estÃ¡ disponÃ­vel no site.'
         );
       }
       $('doc-tipo').value = tipo;
@@ -2587,7 +3148,7 @@ Por ser verdade, firmamos a presente declaração.`;
         ).trim()
       }));
     } catch {
-      // O formulário continua disponível.
+      // O formulÃ¡rio continua disponÃ­vel.
     }
     if (
       $('doc-texto') !== textoOriginal ||
@@ -2672,28 +3233,33 @@ Por ser verdade, firmamos a presente declaração.`;
       </style>
       <h3>Assistente de documentos</h3>
       <p>
-        Descreva o documento. A IA usa o cadastro e prepara
-        a redação no modelo escolhido.
+        Descreva o documento. O assistente local organiza os dados
+        e prepara um rascunho usando regras de redaÃ§Ã£o e os modelos da escola.
+        Confira o resultado; pedidos fora das regras podem exigir ediÃ§Ã£o manual.
+        NÃ£o hÃ¡ envio do pedido para um serviÃ§o de IA.
       </p>
       <label for="ia-extra-pedido">
-        O que você precisa?
+        O que vocÃª precisa?
       </label>
+      <p>VocÃª pode usar: Servidor:, Titular:, Data inicial:, Data final:,
+        Justificativa:, Pedido:, Cargo:, ResponsÃ¡vel:, Entrada: e SaÃ­da:.
+        Informe nomes completos ou matrÃ­culas para identificar servidores.</p>
       <textarea
         id="ia-extra-pedido"
         maxlength="12000"
-        placeholder="Ex.: Faça um memorando prorrogando o contrato de [nome completo], em substituição a [nome completo] em readaptação, a partir de 20/10/2026 por 30 dias. Justificativa: manter o atendimento aos estudantes."
+        placeholder="Ex.: FaÃ§a um memorando prorrogando o contrato de [nome completo], em substituiÃ§Ã£o a [nome completo] em readaptaÃ§Ã£o, a partir de 20/10/2026 por 30 dias. Justificativa: manter o atendimento aos estudantes."
       ></textarea>
       <details>
         <summary>
-          Informações ou texto de referência
+          InformaÃ§Ãµes complementares
         </summary>
         <label for="ia-extra-referencia">
-          Referência opcional
+          InformaÃ§Ãµes complementares opcionais
         </label>
         <textarea
           id="ia-extra-referencia"
           maxlength="16000"
-          placeholder="Cole informações que devem orientar a redação."
+          placeholder="Cole informaÃ§Ãµes confirmadas. Elas serÃ£o incluÃ­das como texto complementar, sem interpretaÃ§Ã£o automÃ¡tica."
         ></textarea>
       </details>
       <div class="ia-botoes">
@@ -2744,7 +3310,7 @@ Por ser verdade, firmamos a presente declaração.`;
         id="ia-extra-aplicar"
         hidden
       >
-        Aplicar sugestão recebida
+        Aplicar sugestÃ£o recebida
       </button>
     `;
     const container = textoOriginal.closest('.docs-panel');
@@ -2755,18 +3321,21 @@ Por ser verdade, firmamos a presente declaração.`;
       bloco.className = 'docs-field full';
       bloco.innerHTML = `
         <label for="doc-afastamento">
-          Motivo do afastamento / situação da vaga
+          Motivo do afastamento / situaÃ§Ã£o da vaga
         </label>
         <input
           id="doc-afastamento"
           maxlength="1000"
-          placeholder="Ex.: LTS, readaptação, licença-maternidade"
+          placeholder="Ex.: LTS, readaptaÃ§Ã£o, licenÃ§a-maternidade"
         >
       `;
       $('doc-inicio')
         ?.closest('.docs-grid')
         ?.appendChild(bloco);
     }
+    $('doc-afastamento')?.addEventListener('input', () => {
+      $('doc-status').textContent = 'Motivo do afastamento alterado. Confira a redaÃ§Ã£o ou use Atualizar texto.';
+    });
     let pedidoAnterior = '';
     let controller = null;
     let pendente = null;
@@ -2778,7 +3347,7 @@ Por ser verdade, firmamos a presente declaração.`;
     };
     const rotulo = f => f.nome + (
       f.matricula
-        ? ' — Matrícula ' + f.matricula
+        ? ' â€” MatrÃ­cula ' + f.matricula
         : ''
     );
     function pessoa(id) {
@@ -2795,40 +3364,6 @@ Por ser verdade, firmamos a presente declaração.`;
       return encontrados.length === 1
         ? encontrados[0]
         : null;
-    }
-    function candidatos(texto) {
-      const s = ' ' +
-        normalizar(texto).replace(/[^a-z0-9]+/g, ' ') +
-        ' ';
-      const ignorar = new Set([
-        'de', 'da', 'do', 'das', 'dos', 'e'
-      ]);
-      return funcionarios.map(f => {
-        const nome = normalizar(f.nome);
-        const partes = nome.split(' ')
-          .filter(t => !ignorar.has(t));
-        const n = partes.filter(t =>
-          s.includes(' ' + t + ' ')
-        ).length;
-        const mat = f.matricula.replace(/\D/g, '');
-        const score =
-          mat.length >= 4 &&
-          s.includes(' ' + mat + ' ')
-            ? 120
-            : nome && s.includes(' ' + nome + ' ')
-              ? 110
-              : n >= 2
-                ? 70 + n
-                : partes[0] &&
-                  s.includes(' ' + partes[0] + ' ')
-                  ? 30
-                  : 0;
-        return { id: f.id, score };
-      })
-        .filter(x => x.score)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 12)
-        .map(x => x.id);
     }
     function perguntas(lista = []) {
       const area = $('ia-extra-perguntas');
@@ -2857,10 +3392,10 @@ Por ser verdade, firmamos a presente declaração.`;
       };
       if (tipo === 'comparecimento-responsavel') {
         for (const [id, nome] of [
-          ['ds-nome', 'responsável'],
+          ['ds-nome', 'responsÃ¡vel'],
           ['ds-data', 'data do comparecimento'],
           ['ds-entrada', 'entrada'],
-          ['ds-saida', 'saída'],
+          ['ds-saida', 'saÃ­da'],
           ['ds-assinante', 'assinante'],
           ['ds-cargo', 'cargo do assinante']
         ]) exigir(id, nome);
@@ -2869,7 +3404,7 @@ Por ser verdade, firmamos a presente declaração.`;
           valor('ds-entrada') &&
           valor('ds-saida') <= valor('ds-entrada')
         ) {
-          p.push('Confira os horários do comparecimento.');
+          p.push('Confira os horÃ¡rios do comparecimento.');
         }
       } else {
         exigir('doc-data', 'data do documento');
@@ -2887,8 +3422,8 @@ Por ser verdade, firmamos a presente declaração.`;
           exigir('doc-cargo-assinante', 'cargo do assinante');
         }
         if (!['declaracao', 'requerimento'].includes(tipo)) {
-          exigir('doc-numero', 'número do memorando');
-          exigir('doc-para', 'destinatário');
+          exigir('doc-numero', 'nÃºmero do memorando');
+          exigir('doc-para', 'destinatÃ¡rio');
           exigir('doc-setor', 'setor');
         }
         if (
@@ -2935,22 +3470,26 @@ Por ser verdade, firmamos a presente declaração.`;
           pessoa('doc-principal') === pessoa('doc-secundario')
         ) {
           p.push(
-            'Confira: titular e substituto são a mesma pessoa.'
+            'Confira: titular e substituto sÃ£o a mesma pessoa.'
           );
         }
       }
+      if (['prorrogacao', 'substituicao'].includes(tipo) &&
+          (tipo === 'substituicao' || pessoa('doc-secundario')) && !valor('doc-afastamento')) {
+        p.push('Informe o motivo confirmado do afastamento.');
+      }
       if (!valor('doc-texto')) {
-        p.push('O texto está vazio.');
+        p.push('O texto estÃ¡ vazio.');
       }
       if (/\[[^\]]+\]|\{\{[^}]+\}\}/.test(valor('doc-texto'))) {
-        p.push('O texto contém informações a preencher.');
+        p.push('O texto contÃ©m informaÃ§Ãµes a preencher.');
       }
       return p;
     }
     function validar(raw) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !tipos.includes(raw.tipo)) {
         throw new Error(
-          'Tipo de documento inválido na resposta.'
+          'Tipo de documento invÃ¡lido na resposta.'
         );
       }
       const entradas = Array.isArray(raw.campos)
@@ -2963,21 +3502,21 @@ Por ser verdade, firmamos a presente declaração.`;
       for (const [id, v] of entradas) {
         if (!campos.includes(id)) continue;
         if (typeof v !== 'string' || v.length > 16000) {
-          throw new Error('Campo inválido na resposta.');
+          throw new Error('Campo invÃ¡lido na resposta.');
         }
         if (
           v &&
           $(id)?.type === 'date' &&
           !dataValida(v)
         ) {
-          throw new Error('Data inválida na resposta.');
+          throw new Error('Data invÃ¡lida na resposta.');
         }
         if (
           v &&
           $(id)?.type === 'time' &&
           !/^([01]\d|2[0-3]):[0-5]\d$/.test(v)
         ) {
-          throw new Error('Horário inválido na resposta.');
+          throw new Error('HorÃ¡rio invÃ¡lido na resposta.');
         }
         if (
           v &&
@@ -2988,7 +3527,7 @@ Por ser verdade, firmamos a presente declaração.`;
             Number(v) > 100000
           )
         ) {
-          throw new Error('Quantidade inválida na resposta.');
+          throw new Error('Quantidade invÃ¡lida na resposta.');
         }
         dados[id] = v;
       }
@@ -3001,7 +3540,7 @@ Por ser verdade, firmamos a presente declaração.`;
           !funcionarios.some(f => f.id === String(id))
         ) {
           throw new Error(
-            'A IA indicou uma pessoa fora do cadastro.'
+            'O servidor indicado nÃ£o foi localizado no cadastro.'
           );
         }
       }
@@ -3016,11 +3555,12 @@ Por ser verdade, firmamos a presente declaração.`;
         )
       ) {
         throw new Error(
-          'A redação recebida deve conter somente texto.'
+          'A redaÃ§Ã£o recebida deve conter somente texto.'
         );
       }
       return {
         tipo: raw.tipo,
+        resumo: typeof raw.resumo === 'string' ? raw.resumo.slice(0, 300) : '',
         principal_id: raw.principal_id ? String(raw.principal_id) : '',
         secundario_id: raw.secundario_id ? String(raw.secundario_id) : '',
         paragrafos: raw.paragrafos,
@@ -3070,8 +3610,8 @@ Por ser verdade, firmamos a presente declaração.`;
           const f = funcionarios.find(x =>
             x.id === String(plano[chave] || '')
           );
-          if (f && $(id)) {
-            $(id).value = rotulo(f);
+          if ($(id)) {
+            $(id).value = f ? rotulo(f) : '';
           }
         }
         if (
@@ -3136,89 +3676,30 @@ Por ser verdade, firmamos a presente declaração.`;
         ...pendencias()
       ];
       mensagem([
-        'IA conectada: ' +
+        'Assistente local: ' +
           (plano.resumo || 'documento preparado.'),
         ...avisos,
-        'Confira a prévia antes de imprimir ou assinar.'
+        'Confira a prÃ©via antes de imprimir ou assinar.'
       ].join('\n'));
     }
-    async function consultar(
-      pedido,
-      acao,
-      preservar,
-      signal
-    ) {
+    async function consultar(pedido, acao, preservar, signal) {
       await App.requireRoles(["administrador", "secretaria"]);
-      if (pedido.length > 12000 || valor('ia-extra-referencia').length > 16000 || valor('doc-texto').length > 24000) {
-        throw new Error('Reduza o pedido, a referência ou o texto antes de consultar.');
-      }
+      if (signal.aborted) throw new DOMException('OperaÃ§Ã£o interrompida.', 'AbortError');
       const contexto = capturar();
       if (!preservar) {
         contexto.campos = Object.fromEntries(
-          Object.entries(contexto.campos)
-            .filter(([id]) => fixos.has(id))
+          Object.entries(contexto.campos).filter(([id]) => fixos.has(id))
         );
       }
-      const ids = new Set(candidatos(pedido));
-      if (preservar) {
-        for (const id of [
-          'doc-principal',
-          'doc-secundario'
-        ]) {
-          const f = pessoa(id);
-          if (f) ids.add(f.id);
-        }
-      }
-      const resposta = await App.request(
-        '/functions/v1/documentos-ia',
-        {
-          method: 'POST',
-          signal,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            pedido,
-            acao,
-            referencia: valor('ia-extra-referencia'),
-            contexto,
-            funcionarios_ids: [...ids],
-            principal_id: preservar
-              ? pessoa('doc-principal')?.id || ''
-              : '',
-            secundario_id: preservar
-              ? pessoa('doc-secundario')?.id || ''
-              : '',
-            modelo_base: preservar
-              ? valor('doc-texto')
-              : ''
-          })
-        }
-      );
-      let dados;
-      try {
-        const leitor = resposta.body?.getReader();
-        if (!leitor) throw new Error('Resposta inválida.');
-        const partes = []; let total = 0;
-        try {
-          for (;;) {
-            const { done, value } = await leitor.read();
-            if (done) break;
-            total += value.byteLength;
-            if (total > 131072) { await leitor.cancel(); throw new Error('Resposta muito longa.'); }
-            partes.push(value);
-          }
-        } finally { leitor.releaseLock(); }
-        const bytes = new Uint8Array(total); let offset = 0;
-        for (const parte of partes) { bytes.set(parte, offset); offset += parte.length; }
-        dados = JSON.parse(new TextDecoder().decode(bytes));
-      } catch {
-        throw new Error(
-          'O serviço de IA não retornou uma resposta válida.'
-        );
-      }
-      if (!resposta.ok) throw App.erroHTTP(resposta);
-      return validar(dados);
+      const plano = AssistenteDocumentalLocal.preparar({
+        pedido, acao, referencia: valor('ia-extra-referencia'), contexto,
+        funcionarios,
+        principal_id: preservar ? pessoa('doc-principal')?.id || '' : '',
+        secundario_id: preservar ? pessoa('doc-secundario')?.id || '' : '',
+        modelo_base: preservar ? valor('doc-texto') : ''
+      });
+      if (signal.aborted) throw new DOMException('OperaÃ§Ã£o interrompida.', 'AbortError');
+      return validar(plano);
     }
     async function executar(acao) {
       if (controller) return;
@@ -3235,7 +3716,7 @@ Por ser verdade, firmamos a presente declaração.`;
       }
       if (ajustar && !valor('doc-texto')) {
         mensagem(
-          'Prepare ou escreva o texto antes de ajustar a redação.'
+          'Prepare ou escreva o texto antes de ajustar a redaÃ§Ã£o.'
         );
         return;
       }
@@ -3248,7 +3729,7 @@ Por ser verdade, firmamos a presente declaração.`;
       if (pedido.length > 12000) {
         mensagem(
           'O pedido acumulado ficou muito longo. ' +
-          'Use Novo pedido e descreva as informações necessárias.'
+          'Use Novo pedido e descreva as informaÃ§Ãµes necessÃ¡rias.'
         );
         return;
       }
@@ -3265,10 +3746,10 @@ Por ser verdade, firmamos a presente declaração.`;
       );
       botoes.forEach(b => b.disabled = true);
       $('ia-extra-cancelar').hidden = false;
-      mensagem('A IA está preparando o documento…');
+      mensagem('Preparando o rascunho no navegadorâ€¦');
       try {
         const plano = await consultar(
-          pedido || 'Ajuste a redação atual.',
+          atual || 'Ajuste a redaÃ§Ã£o atual.',
           acao,
           preservar,
           controle.signal
@@ -3283,9 +3764,9 @@ Por ser verdade, firmamos a presente declaração.`;
           pendente = { plano, preservar };
           $('ia-extra-aplicar').hidden = false;
           mensagem(
-            'A sugestão está pronta. Você alterou o documento ' +
-            'durante a consulta. Clique em Aplicar sugestão ' +
-            'recebida para usá-la.'
+            'A sugestÃ£o estÃ¡ pronta. VocÃª alterou o documento ' +
+            'durante a consulta. Clique em Aplicar sugestÃ£o ' +
+            'recebida para usÃ¡-la.'
           );
         } else {
           aplicar(plano, preservar);
@@ -3294,7 +3775,7 @@ Por ser verdade, firmamos a presente declaração.`;
         mensagem(
           controle.signal.aborted
             ? 'Consulta interrompida. Seu rascunho foi mantido.'
-            : 'Não foi possível preparar o documento: ' +
+            : 'NÃ£o foi possÃ­vel preparar o documento: ' +
               e.message
         );
       } finally {
@@ -3323,8 +3804,8 @@ Por ser verdade, firmamos a presente declaração.`;
     $('ia-extra-verificar').onclick = () => {
       mensagem(
         pendencias().join('\n') ||
-        'Não encontrei pendências básicas. ' +
-        'Confira os fatos e a prévia antes de emitir.'
+        'NÃ£o encontrei pendÃªncias bÃ¡sicas. ' +
+        'Confira os fatos e a prÃ©via antes de emitir.'
       );
     };
     $('ia-extra-desfazer').onclick = () => {
@@ -3346,8 +3827,8 @@ Por ser verdade, firmamos a presente declaração.`;
       $('ia-extra-aplicar').hidden = true;
       perguntas();
       mensagem(
-        'Descreva o novo documento. O rascunho atual será ' +
-        'mantido até você preparar o próximo.'
+        'Descreva o novo documento. O rascunho atual serÃ¡ ' +
+        'mantido atÃ© vocÃª preparar o prÃ³ximo.'
       );
       $('ia-extra-pedido').focus();
     };
@@ -3362,8 +3843,8 @@ Por ser verdade, firmamos a presente declaração.`;
     });
     mensagem(
       funcionarios.length
-        ? 'Pronta para ajudar. O formato oficial do documento será mantido.'
-        : 'Pronta. O cadastro não pôde ser consultado; recarregue a página para preencher servidores.'
+        ? 'Assistente local pronto. Confira os dados reconhecidos e a prÃ©via antes de emitir.'
+        : 'O assistente estÃ¡ disponÃ­vel, mas o cadastro nÃ£o pÃ´de ser consultado. Recarregue a pÃ¡gina para identificar servidores.'
     );
   }
   const iniciarAnterior = DocumentosServidoresPage.init;
