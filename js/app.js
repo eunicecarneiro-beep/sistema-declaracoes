@@ -506,9 +506,9 @@ const App = (() => {
   }
   function idFilter(valor, tabela = "funcionarios") {
     const id = safeId(valor, tabela);
-    // Aspas do PostgREST e codificação de URL têm funções diferentes.
-    const literal = tabela === "agenda" ? id : '"' + id.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
-    return encodeURIComponent(literal);
+    // No filtro eq direto, aspas adicionais passam a fazer parte do ID.
+    // Codificar o valor preserva o ID e impede a criação de novos parâmetros.
+    return encodeURIComponent(id);
   }
   function dataValida(valor) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(valor))) return false;
@@ -1241,3 +1241,4 @@ document.addEventListener("click", async e => {
   } catch (erro) { App.toast(erro.message || "Operação não concluída.", "danger"); }
   finally { b.disabled = false; }
 });
+
