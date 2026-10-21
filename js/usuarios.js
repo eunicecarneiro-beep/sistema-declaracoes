@@ -5,3 +5,4 @@ const UsuariosPage = Object.freeze({
     location.replace("index.html");
   }
 });
+

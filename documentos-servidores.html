@@ -2,9 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>
     Documentos de Servidores | E.M. Prof&#170; Eunice Carneiro
   </title>
@@ -256,13 +257,10 @@
 <body data-page="documentos-servidores">
   <div id="app"></div>
 
-  <script src="js/app.js?v=20261008-docs2"></script>
-  <script src="js/documentos-servidores.js?v=20261020-local-2"></script>
+  <script src="js/app.js?v=20261021-seguranca-3"></script>
+  <script src="js/documentos-servidores.js?v=20261021-seguranca-3"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      DocumentosServidoresPage.init();
-    });
-  </script>
+  <script src="js/inicializar-pagina.js?v=20261021-seguranca-3"></script>
 </body>
 </html>
+

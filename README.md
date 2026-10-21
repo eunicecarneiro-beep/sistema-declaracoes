@@ -1,115 +1,43 @@
 # Sistema de Declarações — E.M. Profª Eunice Carneiro
 
-Sistema interno de demonstração para cadastro de funcionários, lançamento de declarações, anexação de PDF/JPG/PNG, histórico por funcionário, relatórios, backup e exportação CSV.
+Aplicação estática em HTML, CSS e JavaScript com Supabase Auth, banco PostgreSQL
+e Storage para o uso interno da escola. Hospedagem atual: GitHub Pages.
 
-## Tecnologias
+O login valida o usuário e seu perfil no servidor. Perfis previstos:
+`administrador`, `secretaria` e `consulta`; somente contas ativas autorizadas.
+A chave `sb_publishable_…` nos scripts é uma chave pública do navegador;
+as permissões reais dependem dos privilégios e das políticas RLS do Supabase.
+Nunca coloque `service_role` ou chaves secretas nos arquivos do site.
 
-- HTML5
-- CSS3
-- JavaScript puro
-- IndexedDB
-- GitHub Pages
+## Publicação
 
-Não utiliza React, Vue, Angular, Node.js, Vite ou backend obrigatório.
+Mantenha os HTML na raiz, os scripts em `js/` e o CSS em `css/`.
+Publique na branch/pasta já configurada no GitHub Pages.
+O pacote de 21/10/2026 contém `LEIA_PRIMEIRO.txt` com a ordem de aplicação.
 
-## Estrutura
+`SQL_SUPABASE.sql` agora é um complemento para a estrutura existente,
+com verificações e transação. Ele não é um instalador de banco vazio.
+Ele preserva as políticas já instaladas e acrescenta condições restritivas;
+não cria permissões permissivas que estejam faltando. Execute no SQL Editor
+administrativo do projeto correto e teste com contas fictícias de cada perfil.
 
-```text
-sistema-declaracoes/
-├── index.html
-├── funcionarios.html
-├── funcionario.html
-├── declaracoes.html
-├── nova-declaracao.html
-├── novo-funcionario.html
-├── relatorios.html
-├── css/
-│   └── style.css
-├── js/
-│   ├── app.js
-│   ├── funcionarios.js
-│   ├── declaracoes.js
-│   └── relatorios.js
-├── assets/
-└── README.md
-```
+## Segurança e funcionamento
 
-## Como usar localmente
+- Cadastro público deve permanecer desativado no painel do Auth.
+- O bucket `declaracoes` deve ser privado; anexos usam download autenticado.
+- Arquivos permitidos: PDF, PNG e JPEG, até o limite do bucket (máximo 10 MB).
+- Tokens ficam em `sessionStorage`; a sessão é revalidada no servidor.
+- A CSP das páginas bloqueia scripts inline e scripts externos.
+- Os estilos inline são usados pelo layout e pelos documentos impressos.
+- As páginas antigas `usuarios.html`, `acessos.html` e `historicos.html`
+  encaminham ao Dashboard. Gestão de contas deve ser feita no Supabase.
+- O histórico por funcionário continua em `funcionario.html`.
 
-Pode abrir o `index.html` em um navegador moderno. Para uso mais previsível com recursos do navegador, também é possível servir a pasta com qualquer servidor estático simples.
+Os cabeçalhos HTTP completos, incluindo proteção contra incorporação em
+outros sites, exigem configuração na hospedagem/proxy. GitHub Pages não
+interpreta arquivos `_headers`.
 
-## Como publicar no GitHub Pages
-
-1. Crie um repositório no GitHub.
-2. Envie todos os arquivos desta pasta.
-3. Abra **Settings**.
-4. Abra **Pages**.
-5. Em **Build and deployment**, selecione a branch `main`.
-6. Selecione a pasta `/ (root)`.
-7. Salve.
-8. Abra o endereço gerado pelo GitHub Pages.
-
-Os caminhos do projeto são relativos, portanto a aplicação foi preparada para publicação em subpastas do GitHub Pages.
-
-## Como usar
-
-### Cadastrar funcionário
-
-Abra **Novo Funcionário**, preencha os dados e salve. O registro passa a aparecer automaticamente na lista.
-
-### Cadastrar declaração
-
-Abra **Nova Declaração**, selecione o funcionário, escolha entre **Horas** ou **Dias**, preencha os campos e salve.
-
-### Anexar PDF/JPG/PNG
-
-Selecione o arquivo no campo **Anexar declaração**. O arquivo é convertido para uma estrutura armazenável no navegador e fica associado à declaração.
-
-### Visualizar documento
-
-Na lista de declarações ou no histórico do funcionário, clique em **Visualizar**. PDFs abrem em um iframe; imagens são exibidas diretamente. Há opção para abrir PDF em nova aba e baixar o documento.
-
-## Armazenamento local
-
-Os dados são mantidos em **IndexedDB**, não em variáveis temporárias. Isso permite que os dados permaneçam disponíveis após recarregar a página no mesmo navegador/perfil.
-
-O armazenamento é local ao navegador/dispositivo. Ele não cria uma base de dados central para vários computadores.
-
-## Backup
-
-A interface foi preparada para receber rotinas de backup JSON com os dados dos funcionários e declarações. A versão desta entrega prioriza o CRUD principal e a estrutura IndexedDB.
-
-## Limitações
-
-- GitHub Pages é hospedagem estática.
-- IndexedDB é local ao navegador.
-- Dados e documentos não são compartilhados automaticamente entre computadores.
-- Não há autenticação de usuários.
-- Não há controle de permissões.
-- Não há banco de dados central.
-- Para documentos reais de funcionários, recomenda-se implementar autenticação, armazenamento seguro e banco central antes da implantação oficial.
-
-## Integração futura com Supabase
-
-O código possui pontos identificados para substituição do armazenamento local por API/Supabase, mantendo a ideia das funções de CRUD.
-
-Exemplo:
-
-```javascript
-// FUTURO:
-// substituir IndexedDB por Supabase
-// mantendo as mesmas funções de CRUD.
-```
-
-## Dados fictícios
-
-Na primeira execução são criados três funcionários e algumas declarações de demonstração. São dados fictícios e devem ser substituídos/removidos antes de uso oficial.
-
-## Segurança
-
-> Este sistema utiliza armazenamento local do navegador nesta versão. Para utilização oficial com documentos reais de funcionários, recomenda-se implementar autenticação e banco de dados seguro antes da implantação definitiva.
-
-## Fluxo principal
-
-**Funcionário → Declarações → Documento PDF/JPG/PNG → Histórico**
-
+As funções RPC e políticas efetivamente instaladas no banco precisam ser
+conferidas antes de concluir uma aprovação de segurança. Testes locais
+com dados fictícios não substituem a validação de sessões reais e permissões
+no projeto. Não publique dados pessoais, anexos ou backups no repositório.

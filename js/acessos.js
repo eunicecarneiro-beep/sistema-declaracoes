@@ -5,3 +5,4 @@ const AcessosPage = Object.freeze({
     location.replace("index.html");
   }
 });
+

@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sistema interno de declarações - E.M. Profª Eunice Carneiro">
   <title>Dashboard | Sistema de Declarações</title>
@@ -11,18 +14,8 @@
   <div id="app"></div>
 
   <!-- Carregamento do script principal -->
-  <script src="js/app.js?v=20260901"></script>
+  <script src="js/app.js?v=20261021-seguranca-3"></script>
   
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Aguarda a confirmação do carregamento do objeto DashboardPage
-      if (typeof DashboardPage !== "undefined") {
-        DashboardPage.init();
-      } else {
-        console.error("DashboardPage não encontrado em js/app.js. Recarregando...");
-        setTimeout(() => location.reload(), 1000);
-      }
-    });
-  </script>
+  <script src="js/inicializar-pagina.js?v=20261021-seguranca-3"></script>
 </body>
 </html>
