@@ -1,7 +1,7 @@
 /* Inicialização externa, compatível com CSP sem JavaScript inline. */
 "use strict";
 document.addEventListener("DOMContentLoaded", async () => {
-  const pagina = location.pathname.split("/").pop() || "index.html";
+  const pagina = App.getCurrentPageFile();
   const iniciar = {
     "index.html": () => DashboardPage.init(),
     "funcionarios.html": () => FuncionariosPage.init(),

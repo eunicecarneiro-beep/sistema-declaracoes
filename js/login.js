@@ -29,10 +29,14 @@ function obterEmailLogin(v) {
 }
 function destinoLogin(valor) {
   const s = String(valor || "");
-  if (!/^[a-z0-9-]+\.html(?:\?[^#\\\r\n]*)?$/i.test(s) || s.length > 2000) return "index.html";
-  const u = new URL(s, location.href);
-  if (u.origin !== location.origin || !LOGIN_PAGINAS.has(s.split("?")[0].toLowerCase())) return "index.html";
-  return s;
+  if (!/^[a-z0-9-]+(?:\.html)?(?:\?[^#\\\r\n]*)?$/i.test(s) || s.length > 2000) return "index.html";
+  const separador = s.indexOf("?");
+  const nome = (separador < 0 ? s : s.slice(0, separador)).toLowerCase();
+  const pagina = nome.endsWith(".html") ? nome : `${nome}.html`;
+  const destino = pagina + (separador < 0 ? "" : s.slice(separador));
+  const u = new URL(destino, location.href);
+  if (u.origin !== location.origin || !LOGIN_PAGINAS.has(pagina)) return "index.html";
+  return destino;
 }
 function limparCredenciais() {
   for (const chave of [LOGIN_SESSION_KEY, LOGIN_PROFILE_KEY, LOGIN_ACCESS_KEY]) {

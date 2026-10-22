@@ -123,6 +123,10 @@ const App = (() => {
   function getPageKey() {
     return document.body.dataset.page || "";
   }
+  function getCurrentPageFile() {
+    const arquivo = location.pathname.split("/").pop() || "index.html";
+    return arquivo.includes(".") ? arquivo : `${arquivo}.html`;
+  }
   /* LAYOUT */
   function layout(title, subtitle, content) {
     document.title = `${title} | Sistema de Declarações`;
@@ -377,7 +381,7 @@ const App = (() => {
     return r;
   }
   function redirecionarLogin() {
-    const arquivo = location.pathname.split("/").pop() || "index.html";
+    const arquivo = getCurrentPageFile();
     if (arquivo.toLowerCase() !== "login.html") location.replace(`login.html?next=${encodeURIComponent(arquivo + location.search)}`);
   }
   async function carregarPerfilAtual() {
@@ -464,7 +468,7 @@ const App = (() => {
       if (Date.now() - atividadeEm >= LIMITE_INATIVIDADE) return await logout();
       await requireRoles();
       const id = authGetAccessId();
-      if (id) await api("/rpc/ec_atualizar_acesso", { method: "POST", body: JSON.stringify({ p_id: id, p_pagina: location.pathname.split("/").pop() || "index.html", p_sair: false }) });
+      if (id) await api("/rpc/ec_atualizar_acesso", { method: "POST", body: JSON.stringify({ p_id: id, p_pagina: getCurrentPageFile(), p_sair: false }) });
     } catch {
       if (!perfilVerificado) toast("Não foi possível validar seu acesso. Entre novamente se o problema persistir.", "warning");
     } finally { heartbeatOcupado = false; }
@@ -753,6 +757,7 @@ const App = (() => {
     uid: generateId,
     rest: api,
     getSession: authGetSession,
+    getCurrentPageFile,
     getProfile: authGetProfile,
     getAccessToken: authToken,
     carregarPerfilAtual,
@@ -762,7 +767,7 @@ const App = (() => {
 })();
 /* A autenticação é aguardada também por todas as chamadas à API. */
 document.addEventListener("DOMContentLoaded", async () => {
-  if ((location.pathname.split("/").pop() || "").toLowerCase() === "login.html") return;
+  if (App.getCurrentPageFile().toLowerCase() === "login.html") return;
   if (["usuarios", "acessos"].includes(document.body.dataset.page)) {
     location.replace("index.html");
     return;
