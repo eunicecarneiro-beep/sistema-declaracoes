@@ -1,6 +1,4 @@
-/* ARQUIVO COMPLETO: js/documentos-servidores.js. Substitua o conte\u00fado inteiro.
-   Modelos e exporta\u00e7\u00e3o originais; assistente local em JavaScript.
-   Sem API de IA, chave de IA, modelo para baixar ou depend\u00eancia nova. */
+/* Página de documentos da escola. Carregue js/assistente-documental.js antes deste arquivo. */
 /* ====================================================================
   DOCUMENTOS DE SERVIDORES \u2014 E.M. PROF\u00aa EUNICE CARNEIRO
   Declara\u00e7\u00f5es, requerimentos e memorandos com dados do cadastro existente.
@@ -14,7 +12,14 @@ const DocumentosServidoresPage = (() => {
   const BRASAO = "data:image/jpeg;base64,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";
   const MEMO_CSS = '\n/* P\u00e1gina em A4 com o mesmo arranjo da refer\u00eancia da Secretaria. */\n.memo-sheet{box-sizing:border-box;width:210mm;min-height:297mm;padding:38mm 13mm 17mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.22;position:relative}\n.memo-header{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt;line-height:1.15;margin:0}\n.memo-header td{border:1px solid #222;padding:1.5mm 1mm;vertical-align:middle}\n.memo-header .memo-top td{height:19mm}\n.memo-header .memo-title td{height:4.2mm;text-align:center;font-weight:700;padding:.8mm}\n.memo-header .memo-address td{height:15.4mm}\n.memo-logo{text-align:center}\n.memo-logo img{display:block;width:16mm;height:15.5mm;object-fit:contain;margin:0 auto}\n.memo-school{text-align:center;line-height:1.18}\n.memo-school div{margin:0}\n.memo-school strong{font-size:14pt;font-weight:700;line-height:1.25;display:block}\n.memo-control{text-align:center;vertical-align:top!important;line-height:1.3}\n.memo-control .memo-num{margin-top:5mm}\n.memo-from{vertical-align:middle!important}\n.memo-to{vertical-align:top!important}\n.memo-to .memo-sector{margin-top:5mm}\n.memo-subject{margin:5.2mm 2.5mm 0;font-size:11pt;font-weight:700;line-height:1.3}\n.memo-content{margin:14mm 2.5mm 0;min-height:108.6mm;line-height:1.2;font-size:11pt}\n.memo-content .memo-greeting{margin:0 0 5.2mm}\n.memo-content .memo-paragraph{margin:0 0 5.2mm;text-align:left;white-space:pre-line}\n.memo-content .memo-farewell{margin:5.5mm 0 0}\n.memo-signature{width:112mm;max-width:100%;margin:0 auto;text-align:center;font-size:11pt;line-height:1.6;break-inside:avoid;page-break-inside:avoid}\n.memo-signature .memo-signature-line{border-top:1px solid #111;padding-top:1.8mm}\n.memo-viewport{position:relative;overflow:hidden;width:100%;background:#fff}\n.memo-viewport .memo-sheet{transform-origin:left top;box-shadow:none}\n@media print{\n  @page{size:A4;margin:0}\n  html,body{margin:0!important;padding:0!important;background:#fff!important}\n  .memo-viewport{overflow:visible!important;width:auto!important;height:auto!important}\n  .memo-viewport .memo-sheet{transform:none!important}\n  .memo-sheet{break-after:auto;page-break-after:auto;box-shadow:none!important}\n}\n';
   function ehMemo() {
+    if (modeloAmplo()) return valor('doc-genero-amplo') === 'memorando';
     return !['declaracao', 'declaracao-livre', 'requerimento'].includes(valor('doc-tipo'));
+  }
+  function modeloAmplo() {
+    return globalThis.AssistenteDocumentalAmplo?.porId(valor('doc-modelo-amplo'));
+  }
+  function camposAmplo() {
+    return Object.fromEntries((globalThis.AssistenteDocumentalAmplo?.campos || []).map(id => [id, valor(id)]));
   }
   function ensureMemoStyle() {
     if (document.getElementById('estilo-memorando-oficial')) return;
@@ -172,6 +177,9 @@ const DocumentosServidoresPage = (() => {
   function matricula(f) { return pad(f?.matricula, 'MATR\u00cdCULA'); }
   function cargo(f) { return pad(f?.cargo || valor('doc-cargo'), 'CARGO/FUN\u00c7\u00c3O'); }
   function assinatura() {
+    const amplo = modeloAmplo();
+    if (amplo?.genero === 'requerimento') return {nome:valor('doc-pessoa'),cargo:valor('doc-qualificacao') || 'Pessoa requerente'};
+    if (amplo?.genero === 'autorizacao') return {nome:valor('doc-responsavel-amplo'),cargo:'Responsável pela autorização'};
     if (valor('doc-tipo') === 'requerimento') {
       const f = servidor('doc-principal');
       return { nome: f?.nome || 'NOME DO(A) REQUERENTE', cargo: 'Servidor(a) requerente' };
@@ -179,6 +187,12 @@ const DocumentosServidoresPage = (() => {
     return { nome: valor('doc-assinante'), cargo: valor('doc-cargo-assinante') };
   }
   function cabecalho() {
+    const amplo = modeloAmplo();
+    if (amplo) {
+      const titulo = amplo.genero === 'termo' ? amplo.nome.toLocaleUpperCase('pt-BR') : AssistenteDocumentalAmplo.generos[amplo.genero];
+      const numero = ['memorando','oficio'].includes(amplo.genero) && valor('doc-numero') ? ` Nº ${valor('doc-numero')}/${valor('doc-data').slice(0,4)}` : '';
+      return {titulo:titulo+numero,ehMemo:amplo.genero==='memorando'};
+    }
     const tipo = valor('doc-tipo');
     const ehMemo = ['prorrogacao','substituicao','contratacao','memorando'].includes(tipo);
     const titulo = {
@@ -191,6 +205,14 @@ const DocumentosServidoresPage = (() => {
   }
 
   function modeloTexto() {
+    if (modeloAmplo()) {
+      try {
+        const plano = AssistenteDocumentalLocal.preparar({acao:'gerar',pedido:'',somente_campos:true,contexto:{tipo:valor('doc-tipo'),campos:camposAmplo()}});
+        $('doc-texto-gerado').value = plano.paragrafos.join('\n\n');
+        for(const id of ['doc-fatos','doc-dados-reconhecidos']) if($(id)&&plano.campos[id]) $(id).value=plano.campos[id];
+        return plano.paragrafos.join('\n\n');
+      } catch(e) { situacao(e.message,'error'); return valor('doc-texto'); }
+    }
     const tipo = valor('doc-tipo');
     const f = servidor('doc-principal');
     const outro = servidor('doc-secundario');
@@ -331,6 +353,23 @@ const DocumentosServidoresPage = (() => {
       $('doc-inicio-legenda').textContent = 'Data do acontecimento / recebimento (se houver)';
       $('doc-motivo-legenda').textContent = 'Finalidade ou observações (opcional)';
     }
+    const amplo = modeloAmplo();
+    if ($('doc-amplo-bloco')) $('doc-amplo-bloco').hidden = !amplo;
+    if (amplo) {
+      for (const id of ['doc-principal-bloco','doc-secundario-bloco','doc-cargo-bloco','doc-prazo-bloco','doc-inicio-bloco','doc-fim-bloco','doc-pedido-bloco']) $(id).hidden = true;
+      $('doc-motivo').closest('.docs-field').hidden = true;
+      const usados = new Set([...amplo.campos,'doc-fatos','doc-complementos','doc-finalidade-ampla','doc-documentos-amplos']);
+      for (const id of Object.keys(AssistenteDocumentalAmplo.definicoes)) if ($(id+'-amplo-bloco')) $(id+'-amplo-bloco').hidden = !usados.has(id);
+      $('doc-amplo-nome').textContent = amplo.nome;
+      $('doc-dica').textContent = amplo.nome + '. Preencha os dados reconhecidos e confira o texto antes de emitir.';
+      $('doc-numero-bloco').hidden = !['memorando','oficio'].includes(amplo.genero);
+      $('doc-destino-simples').hidden = amplo.genero === 'memorando';
+      $('doc-memorando-cabecalho').hidden = amplo.genero !== 'memorando';
+      if ($('ds-modelo')) { const opt = [...$('ds-modelo').options].find(o=>o.value===tipo); if(opt)opt.textContent=amplo.nome; }
+    } else {
+      $('doc-motivo').closest('.docs-field').hidden = false;
+    }
+    if ($('doc-word')) $('doc-word').textContent = ehMemo() ? 'Baixar Word (.docx oficial)' : 'Baixar Word (.doc)';
   }
 
   function assuntoPadrao(tipo) {
@@ -371,7 +410,7 @@ const DocumentosServidoresPage = (() => {
     const sig = assinatura();
     const destino = valor('doc-destino');
     const assunto = valor('doc-assunto');
-    const destinoHtml = cab.ehMemo || valor('doc-tipo') === 'requerimento' ? `
+    const destinoHtml = cab.ehMemo || valor('doc-tipo') === 'requerimento' || modeloAmplo() && ['oficio','comunicado','convocacao'].includes(valor('doc-genero-amplo')) ? `
       <div class="docs-destination">
         ${destino ? `<div><strong>A/C:</strong> ${esc(destino)}</div>` : ''}
         ${assunto ? `<div><strong>Assunto:</strong> ${esc(assunto)}</div>` : ''}
@@ -406,6 +445,15 @@ const DocumentosServidoresPage = (() => {
     }
   }
   function temPendencias() {
+    if (modeloAmplo()) {
+      const avisos = AssistenteDocumentalAmplo.pendencias(camposAmplo()).map(q=>q.pergunta);
+      if (!valor('doc-data')) avisos.push('Informe a data do documento.');
+      const sig=assinatura();if(!sig.nome||!sig.cargo)avisos.push('Confira o nome e a identificação do assinante.');
+      if (ehMemo()) for(const [id,rot] of [['doc-numero','número do memorando'],['doc-para','destinatário'],['doc-setor','setor']]) if(!valor(id)) avisos.push('Informe: '+rot+'.');
+      if (!valor('doc-texto')) avisos.push('O texto está vazio.');
+      if (/\[[^\]]+\]/.test(valor('doc-texto'))) avisos.push('O texto contém dados a preencher.');
+      return avisos;
+    }
     const tipo = valor('doc-tipo');
     const requerServidor = ['declaracao','requerimento','prorrogacao','substituicao','estagio'].includes(tipo);
     const avisos = [];
@@ -706,7 +754,7 @@ const DocumentosServidoresPage = (() => {
   }
 
   function interface() {
-    return `<div class="page-header"><div><h2>Documentos de Servidores</h2>
+    return `<div class="page-header"><div><h2>Documentos da Escola</h2>
       <p>Modelos para a Secretaria: pessoal, calend\u00e1rio, zeladoria, transporte, est\u00e1gio, inclus\u00e3o e memorando livre.</p></div>
       <span class="docs-badge">Conferir antes de assinar</span></div>
     <div class="docs-layout">
@@ -738,6 +786,11 @@ const DocumentosServidoresPage = (() => {
             </div>
           </div>
           <div class="docs-field full"><label>Assunto</label><input id="doc-assunto"></div>
+          <div class="docs-field full" id="doc-amplo-bloco" hidden>
+            <h4 id="doc-amplo-nome">Dados do documento</h4>
+            <input id="doc-modelo-amplo" type="hidden"><input id="doc-genero-amplo" type="hidden"><input id="doc-texto-gerado" type="hidden"><input id="doc-dados-reconhecidos" type="hidden">
+            <div class="docs-grid">${Object.entries(globalThis.AssistenteDocumentalAmplo?.definicoes || {}).filter(([id])=>!['doc-destino','doc-assunto','doc-data','doc-numero','doc-para','doc-ac','doc-setor'].includes(id)).map(([id,[label,type]])=>`<div class="docs-field ${type==='textarea'?'full':''}" id="${id}-amplo-bloco"><label for="${id}">${esc(label)}</label>${type==='textarea'?`<textarea id="${id}" maxlength="16000"></textarea>`:`<input id="${id}" type="${type}" maxlength="1000">`}</div>`).join('')}</div>
+          </div>
           <div class="docs-field" id="doc-cargo-bloco" hidden><label>Cargo/fun\u00e7\u00e3o a contratar</label>
             <input id="doc-cargo" placeholder="Ex.: Professor(a) PEB I"></div>
           <div class="docs-field" id="doc-inicio-bloco" hidden><label id="doc-inicio-legenda">Data inicial</label>
@@ -787,7 +840,7 @@ const DocumentosServidoresPage = (() => {
     try {
       await App.requireRoles(['administrador', 'secretaria']);
     } catch {
-      App.layout('Documentos de Servidores', 'Acesso restrito',
+      App.layout('Documentos da Escola', 'Acesso restrito',
         '<div class="docs-panel">Acesso permitido apenas aos perfis Secretaria e Administrador ativos.</div>');
       return;
     }
@@ -795,11 +848,9 @@ const DocumentosServidoresPage = (() => {
       S.funcionarios = await App.getAll('funcionarios');
       S.funcionarios.sort((a,b) => normaliza(a.nome).localeCompare(normaliza(b.nome), 'pt-BR'));
     } catch(err) {
-      App.layout('Documentos de Servidores','Falha na consulta de funcion\u00e1rios',
-        `<div class="docs-panel">N\u00e3o foi poss\u00edvel carregar os funcion\u00e1rios: ${esc(err.message)}</div>`);
-      return;
+      S.funcionarios = [];
     }
-    App.layout('Documentos de Servidores', 'Declara\u00e7\u00f5es \u2022 Requerimentos \u2022 Memorandos', interface());
+    App.layout('Documentos da Escola', 'Declara\u00e7\u00f5es \u2022 Requerimentos \u2022 Memorandos', interface());
     $('doc-assunto').value = assuntoPadrao(valor('doc-tipo'));
     ensureMemoStyle();
     camposDinamicos();
@@ -821,6 +872,11 @@ const DocumentosServidoresPage = (() => {
       $(id).addEventListener('input', () => atualizarModelo(false));
       $(id).addEventListener('change', () => atualizarModelo(false));
     }
+    for (const id of Object.keys(globalThis.AssistenteDocumentalAmplo?.definicoes || {})) {
+      if (!$(id) || !$(id+'-amplo-bloco')) continue;
+      $(id).addEventListener('input',()=>{ if(modeloAmplo()) atualizarModelo(false); });
+      $(id).addEventListener('change',()=>{ if(modeloAmplo()) atualizarModelo(false); });
+    }
     $('doc-texto').addEventListener('input', () => {
       S.textoEditado = true;
       $('doc-edicao').textContent = 'Texto personalizado; a edi\u00e7\u00e3o ser\u00e1 mantida at\u00e9 clicar em Atualizar texto.';
@@ -834,7 +890,7 @@ const DocumentosServidoresPage = (() => {
     window.addEventListener('resize',()=>{if(ehMemo())ajustarVisualMemorando();});
     situacao(`${S.funcionarios.length} funcion\u00e1rios dispon\u00edveis para pesquisa. Selecione o tipo de documento.`, 'ok');
   }
-  return {init};
+  return {init, sincronizarCampos:camposDinamicos};
 })();
 
 /* ============================================================
@@ -1279,6 +1335,7 @@ Por ser verdade, firmamos a presente declara\u00e7\u00e3o.`;
   }
 
   function usarModelo() {
+    for(const id of ['doc-modelo-amplo','doc-genero-amplo','doc-texto-gerado']) if($(id)) $(id).value='';
     const id = valor('ds-modelo');
     const pais = id === 'comparecimento-responsavel';
 
@@ -2464,7 +2521,7 @@ Por ser verdade, firmamos a presente declara\u00e7\u00e3o.`;
 /* ASSISTENTE DOCUMENTAL LOCAL \u2014 JavaScript, sem API de IA.
    Reda\u00e7\u00e3o por regras e modelos; n\u00e3o \u00e9 um modelo de linguagem treinado.
    N\u00e3o faz requisi\u00e7\u00f5es, n\u00e3o executa comandos do pedido e n\u00e3o grava dados. */
-const AssistenteDocumentalLocal = (() => {
+const AssistenteDocumentalLegado = (() => {
   'use strict';
   const TIPOS = ['declaracao-livre', 'declaracao', 'requerimento', 'prorrogacao', 'substituicao',
     'contratacao', 'calendario', 'zeladoria', 'transporte', 'estagio', 'avanco',
@@ -3032,6 +3089,18 @@ const AssistenteDocumentalLocal = (() => {
 
 
 /* Integra\u00e7\u00e3o do assistente local, inclu\u00edda uma \u00fanica vez. */
+const AssistenteDocumentalLocal = Object.freeze({
+  preparar: entrada => {
+    const pronto = (entrada.acao || 'gerar') === 'gerar' && (!entrada.modelo_escolhido || entrada.modelo_escolhido === 'auto') && /^\s*(?:\*\*)?Declaramos\b/i.test(entrada.pedido || '');
+    if (pronto) return AssistenteDocumentalLegado.preparar(entrada);
+    return globalThis.AssistenteDocumentalAmplo
+      ? AssistenteDocumentalAmplo.preparar(entrada, AssistenteDocumentalLegado)
+      : AssistenteDocumentalLegado.preparar(entrada);
+  },
+  revisar: AssistenteDocumentalLegado.revisar,
+  versao: '20261023-amplo-1'
+});
+
 (function instalarIADeDocumentos() {
   'use strict';
   if (
@@ -3054,6 +3123,7 @@ const AssistenteDocumentalLocal = (() => {
     'memorando', 'comparecimento-responsavel'
   ];
   const campos = [
+    ...(globalThis.AssistenteDocumentalAmplo?.campos || []),
     'doc-numero', 'doc-data', 'doc-assunto', 'doc-cargo',
     'doc-inicio', 'doc-fim', 'doc-prazo', 'doc-afastamento',
     'doc-pedido', 'doc-motivo', 'doc-para', 'doc-ac',
@@ -3066,6 +3136,7 @@ const AssistenteDocumentalLocal = (() => {
     'ds-entrada', 'ds-saida'
   ];
   const formulario = [
+    'ia-extra-pedido',
     ...campos,
     'doc-principal', 'doc-secundario', 'doc-texto',
     'doc-assinante', 'doc-cargo-assinante', 'doc-destino',
@@ -3258,12 +3329,36 @@ const AssistenteDocumentalLocal = (() => {
           }
         }
       </style>
-      <h3>Assistente de documentos</h3>
+      <h3>Assistente de documentos da escola</h3>
+      <div id="ia-local-painel" style="border:1px solid #adc7df;border-radius:9px;padding:12px;margin:12px 0">
+        <strong>IA de linguagem neste computador</strong>
+        <p>Converse e redija com um modelo aberto executado no navegador. A primeira ativação baixa vários arquivos, que podem ocupar alguns GB. As fontes públicas recebem o download do modelo; seus pedidos são processados no computador. Este recurso exige WebGPU e memória disponível.</p>
+        <label for="ia-local-perfil">Modelo local</label>
+        <select id="ia-local-perfil"><option value="qualidade">Qwen3 4B — maior capacidade</option><option value="leve">Qwen3 1.7B — menor consumo</option></select>
+        <details><summary>Opções de instalação</summary>
+          <label for="ia-local-origem">Origem dos arquivos do modelo</label>
+          <select id="ia-local-origem"><option value="publica">Baixar os arquivos das fontes oficiais</option><option value="escola">Usar arquivos hospedados pela escola</option></select>
+          <p>Use a segunda opção somente se a equipe técnica já instalou os modelos no endereço da escola. Os modelos não acompanham a atualização do site. A geração dos textos acontece neste computador em ambas as opções.</p>
+        </details>
+        <div class="ia-botoes"><button type="button" id="ia-local-ativar">Baixar / ativar IA local</button><button type="button" id="ia-local-parar">Parar / liberar memória</button></div>
+        <div id="ia-local-situacao" role="status" aria-live="polite">IA de linguagem ainda não carregada. Nenhum modelo é baixado automaticamente.</div>
+        <label for="ia-local-modo">Como preparar o texto</label>
+        <select id="ia-local-modo"><option value="modelos">Modelos e regras locais</option><option value="ia">Modelo de linguagem local</option></select>
+        <p>O modo selecionado será usado pelos botões Preparar, Complementar e Melhorar texto. A IA pode cometer erros; confira a redação e os fatos.</p>
+        <details><summary>Conversar com a IA</summary>
+          <label for="ia-local-pergunta">Pergunta ou pedido livre</label><textarea id="ia-local-pergunta" maxlength="8000" placeholder="Peça uma explicação, ideias ou ajuda com um texto."></textarea>
+          <label><input type="checkbox" id="ia-local-incluir" style="width:auto"> Incluir o documento atual como referência</label>
+          <div class="ia-botoes"><button type="button" id="ia-local-conversar">Enviar à IA local</button><button type="button" id="ia-local-nova-conversa">Nova conversa</button></div>
+          <div id="ia-local-resposta" role="log" aria-live="polite" style="white-space:pre-wrap;margin-top:12px;line-height:1.6"></div>
+        </details>
+      </div>
+      <label for="ia-extra-modelo">Assunto / modelo</label>
+      <select id="ia-extra-modelo" style="width:100%;padding:10px"><option value="auto">Identificar pelo pedido</option>${Object.entries(AssistenteDocumentalAmplo.generos).map(([g,n])=>`<optgroup label="${n}">${AssistenteDocumentalAmplo.modelos.filter(m=>m.genero===g).map(m=>`<option value="${m.id}">${m.nome}</option>`).join('')}</optgroup>`).join('')}<optgroup label="MODELOS OFICIAIS DE SERVIDORES"><option value="legado:declaracao">Declaração funcional de servidor</option><option value="legado:requerimento">Requerimento do servidor</option><option value="legado:prorrogacao">Prorrogação de contrato</option><option value="legado:substituicao">Substituição por afastamento</option><option value="legado:contratacao">Contratação / reposição de vaga</option><option value="legado:calendario">Alteração de calendário</option><option value="legado:transporte">Transporte escolar</option><option value="legado:zeladoria">Zeladoria</option><option value="legado:estagio">Estágio de servidor</option><option value="legado:avanco">Parecer sobre avanço de nível</option></optgroup></select>
+      <p>Descreva os fatos ou escolha um modelo: recebimento de materiais de um projeto, matrícula de aluno, comparecimento, manutenção e outros assuntos. Alunos e pessoas externas podem ser informados diretamente.</p>
       <p>
-        Descreva o documento. O assistente local organiza os dados
-        e prepara um rascunho usando regras de reda\u00e7\u00e3o e os modelos da escola.
-        Confira o resultado; pedidos fora das regras podem exigir edi\u00e7\u00e3o manual.
-        N\u00e3o h\u00e1 envio do pedido para um servi\u00e7o de IA.
+        Descreva os fatos e escolha o modo de preparação. Os modelos prontos usam regras locais.
+        Com a IA de linguagem ativada, você pode redigir e revisar pedidos mais variados.
+        Confira o resultado antes de emitir. Não há envio do texto para um serviço externo de IA.
       </p>
       <label for="ia-extra-pedido">
         O que voc\u00ea precisa?
@@ -3288,7 +3383,7 @@ const AssistenteDocumentalLocal = (() => {
         <textarea
           id="ia-extra-referencia"
           maxlength="16000"
-          placeholder="Cole informa\u00e7\u00f5es confirmadas. Elas ser\u00e3o inclu\u00eddas como texto complementar, sem interpreta\u00e7\u00e3o autom\u00e1tica."
+          placeholder="Cole informa\u00e7\u00f5es confirmadas que devem orientar a reda\u00e7\u00e3o do documento."
         ></textarea>
       </details>
       <div class="ia-botoes">
@@ -3345,6 +3440,8 @@ const AssistenteDocumentalLocal = (() => {
     const container = textoOriginal.closest('.docs-panel');
     if (!container) return;
     container.prepend(painel);
+    const descricao = document.querySelector('.page-header p');
+    if(descricao)descricao.textContent='Documentos para alunos, responsáveis, servidores, projetos e outras situações da escola. Escolha um assunto no assistente ou descreva os fatos.';
     if (!$('doc-afastamento')) {
       const bloco = document.createElement('div');
       bloco.className = 'docs-field full';
@@ -3369,6 +3466,42 @@ const AssistenteDocumentalLocal = (() => {
     let controller = null;
     let pendente = null;
     const historico = [];
+    const iaLinguagem=()=>valor('ia-local-modo')==='ia';
+    let controladorConversa=null;
+    if(globalThis.IAInternaLocal){
+      const local=IAInternaLocal;
+      let estadoAnteriorIA='inativa';
+      local.cliente.observar(s=>{
+        if(!$('ia-local-situacao'))return;
+        $('ia-local-situacao').textContent=s.detalhe||s.estado;
+        $('ia-local-ativar').disabled=['carregando','gerando'].includes(s.estado);
+        if(s.estado==='pronta'&&estadoAnteriorIA==='carregando')$('ia-local-modo').value='ia';
+        estadoAnteriorIA=s.estado;
+      });
+      $('ia-local-ativar').onclick=async()=>{
+        try{await App.requireRoles(['administrador','secretaria']);await local.cliente.carregar(valor('ia-local-perfil'),{origem:valor('ia-local-origem')});}
+        catch(e){$('ia-local-situacao').textContent='Não foi possível ativar a IA local: '+e.message;}
+      };
+      $('ia-local-parar').onclick=()=>{controller?.abort();controladorConversa?.abort();local.cliente.descarregar();};
+      $('ia-local-conversar').onclick=async()=>{
+        if(controladorConversa)return;
+        controladorConversa=new AbortController();const atual=controladorConversa;
+        $('ia-local-conversar').disabled=true;
+        $('ia-local-resposta').textContent='Pensando neste computador…';
+        try{
+          await App.requireRoles(['administrador','secretaria']);
+          const resposta=await local.conversar(valor('ia-local-pergunta'),{signal:atual.signal,documento:$('ia-local-incluir').checked?valor('doc-texto'):''});
+          if(!atual.signal.aborted)$('ia-local-resposta').textContent=resposta;
+        }catch(e){if(!atual.signal.aborted)$('ia-local-resposta').textContent='Não foi possível responder: '+e.message;}
+        finally{controladorConversa=null;$('ia-local-conversar').disabled=false;}
+      };
+      $('ia-local-nova-conversa').onclick=()=>{controladorConversa?.abort();local.novaConversa();$('ia-local-pergunta').value='';$('ia-local-resposta').textContent='Nova conversa. O histórico anterior foi descartado deste atendimento.';};
+      const atualizarOriginal=$('doc-atualizar').onclick;
+      $('doc-atualizar').onclick=()=>iaLinguagem()?executar('complementar','Atualize a redação com os dados atuais do formulário. Preserve os demais fatos confirmados e as alterações manuais.'):atualizarOriginal();
+    }else{
+      $('ia-local-ativar').disabled=true;
+      $('ia-local-situacao').textContent='O módulo de IA de linguagem não foi carregado. Confira se js/ia-local.js foi enviado ao site.';
+    }
     const mensagem = texto => {
       if (painel.isConnected) {
         $('ia-extra-status').textContent = texto;
@@ -3412,6 +3545,19 @@ const AssistenteDocumentalLocal = (() => {
       }
     }
     function pendencias() {
+      if(AssistenteDocumentalAmplo.porId(valor('doc-modelo-amplo'))) {
+        const c=Object.fromEntries(campos.map(id=>[id,valor(id)]));
+        const p=AssistenteDocumentalAmplo.pendencias(c).map(q=>q.pergunta);
+        if(!valor('doc-data'))p.push('Informe a data do documento.');
+        const g=valor('doc-genero-amplo');
+        if(g==='requerimento'&&!valor('doc-pessoa'))p.push('Informe o nome de quem requer.');
+        else if(g==='autorizacao'&&!valor('doc-responsavel-amplo'))p.push('Informe quem assina a autorização.');
+        else if(!['requerimento','autorizacao'].includes(g)&&(!valor('doc-assinante')||!valor('doc-cargo-assinante')))p.push('Confira os dados do assinante.');
+        if(g==='memorando')for(const[id,n]of[['doc-numero','número do memorando'],['doc-para','destinatário'],['doc-setor','setor']])if(!valor(id))p.push('Informe: '+n+'.');
+        if(!valor('doc-texto'))p.push('O texto está vazio.');
+        if(/\[[^\]]+\]/.test(valor('doc-texto')))p.push('O texto contém dados a preencher.');
+        return p;
+      }
       const p = [];
       const tipo = tipoAtual();
       const exigir = (id, nome) => {
@@ -3530,7 +3676,7 @@ const AssistenteDocumentalLocal = (() => {
       }
       for (const [id, v] of entradas) {
         if (!campos.includes(id)) continue;
-        if (typeof v !== 'string' || v.length > 16000) {
+        if (typeof v !== 'string' || v.length > (id === 'doc-texto-gerado' ? 24000 : 16000)) {
           throw new Error('Campo inv\u00e1lido na resposta.');
         }
         if (
@@ -3575,11 +3721,11 @@ const AssistenteDocumentalLocal = (() => {
       }
       if (
         !Array.isArray(raw.paragrafos) ||
-        raw.paragrafos.length < 1 || raw.paragrafos.length > 18 ||
+        raw.paragrafos.length < 1 || raw.paragrafos.length > 40 ||
         raw.paragrafos.reduce((n,p) => n + (typeof p === "string" ? p.length : 0),0) > 24000 ||
         raw.paragrafos.some(p =>
           typeof p !== 'string' ||
-          p.length > 12000 ||
+          p.length > 16000 ||
           /<\/?[a-z]|```/i.test(p)
         )
       ) {
@@ -3612,6 +3758,7 @@ const AssistenteDocumentalLocal = (() => {
       for (const [id, v] of Object.entries(s.campos)) {
         if ($(id)) $(id).value = v;
       }
+      DocumentosServidoresPage.sincronizarCampos();
       escrever(s.campos['doc-texto'] || '');
     }
     function aplicar(plano, preservar) {
@@ -3684,6 +3831,7 @@ const AssistenteDocumentalLocal = (() => {
           }
         }
         if (plano.paragrafos.length) {
+          DocumentosServidoresPage.sincronizarCampos();
           escrever(plano.paragrafos.join('\n\n'));
         } else {
           $('doc-atualizar').click();
@@ -3720,25 +3868,29 @@ const AssistenteDocumentalLocal = (() => {
           Object.entries(contexto.campos).filter(([id]) => fixos.has(id))
         );
       }
-      const plano = AssistenteDocumentalLocal.preparar({
+      const entrada = {
         pedido, acao, referencia: valor('ia-extra-referencia'), contexto,
+        modelo_escolhido: valor('ia-extra-modelo'),
         funcionarios,
         principal_id: preservar ? pessoa('doc-principal')?.id || '' : '',
         secundario_id: preservar ? pessoa('doc-secundario')?.id || '' : '',
         modelo_base: preservar ? valor('doc-texto') : ''
-      });
+      };
+      const plano = iaLinguagem()
+        ? await IAInternaLocal.redigir(entrada,{signal})
+        : AssistenteDocumentalLocal.preparar(entrada);
       if (signal.aborted) throw new DOMException('Opera\u00e7\u00e3o interrompida.', 'AbortError');
       return validar(plano);
     }
-    async function executar(acao) {
+    async function executar(acao, pedidoExplicito) {
       if (controller) return;
       const ajustar = [
         'melhorar',
         'resumir',
         'formalizar'
       ].includes(acao);
-      const atual = valor('ia-extra-pedido');
-      if (!atual && !ajustar) {
+      const atual = pedidoExplicito ?? valor('ia-extra-pedido');
+      if (!atual && !ajustar && valor('ia-extra-modelo') === 'auto') {
         mensagem('Escreva seu pedido ou complemento.');
         $('ia-extra-pedido').focus();
         return;
@@ -3767,7 +3919,7 @@ const AssistenteDocumentalLocal = (() => {
       const controle = controller;
       const timeout = setTimeout(
         () => controle.abort(),
-        45000
+        iaLinguagem() ? 250000 : 45000
       );
       const botoes = painel.querySelectorAll(
         '[data-acao],#ia-extra-novo,' +
@@ -3778,7 +3930,7 @@ const AssistenteDocumentalLocal = (() => {
       mensagem('Preparando o rascunho no navegador\u2026');
       try {
         const plano = await consultar(
-          atual || 'Ajuste a reda\u00e7\u00e3o atual.',
+          atual || (ajustar ? 'Ajuste a redação atual.' : ''),
           acao,
           preservar,
           controle.signal
@@ -3853,6 +4005,7 @@ const AssistenteDocumentalLocal = (() => {
       pendente = null;
       $('ia-extra-pedido').value = '';
       $('ia-extra-referencia').value = '';
+      $('ia-extra-modelo').value = 'auto';
       $('ia-extra-aplicar').hidden = true;
       perguntas();
       mensagem(
@@ -3886,5 +4039,6 @@ const AssistenteDocumentalLocal = (() => {
     montar().catch(console.error);
   }
 })();
+
 
 

@@ -100,7 +100,7 @@ const App = (() => {
         key: "documentos-servidores",
         href: "documentos-servidores.html",
         icon: "📝",
-        label: "Documentos de Servidores"
+        label: "Documentos da Escola"
       });
     }
     return nav;
@@ -1246,5 +1246,6 @@ document.addEventListener("click", async e => {
   } catch (erro) { App.toast(erro.message || "Operação não concluída.", "danger"); }
   finally { b.disabled = false; }
 });
+
 
 
