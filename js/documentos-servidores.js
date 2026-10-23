@@ -14,7 +14,7 @@ const DocumentosServidoresPage = (() => {
   const BRASAO = "data:image/jpeg;base64,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";
   const MEMO_CSS = '\n/* P\u00e1gina em A4 com o mesmo arranjo da refer\u00eancia da Secretaria. */\n.memo-sheet{box-sizing:border-box;width:210mm;min-height:297mm;padding:38mm 13mm 17mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.22;position:relative}\n.memo-header{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt;line-height:1.15;margin:0}\n.memo-header td{border:1px solid #222;padding:1.5mm 1mm;vertical-align:middle}\n.memo-header .memo-top td{height:19mm}\n.memo-header .memo-title td{height:4.2mm;text-align:center;font-weight:700;padding:.8mm}\n.memo-header .memo-address td{height:15.4mm}\n.memo-logo{text-align:center}\n.memo-logo img{display:block;width:16mm;height:15.5mm;object-fit:contain;margin:0 auto}\n.memo-school{text-align:center;line-height:1.18}\n.memo-school div{margin:0}\n.memo-school strong{font-size:14pt;font-weight:700;line-height:1.25;display:block}\n.memo-control{text-align:center;vertical-align:top!important;line-height:1.3}\n.memo-control .memo-num{margin-top:5mm}\n.memo-from{vertical-align:middle!important}\n.memo-to{vertical-align:top!important}\n.memo-to .memo-sector{margin-top:5mm}\n.memo-subject{margin:5.2mm 2.5mm 0;font-size:11pt;font-weight:700;line-height:1.3}\n.memo-content{margin:14mm 2.5mm 0;min-height:108.6mm;line-height:1.2;font-size:11pt}\n.memo-content .memo-greeting{margin:0 0 5.2mm}\n.memo-content .memo-paragraph{margin:0 0 5.2mm;text-align:left;white-space:pre-line}\n.memo-content .memo-farewell{margin:5.5mm 0 0}\n.memo-signature{width:112mm;max-width:100%;margin:0 auto;text-align:center;font-size:11pt;line-height:1.6;break-inside:avoid;page-break-inside:avoid}\n.memo-signature .memo-signature-line{border-top:1px solid #111;padding-top:1.8mm}\n.memo-viewport{position:relative;overflow:hidden;width:100%;background:#fff}\n.memo-viewport .memo-sheet{transform-origin:left top;box-shadow:none}\n@media print{\n  @page{size:A4;margin:0}\n  html,body{margin:0!important;padding:0!important;background:#fff!important}\n  .memo-viewport{overflow:visible!important;width:auto!important;height:auto!important}\n  .memo-viewport .memo-sheet{transform:none!important}\n  .memo-sheet{break-after:auto;page-break-after:auto;box-shadow:none!important}\n}\n';
   function ehMemo() {
-    return valor('doc-tipo') !== 'declaracao' && valor('doc-tipo') !== 'requerimento';
+    return !['declaracao', 'declaracao-livre', 'requerimento'].includes(valor('doc-tipo'));
   }
   function ensureMemoStyle() {
     if (document.getElementById('estilo-memorando-oficial')) return;
@@ -92,6 +92,7 @@ const DocumentosServidoresPage = (() => {
     return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
   };
   const tipos = [
+    ['declaracao-livre', 'Declaração institucional, escolar ou personalizada'],
     ['declaracao', 'Declara\u00e7\u00e3o funcional do servidor'],
     ['requerimento', 'Requerimento do servidor'],
     ['prorrogacao', 'Memorando \u2014 prorroga\u00e7\u00e3o de contrato'],
@@ -181,7 +182,7 @@ const DocumentosServidoresPage = (() => {
     const tipo = valor('doc-tipo');
     const ehMemo = ['prorrogacao','substituicao','contratacao','memorando'].includes(tipo);
     const titulo = {
-      declaracao:'DECLARA\u00c7\u00c3O', requerimento:'REQUERIMENTO',
+      declaracao:'DECLARA\u00c7\u00c3O', 'declaracao-livre':'DECLARAÇÃO', requerimento:'REQUERIMENTO',
       prorrogacao:'MEMORANDO', substituicao:'MEMORANDO',
       contratacao:'MEMORANDO', memorando:'MEMORANDO'
     }[tipo] || 'DOCUMENTO';
@@ -203,6 +204,11 @@ const DocumentosServidoresPage = (() => {
     const cargoVaga = pad(valor('doc-cargo'), 'CARGO/FUN\u00c7\u00c3O');
     const afastamento = pad(valor('doc-afastamento'), 'MOTIVO DO AFASTAMENTO');
     switch (tipo) {
+      case 'declaracao-livre':
+        return RedacaoLivre.preparar({ pedido: valor('doc-pedido'), hoje: dataLocal(), campos: {
+          'doc-inicio': valor('doc-inicio'), 'doc-instituicao': valor('doc-instituicao'),
+          'doc-assunto': valor('doc-assunto'), 'doc-motivo': valor('doc-motivo')
+        } }).paragrafos.join('\n\n');
       case 'declaracao':
         return `Declaramos, para os devidos fins, que ${n}, matr\u00edcula n\u00ba ${mat}, ${pad(cg, 'CARGO/FUN\u00c7\u00c3O')}, possui registro funcional nesta unidade escolar, E.M. Prof.\u00aa Eunice Carneiro, conforme os dados constantes do cadastro da escola.${f?.vinculo ? ` O v\u00ednculo informado no cadastro \u00e9: ${f.vinculo}.` : ''}${f?.dataAdmissao ? ` A data de admiss\u00e3o registrada \u00e9 ${dt(f.dataAdmissao) || f.dataAdmissao}.` : ''}\n\n${obs || 'A presente declara\u00e7\u00e3o \u00e9 expedida a pedido do(a) interessado(a), para os fins que se fizerem necess\u00e1rios.'}\n\nPor ser express\u00e3o das informa\u00e7\u00f5es registradas, firmamos a presente declara\u00e7\u00e3o, sujeita \u00e0 confer\u00eancia dos documentos funcionais.`;
       case 'requerimento':
@@ -255,6 +261,7 @@ const DocumentosServidoresPage = (() => {
   function camposDinamicos() {
     const tipo = valor('doc-tipo');
     const dicas = {
+      'declaracao-livre': 'Recebimentos, projetos, acontecimentos e declarações escolares. Descreva os fatos confirmados.',
       declaracao: 'Declara\u00e7\u00e3o funcional. Confirme os registros antes da assinatura.',
       requerimento: 'Requerimento em primeira pessoa, assinado pelo pr\u00f3prio servidor.',
       prorrogacao: 'Prorroga\u00e7\u00e3o de contrato: confirme o t\u00e9rmino, o per\u00edodo solicitado e eventual LTS.',
@@ -268,7 +275,7 @@ const DocumentosServidoresPage = (() => {
       memorando: 'Modelo personalizado: escolha destinat\u00e1rio, assunto, pedido e justificativa; todo o texto pode ser editado.'
     };
     $('doc-dica').textContent = dicas[tipo] || '';
-    const semServidor = ['calendario','zeladoria','transporte','avanco','memorando'].includes(tipo);
+    const semServidor = ['declaracao-livre','calendario','zeladoria','transporte','avanco','memorando'].includes(tipo);
     $('doc-principal-bloco').hidden = semServidor;
     $('doc-principal-legenda').textContent = ({
       substituicao: 'Servidor afastado',
@@ -282,11 +289,11 @@ const DocumentosServidoresPage = (() => {
       : 'Profissional sugerido para substitui\u00e7\u00e3o (opcional)';
     $('doc-destino-simples').hidden = ehMemo();
     $('doc-memorando-cabecalho').hidden = !ehMemo();
-    $('doc-inicio-bloco').hidden = !['prorrogacao','substituicao','contratacao','calendario','transporte'].includes(tipo);
+    $('doc-inicio-bloco').hidden = !['declaracao-livre','prorrogacao','substituicao','contratacao','calendario','transporte'].includes(tipo);
     $('doc-fim-bloco').hidden = !['prorrogacao','substituicao','calendario'].includes(tipo);
     $('doc-prazo-bloco').hidden = !['substituicao','prorrogacao'].includes(tipo);
     $('doc-cargo-bloco').hidden = !['substituicao','contratacao'].includes(tipo);
-    $('doc-pedido-bloco').hidden = !['memorando','requerimento','zeladoria'].includes(tipo);
+    $('doc-pedido-bloco').hidden = !['declaracao-livre','memorando','requerimento','zeladoria'].includes(tipo);
     $('doc-numero-bloco').hidden = !ehMemo();
     $('doc-motivo-legenda').textContent = ({
       declaracao: 'Finalidade da declara\u00e7\u00e3o',
@@ -316,10 +323,19 @@ const DocumentosServidoresPage = (() => {
     for (const [id,,fieldTipo] of EXTRA_CAMPOS) {
       $(id + '-bloco').hidden = fieldTipo !== tipo;
     }
+    const livre = tipo === 'declaracao-livre';
+    $('doc-instituicao-bloco').hidden = !livre && tipo !== 'estagio';
+    $('doc-instituicao-bloco').querySelector('label').textContent = livre ? 'Pessoa, projeto ou instituição responsável (se houver)' : 'Instituição / local do estágio (opcional)';
+    if (livre) {
+      $('doc-pedido-legenda').textContent = 'Fatos a declarar';
+      $('doc-inicio-legenda').textContent = 'Data do acontecimento / recebimento (se houver)';
+      $('doc-motivo-legenda').textContent = 'Finalidade ou observações (opcional)';
+    }
   }
 
   function assuntoPadrao(tipo) {
     return {
+      'declaracao-livre':'Declaração institucional',
       declaracao:'Declara\u00e7\u00e3o funcional',
       requerimento:'Requerimento administrativo',
       prorrogacao:'Solicita\u00e7\u00e3o de prorroga\u00e7\u00e3o de contrato',
@@ -784,7 +800,7 @@ const DocumentosServidoresPage = (() => {
       return;
     }
     App.layout('Documentos de Servidores', 'Declara\u00e7\u00f5es \u2022 Requerimentos \u2022 Memorandos', interface());
-    $('doc-assunto').value = assuntoPadrao('declaracao');
+    $('doc-assunto').value = assuntoPadrao(valor('doc-tipo'));
     ensureMemoStyle();
     camposDinamicos();
     atualizarModelo(true);
@@ -837,6 +853,7 @@ const DocumentosServidoresPage = (() => {
 
   const grupos = {
     declaracao: [
+      ['declaracao-livre', 'Declaração institucional, escolar ou personalizada'],
       ['declaracao', 'Declara\u00e7\u00e3o funcional do servidor'],
       ['comparecimento-responsavel', 'Comparecimento de pai, m\u00e3e ou respons\u00e1vel']
     ],
@@ -2449,10 +2466,11 @@ Por ser verdade, firmamos a presente declara\u00e7\u00e3o.`;
    N\u00e3o faz requisi\u00e7\u00f5es, n\u00e3o executa comandos do pedido e n\u00e3o grava dados. */
 const AssistenteDocumentalLocal = (() => {
   'use strict';
-  const TIPOS = ['declaracao', 'requerimento', 'prorrogacao', 'substituicao',
+  const TIPOS = ['declaracao-livre', 'declaracao', 'requerimento', 'prorrogacao', 'substituicao',
     'contratacao', 'calendario', 'zeladoria', 'transporte', 'estagio', 'avanco',
     'memorando', 'comparecimento-responsavel'];
   const ASSUNTOS = {
+    'declaracao-livre': 'Declaração institucional',
     declaracao: 'Declara\u00e7\u00e3o funcional', requerimento: 'Requerimento administrativo',
     prorrogacao: 'Solicita\u00e7\u00e3o de prorroga\u00e7\u00e3o de contrato',
     substituicao: 'Solicita\u00e7\u00e3o de substitui\u00e7\u00e3o de servidor(a)',
@@ -2469,11 +2487,11 @@ const AssistenteDocumentalLocal = (() => {
     'doc-numero': ['numero do memorando', 'numero do documento', 'memorando numero', 'numero'],
     'doc-data': ['data do documento', 'data de emissao', 'emissao'],
     'doc-assunto': ['assunto'], 'doc-cargo': ['cargo a contratar', 'cargo funcao', 'cargo', 'funcao'],
-    'doc-inicio': ['data inicial', 'data de inicio', 'data original', 'inicio', 'data da visita'],
+    'doc-inicio': ['data inicial', 'data de inicio', 'data original', 'inicio', 'data da visita', 'data do recebimento', 'data do acontecimento', 'data do evento'],
     'doc-fim': ['data final', 'data de termino', 'nova data', 'fim', 'termino'],
     'doc-prazo': ['quantidade de dias', 'prazo em dias', 'duracao em dias', 'prazo'],
     'doc-afastamento': ['motivo do afastamento', 'situacao da vaga', 'afastamento', 'licenca'],
-    'doc-pedido': ['solicitacao adicional', 'pedido', 'solicitacao', 'objeto'],
+    'doc-pedido': ['solicitacao adicional', 'pedido', 'solicitacao', 'objeto', 'fatos', 'fatos a declarar', 'texto a declarar'],
     'doc-motivo': ['justificativa', 'fundamentacao', 'objetivo pedagogico', 'motivo', 'finalidade'],
     'doc-para': ['destinatario', 'para'], 'doc-ac': ['a/c', 'aos cuidados de'],
     'doc-setor': ['coordenadoria', 'setor'],
@@ -2485,7 +2503,7 @@ const AssistenteDocumentalLocal = (() => {
     'doc-hora-fim': ['fim da visita', 'hora final da visita'],
     'doc-saida': ['horario de embarque', 'embarque', 'saida da escola'],
     'doc-retorno': ['horario de retorno', 'retorno'],
-    'doc-instituicao': ['instituicao do estagio', 'instituicao'],
+    'doc-instituicao': ['instituicao do estagio', 'instituicao', 'fornecedor', 'projeto', 'instituicao responsavel'],
     'doc-horario': ['compatibilidade de horarios', 'horario do estagio'],
     'doc-estudante': ['nome do estudante', 'nome do aluno', 'estudante', 'aluno'],
     'doc-turma-aluno': ['turma do estudante', 'turma do aluno', 'turma'],
@@ -2601,6 +2619,8 @@ const AssistenteDocumentalLocal = (() => {
   }
   function tipoDoPedido(texto, atual) {
     const n = norm(texto);
+    const comparecimentoPais = /\b(?:comparecimento|compareceu|comparecer)\b/.test(n) && /\b(?:responsavel|mae|pai|genitor)\b/.test(n);
+    if (!comparecimentoPais && RedacaoLivre.reconhecer(texto)) return { tipo: 'declaracao-livre', reconhecido: true };
     const genero = /^(?:(?:por favor[,]?)\s+)?(?:(?:faca|crie|elabore|prepare|redija|gere|quero)\s+)?(?:um[ae]?\s+)?(declaracao|requerimento)\b/.exec(n)?.[1];
     if (genero === 'requerimento') return { tipo: genero, reconhecido: true };
     if (genero === 'declaracao' && !/(?:comparecimento|declaracao)[^\n.;]{0,90}\b(?:responsavel|mae|pai|genitor)/.test(n)) return { tipo: genero, reconhecido: true };
@@ -2622,7 +2642,7 @@ const AssistenteDocumentalLocal = (() => {
       const m = re.exec(n);
       if (m && !/\b(?:nao|sem)\s+(?:(?:faca|fazer|quero|solicitar|ha|houve)\s+){0,2}$/.test(n.slice(Math.max(0, m.index - 40), m.index))) return { tipo, reconhecido: true };
     }
-    return { tipo: TIPOS.includes(atual) ? atual : 'memorando', reconhecido: false };
+    return { tipo: TIPOS.includes(atual) ? atual : 'memorando', reconhecido: atual === 'declaracao-livre' };
   }
   function selecionarPessoas(texto, cadastro, valores, tipo, idsAtuais, avisar, perguntar) {
     const s = ' ' + chave(texto) + ' ';
@@ -2796,6 +2816,13 @@ const AssistenteDocumentalLocal = (() => {
       dados[id] = v; alterados.add(id);
     }
     for (const [id, v] of Object.entries(valores)) if (CAMPOS.has(id)) gravar(id, v);
+    if (tipo === 'declaracao-livre') {
+      const plano = RedacaoLivre.preparar({ pedido, referencia, campos: dados, hoje });
+      Object.assign(dados, plano.campos);
+      plano.perguntas.forEach(q => perguntar(q.campo, q.pergunta));
+      plano.avisos.forEach(avisar);
+      return retornar(tipo, plano.paragrafos.join('\n\n'), { principal: null, secundario: null }, plano.resumo);
+    }
     const datas = datasNoTexto(semRotulos, hoje);
     if (/\b(?:hoje|amanha|ontem)\b/.test(natural)) avisar('Datas relativas foram interpretadas no hor\u00e1rio de Bras\u00edlia. Confira as datas preenchidas.');
     if (/\b\d{1,2}\/\d{1,2}(?![\d/])\b/.test(natural.replace(/\b\d{1,2}\/\d{1,2}\/\d{4}\b/g, ''))) avisar('H\u00e1 uma data sem ano. Informe dia, m\u00eas e ano para evitar ambiguidade.');
@@ -3000,7 +3027,7 @@ const AssistenteDocumentalLocal = (() => {
     avisar('Confira se todos os detalhes do pedido constam no rascunho. Informa\u00e7\u00f5es fora das regras podem precisar de edi\u00e7\u00e3o manual.');
     return retornar(tipo, partes.join('\n\n'), pessoas, 'Rascunho preparado no navegador.');
   }
-  return Object.freeze({ preparar, revisar, versao: '20261020-local-2' });
+  return Object.freeze({ preparar, revisar, versao: '20261023-local-3' });
 })();
 
 
@@ -3021,7 +3048,7 @@ const AssistenteDocumentalLocal = (() => {
     .replace(/\s+/g, ' ')
     .trim();
   const tipos = [
-    'declaracao', 'requerimento', 'prorrogacao',
+    'declaracao-livre', 'declaracao', 'requerimento', 'prorrogacao',
     'substituicao', 'contratacao', 'calendario',
     'zeladoria', 'transporte', 'estagio', 'avanco',
     'memorando', 'comparecimento-responsavel'
@@ -3068,7 +3095,7 @@ const AssistenteDocumentalLocal = (() => {
   function mudarTipo(tipo) {
     if ($('ds-categoria') && $('ds-modelo')) {
       const categoria = [
-        'declaracao',
+        'declaracao-livre', 'declaracao',
         'requerimento',
         'comparecimento-responsavel'
       ].includes(tipo) ? 'declaracao' : 'memorando';
@@ -3241,13 +3268,15 @@ const AssistenteDocumentalLocal = (() => {
       <label for="ia-extra-pedido">
         O que voc\u00ea precisa?
       </label>
-      <p>Voc\u00ea pode usar: Servidor:, Titular:, Data inicial:, Data final:,
-        Justificativa:, Pedido:, Cargo:, Respons\u00e1vel:, Entrada: e Sa\u00edda:.
-        Informe nomes completos ou matr\u00edculas para identificar servidores.</p>
+      <p>Voc\u00ea pode pedir declara\u00e7\u00f5es sobre projetos, recebimentos,
+        acontecimentos e estudantes. Informe o que ocorreu, quando e quem participou.
+        Para documentos funcionais, informe o nome completo ou a matr\u00edcula do servidor.
+        Tamb\u00e9m pode usar: Fatos:, Data do acontecimento:, Fornecedor:,
+        Servidor:, Titular:, Data inicial:, Data final: e Justificativa:.</p>
       <textarea
         id="ia-extra-pedido"
         maxlength="12000"
-        placeholder="Ex.: Fa\u00e7a um memorando prorrogando o contrato de [nome completo], em substitui\u00e7\u00e3o a [nome completo] em readapta\u00e7\u00e3o, a partir de 20/10/2026 por 30 dias. Justificativa: manter o atendimento aos estudantes."
+        placeholder="Ex.: Fa\u00e7a uma declara\u00e7\u00e3o de que a escola recebeu 6 lixeiras para coleta seletiva do Projeto Montesul em 23/10/2026, ap\u00f3s uma palestra. Voc\u00ea tamb\u00e9m pode colar um texto para organizar."
       ></textarea>
       <details>
         <summary>
@@ -3421,7 +3450,7 @@ const AssistenteDocumentalLocal = (() => {
           exigir('doc-assinante', 'assinante');
           exigir('doc-cargo-assinante', 'cargo do assinante');
         }
-        if (!['declaracao', 'requerimento'].includes(tipo)) {
+        if (!['declaracao-livre', 'declaracao', 'requerimento'].includes(tipo)) {
           exigir('doc-numero', 'n\u00famero do memorando');
           exigir('doc-para', 'destinat\u00e1rio');
           exigir('doc-setor', 'setor');
@@ -3436,7 +3465,7 @@ const AssistenteDocumentalLocal = (() => {
         if (['memorando', 'requerimento'].includes(tipo)) {
           exigir('doc-pedido', 'pedido');
         }
-        if (tipo !== 'declaracao') {
+        if (!['declaracao', 'declaracao-livre'].includes(tipo)) {
           exigir('doc-motivo', 'justificativa');
         }
         if (['substituicao', 'contratacao'].includes(tipo)) {
@@ -3844,7 +3873,7 @@ const AssistenteDocumentalLocal = (() => {
     mensagem(
       funcionarios.length
         ? 'Assistente local pronto. Confira os dados reconhecidos e a pr\u00e9via antes de emitir.'
-        : 'O assistente est\u00e1 dispon\u00edvel, mas o cadastro n\u00e3o p\u00f4de ser consultado. Recarregue a p\u00e1gina para identificar servidores.'
+        : 'Declara\u00e7\u00f5es institucionais e escolares dispon\u00edveis. Para documentos funcionais, \u00e9 necess\u00e1rio consultar o cadastro de servidores.'
     );
   }
   const iniciarAnterior = DocumentosServidoresPage.init;
