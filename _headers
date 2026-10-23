@@ -1,7 +1,102 @@
 /*
-  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), clipboard-read=()
   Strict-Transport-Security: max-age=31536000
+
+/
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/404
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/404.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/acessos
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/acessos.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/agenda
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/agenda.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/declaracoes
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/declaracoes.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/documentos-servidores
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'self'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/documentos-servidores.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'self'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/faltas
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/faltas.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/funcionario
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/funcionario.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/funcionarios
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/funcionarios.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/historicos
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/historicos.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/index
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/index.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/login
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/login.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/nova-declaracao
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/nova-declaracao.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/novo-funcionario
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/novo-funcionario.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/relatorios
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/relatorios.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/usuarios
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/usuarios.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src https://cujlebxqqposqomtfvdk.supabase.co; object-src 'none'; frame-src blob:; worker-src 'none'; form-action 'none'; manifest-src 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+
+/js/ia-local-worker.js
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' data: https://huggingface.co https://raw.githubusercontent.com https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.hf.co https://cas-bridge.xethub.hf.co https://us.aws.cdn.hf.co; worker-src 'none'; object-src 'none'; form-action 'none'; frame-ancestors 'none'
