@@ -1,7 +1,7 @@
 # Sistema de Declarações — E.M. Profª Eunice Carneiro
 
 Aplicação estática em HTML, CSS e JavaScript com Supabase Auth, banco PostgreSQL
-e Storage para o uso interno da escola. Hospedagem atual: GitHub Pages.
+e Storage para o uso interno da escola. Publicação no Cloudflare Pages a partir do GitHub.
 
 O login valida o usuário e seu perfil no servidor. Perfis previstos:
 `administrador`, `secretaria` e `consulta`; somente contas ativas autorizadas.
@@ -12,8 +12,18 @@ Nunca coloque `service_role` ou chaves secretas nos arquivos do site.
 ## Publicação
 
 Mantenha os HTML na raiz, os scripts em `js/` e o CSS em `css/`.
-Publique na branch/pasta já configurada no GitHub Pages.
-O pacote de 21/10/2026 contém `LEIA_PRIMEIRO.txt` com a ordem de aplicação.
+Veja `CLOUDFLARE.md` para o build e a pasta de saída.
+O motor de IA do navegador já está empacotado em `js/ia-local-worker.js`;
+não é necessário recompilá-lo para publicar. Não publique `node_modules`.
+
+## Assistente documental e IA local
+
+`DOCUMENTOS_ASSISTENTE.md` descreve os 58 modelos adicionais e os modelos
+oficiais de servidores. `IA_LOCAL.md` explica o modelo de linguagem aberto,
+ativação, requisitos, privacidade e teste de aceitação no computador da escola.
+O uso dos modelos prontos dispensa download de pesos e WebGPU.
+O modo de linguagem usa Qwen3 localmente, sem API de IA nem chave paga.
+O download inicial do modelo é separado da geração dos textos.
 
 `SQL_SUPABASE.sql` agora é um complemento para a estrutura existente,
 com verificações e transação. Ele não é um instalador de banco vazio.
@@ -41,3 +51,4 @@ As funções RPC e políticas efetivamente instaladas no banco precisam ser
 conferidas antes de concluir uma aprovação de segurança. Testes locais
 com dados fictícios não substituem a validação de sessões reais e permissões
 no projeto. Não publique dados pessoais, anexos ou backups no repositório.
+

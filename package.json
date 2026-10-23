@@ -1,0 +1,14 @@
+{
+  "name": "sistema-declaracoes",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/build-cloudflare.mjs",
+    "build:ia": "node scripts/build-ia-local.mjs",
+    "test": "node scripts/test-ia-local.mjs && node scripts/test-documentos.mjs && node scripts/test-redacao-livre.mjs && node scripts/test-cloudflare.mjs"
+  },
+  "devDependencies": {
+    "@mlc-ai/web-llm": "0.2.85",
+    "esbuild": "0.25.12"
+  }
+}

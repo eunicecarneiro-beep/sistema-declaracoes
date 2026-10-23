@@ -1,0 +1,71 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const ctx=vm.createContext({console,Intl,Date,TextEncoder,TextDecoder,Uint8Array,Blob,AbortController,DOMException,URL,setTimeout,clearTimeout,document:{getElementById(){return null;}},window:{},App:{}});
+for(const f of ['redacao-livre.js','assistente-documental.js','ia-local.js','documentos-servidores.js'])vm.runInContext(fs.readFileSync(path.join(root,'js',f),'utf8'),ctx,{filename:f});
+const api=ctx.IAInternaLocal, t=api._teste;
+const entrada={acao:'gerar',pedido:'Faça uma declaração de recebimento de 6 lixeiras do Projeto Montesul em 23/10/2026.',referencia:'Os itens permanecem em comodato.',funcionarios:[{id:'segredo',nome:'Servidor sem relação com este pedido',matricula:'1234567',cargo:'PEB I'}],contexto:{tipo:'declaracao-livre',campos:{'doc-data':'2026-10-23'}}};
+const mensagens=t.prepararMensagens(entrada);
+assert.ok(JSON.stringify(mensagens).includes('comodato'));assert.ok(!JSON.stringify(mensagens).includes('Servidor sem relação'));
+console.log('PASSOU: pedido completo e ressalvas seguem ao modelo; cadastro não relacionado fica fora do contexto.');
+const aluno=t.prepararMensagens({...entrada,pedido:'Declaração de matrícula do aluno Ana Silva.',funcionarios:[{id:'a',nome:'Ana Silva',matricula:'98765',cargo:'PEB I'}]});
+assert.ok(!JSON.stringify(aluno).includes('98765'));
+console.log('PASSOU: estudante com nome igual ao de servidor não recebe dados funcionais.');
+const funcionario=t.prepararMensagens({...entrada,pedido:'Declaração funcional do servidor, matrícula 1234567.'});
+assert.ok(JSON.stringify(funcionario).includes('Servidor sem relação'));
+assert.throws(()=>t.prepararMensagens({...entrada,referencia:'x'.repeat(16001)}),/tamanho/);
+const original={modelo:'recebimento',assunto:'Recebimento de lixeiras',paragrafos:['Declaramos que esta escola recebeu 6 lixeiras do Projeto Montesul em 23/10/2026, em comodato.'],pendencias:[],avisos:[]};
+const plano=t.validarResposta(original,entrada);assert.equal(plano.tipo,'declaracao');assert.equal(plano.principal_id,'');assert.match(plano.paragrafos[0],/comodato/);
+for(const raw of [{...original,modelo:'modelo-inventado'},{...original,paragrafos:['<script>alert(1)</script>']},{...original,paragrafos:[]},{...original,avisos:'sem formato'}])assert.throws(()=>t.validarResposta(raw,entrada));
+assert.throws(()=>t.validarResposta(original,{...entrada,modelo_escolhido:'matricula'}),/mudar o modelo/);
+console.log('PASSOU: resposta estruturada validada; HTML, tipo inexistente e mudança de modelo escolhido são recusados.');
+let criado=0,terminado=0,envios=[];
+function workerFactory(){criado++;return{terminate(){terminado++;},postMessage(m){envios.push(m);queueMicrotask(()=>this.onmessage({data:{id:m.id,resultado:m.acao==='carregar'?{modelo:'Qwen3-4B'}:{texto:JSON.stringify(original),motivo:'stop'}}}));}};}
+const nav={gpu:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}};
+const cliente=t.criarCliente({workerFactory,navigator:nav});
+assert.equal(criado,0);await assert.rejects(cliente.gerar({mensagens,modo:'documento'}),/Ative/);
+await cliente.carregar('qualidade');assert.equal(cliente.estado,'pronta');assert.equal(envios[0].acao,'carregar');assert.ok(!JSON.stringify(envios[0]).includes('Montesul'));
+const r=await cliente.gerar({mensagens,esquema:t.esquema(),modo:'documento'});assert.match(r.texto,/Montesul/);cliente.descarregar();assert.equal(terminado,1);assert.equal(cliente.estado,'inativa');
+console.log('PASSOU: sem download automático; ativação só envia perfil público; pedido vai por mensagem ao worker.');
+const incompat=t.criarCliente({workerFactory,navigator:{}});await assert.rejects(incompat.carregar(),/WebGPU/);
+const lento=t.criarCliente({workerFactory:()=>({terminate(){},postMessage(){}}),navigator:nav});const abort=new AbortController();const carregamento=lento.carregar('leve',{signal:abort.signal});await new Promise(r=>setImmediate(r));abort.abort();await assert.rejects(carregamento,/interrompida/);assert.equal(lento.estado,'inativa');
+console.log('PASSOU: incompatibilidade e cancelamento têm erro explícito e liberam a operação.');
+let concluirDiagnostico,workersTardios=0;
+const diagnosticoLento=t.criarCliente({workerFactory:()=>{workersTardios++;return workerFactory();},navigator:{gpu:{requestAdapter:()=>new Promise(r=>concluirDiagnostico=r)}}});
+const aguardandoDiagnostico=diagnosticoLento.carregar('leve');
+const canceladoDuranteDiagnostico=assert.rejects(aguardandoDiagnostico,/interrompida/);
+assert.equal(diagnosticoLento.estado,'carregando');
+await assert.rejects(diagnosticoLento.carregar('qualidade'),/Aguarde/);
+diagnosticoLento.cancelar();concluirDiagnostico({features:new Set()});
+await canceladoDuranteDiagnostico;assert.equal(workersTardios,0);assert.equal(diagnosticoLento.estado,'inativa');
+const jaAbortado=new AbortController();jaAbortado.abort();
+await assert.rejects(diagnosticoLento.carregar('leve',{signal:jaAbortado.signal}),/interrompida/);
+assert.equal(workersTardios,0);
+console.log('PASSOU: cancelar durante a verificação de GPU impede carregamento tardio e download; ativações concorrentes são recusadas.');
+// Verifica a barreira de rede do worker com engine e GPU simuladas.
+const registros=['1.7B','4B'].flatMap(t=>['q4f16_1','q4f32_1'].map(q=>({model_id:`Qwen3-${t}-${q}-MLC`,model:`https://huggingface.co/mlc-ai/Qwen3-${t}-${q}-MLC`,model_lib:`https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/Qwen3-${t}-${q}.wasm`})));
+const mensagensWorker=[],rede=[];let ctxWorker;
+class EngineFalso{
+ constructor(config){this.config=config;this.chat={completions:{create:async request=>{assert.equal(request.extra_body?.enable_thinking,false,'A geração deve desativar thinking no parâmetro reconhecido pelo WebLLM.');await assert.rejects(vm.runInContext("fetch('https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC/resolve/main/config.json')",ctxWorker),/bloqueada/);await vm.runInContext("fetch('data:application/octet-stream;base64,AA==')",ctxWorker);return{choices:[{message:{content:'{}'},finish_reason:'stop'}]};}}};}
+ setLogLevel(){} async reload(modelo){const m=this.config.appConfig.model_list.find(x=>x.model_id===modelo);ctxWorker.urlAsset=m.model.replace(/\/$/,'')+(m.model.includes('/resolve/')?'/mlc-chat-config.json':'/resolve/main/mlc-chat-config.json');await vm.runInContext('fetch(urlAsset)',ctxWorker);}async resetChat(){}async unload(){}
+}
+ctxWorker=vm.createContext({MLCEngine:EngineFalso,prebuiltAppConfig:{model_list:registros},URL,Request,location:{href:'https://escola.example/js/ia-local-worker.js'},fetch:async(...x)=>{rede.push(x);return new Response('{}');},postMessage:x=>mensagensWorker.push(x),console});
+const workerCode=fs.readFileSync(path.join(root,'source/ia-local-worker.entry.js'),'utf8').replace(/^import[^\n]+\n/,'');vm.runInContext(workerCode,ctxWorker);
+await assert.rejects(vm.runInContext("fetch('https://exemplo.invalid/enviar',{method:'POST',body:'dado escolar'})",ctxWorker),/só pode baixar/);
+await vm.runInContext("onmessage({data:{id:1,acao:'carregar',dados:{perfil:'qualidade',shaderF16:true}}})",ctxWorker);assert.ok(!mensagensWorker.at(-1).erro);
+await vm.runInContext("onmessage({data:{id:2,acao:'gerar',dados:{mensagens:[{role:'user',content:'fato de teste'}],modo:'conversa'}}})",ctxWorker);assert.ok(!mensagensWorker.at(-1).erro);
+assert.equal(rede.filter(x=>String(x[0]).startsWith('https:')).length,1);assert.equal(rede[0][1].credentials,'omit');
+console.log('PASSOU: rede limitada a arquivos aprovados; nenhuma requisição HTTP ocorre durante a geração.');
+await vm.runInContext("onmessage({data:{id:3,acao:'carregar',dados:{perfil:'qualidade',shaderF16:true,origem:'escola'}}})",ctxWorker);assert.ok(!mensagensWorker.at(-1).erro);assert.ok(String(rede.at(-1)[0]).startsWith('https://escola.example/modelos/'));
+await assert.rejects(vm.runInContext("fetch('https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC/resolve/main/config.json')",ctxWorker),/só pode baixar/);
+console.log('PASSOU: modo de hospedagem própria bloqueia até os downloads de fontes públicas.');
+const headers=fs.readFileSync(path.join(root,'_headers'),'utf8');const blocos=headers.split(/\n\s*\n/).filter(Boolean).map(b=>({rota:b.split('\n')[0],linhas:b.split('\n').slice(1)}));
+assert.ok(!blocos.find(b=>b.rota==='/*').linhas.some(l=>l.includes('Content-Security-Policy:')),'Não pode haver CSP global conflitante com o worker.');
+for(const file of fs.readdirSync(root).filter(x=>x.endsWith('.html')))for(const rota of ['/'+file,'/'+file.replace(/\.html$/,'')])assert.ok(blocos.find(b=>b.rota===rota)?.linhas.some(l=>l.includes("frame-ancestors 'none'")),rota);
+for(const rota of ['/documentos-servidores','/documentos-servidores.html'])assert.ok(blocos.find(b=>b.rota===rota).linhas.some(l=>l.includes("worker-src 'self'")));
+const workerPolicy=blocos.find(b=>b.rota==='/js/ia-local-worker.js').linhas.join('\n');assert.ok(workerPolicy.includes("'wasm-unsafe-eval'"));assert.ok(!workerPolicy.includes("'unsafe-eval'"));assert.ok(!workerPolicy.includes('supabase'));
+console.log('PASSOU: CSP de páginas preservada; worker isolado tem apenas as permissões necessárias para o modelo.');
+console.log('Testes com engine, GPU e rede simuladas. Não validam a qualidade nem a velocidade de um modelo real no hardware do usuário.');
