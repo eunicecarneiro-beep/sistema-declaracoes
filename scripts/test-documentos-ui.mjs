@@ -9,6 +9,8 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const browser=await chromium.launch({headless:true,...(process.env.DOCUMENTOS_CHROMIUM?{executablePath:process.env.DOCUMENTOS_CHROMIUM}:{})});
 const page=await browser.newPage({viewport:{width:1440,height:1050}});
 const erros=[];page.on('pageerror',e=>erros.push(e.message));
+const pedidosDeModelo=[],tempos=[];
+page.on('request',r=>{if(/ia-(?:local|cpu)-worker|\/modelos\/|huggingface\.co/.test(r.url()))pedidosDeModelo.push(r.url());});
 await page.route('**/js/app.js*',route=>route.fulfill({contentType:'application/javascript',body:`
 globalThis.App={
 getCurrentPageFile:()=> 'documentos-servidores.html', toast:console.error,
@@ -19,13 +21,14 @@ layout:(a,b,html)=>document.getElementById('app').innerHTML=html};
 await page.route('**/*.supabase.co/**',route=>route.abort());
 await page.goto('http://127.0.0.1:8765/documentos-servidores.html');
 await page.locator('#ia-extra-pedido').waitFor();
-assert.equal(await page.locator('#ia-local-modo').inputValue(),'ia');
-await page.locator('#ia-local-modo').selectOption('modelos');
+assert.equal(await page.locator('#ia-local-modo').inputValue(),'modelos');
 const gerar=async(pedido,modelo='auto')=>{
  await page.locator('#ia-extra-modelo').selectOption(modelo);
  await page.locator('#ia-extra-pedido').fill(pedido);
+ const inicio=performance.now();
  await page.locator('[data-acao="gerar"]').click();
  await page.waitForFunction(()=>!document.querySelector('[data-acao="gerar"]').disabled);
+ tempos.push(performance.now()-inicio);
  const status=await page.locator('#ia-extra-status').innerText();assert.ok(!status.includes('Não foi possível'),status);
 };
 await gerar('Faça uma declaração de recebimento de 06 (seis) lixeiras destinadas à coleta seletiva, fornecidas pelo Projeto Montesul (Associação Montes Claros de Catadores), no dia 23/10/2026, em decorrência da palestra realizada nesta unidade escolar.');
@@ -35,6 +38,12 @@ assert.equal(await page.locator('#doc-principal').isVisible(),false);
 await page.locator('#ia-extra-verificar').click();
 assert.doesNotMatch(await page.locator('#ia-extra-status').innerText(),/servidor|matrícula/);
 console.log('PASSOU UI: recebimento de lixeiras, prévia e conferência sem servidor.');
+await page.locator('#ia-extra-pedido').fill('mude a data para 24/10/2026 e inclua que não houve doação');
+await page.locator('[data-acao="complementar"]').click();
+await page.waitForFunction(()=>!document.querySelector('[data-acao="gerar"]').disabled);
+assert.equal(await page.locator('#doc-data-fato').inputValue(),'2026-10-24');assert.match(await page.locator('#doc-preview').innerText(),/Não houve doação/);assert.match(await page.locator('#ia-extra-entendimento').innerText(),/24\/10\/2026/);
+await page.locator('#ia-extra-desfazer').click();assert.equal(await page.locator('#doc-data-fato').inputValue(),'2026-10-23');assert.doesNotMatch(await page.locator('#doc-texto').inputValue(),/Não houve doação/);
+console.log('PASSOU UI: correção natural composta, dados identificados e desfazer.');
 await gerar('Faça uma declaração de matrícula para o aluno João Pedro Silva, do 2º ano E, ano letivo 2026, turno vespertino.');
 assert.equal(await page.locator('#doc-modelo-amplo').inputValue(),'matricula');
 assert.match(await page.locator('#doc-preview').innerText(),/João Pedro Silva/);
@@ -73,6 +82,8 @@ console.log('PASSOU UI: ofício utiliza título e formato próprios.');
 await page.setViewportSize({width:390,height:844});
 assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
 assert.deepEqual(erros,[]);
+assert.deepEqual(pedidosDeModelo,[],'O modo rápido não pode disparar download ou inicialização de modelos.');
+console.log(JSON.stringify({medicao:'Clique em Preparar até formulário liberado, Chromium local, autenticação e cadastro simulados',geracoes:tempos.length,medianaMs:Math.round([...tempos].sort((a,b)=>a-b)[Math.floor(tempos.length/2)]),maximoMs:Math.round(Math.max(...tempos)),requisicoesDeModelo:pedidosDeModelo.length}));
 await page.screenshot({path:path.join(root,'../qa-documentos-mobile.png'),fullPage:true});
 console.log('PASSOU UI: tela móvel sem rolagem horizontal e sem erros JavaScript.');
 await browser.close();
