@@ -15,3 +15,15 @@ const loglevelDir=modules?path.join(modules,'loglevel'):path.dirname(path.dirnam
 for(const nome of ['LICENSE','LICENSE.txt']){try{const licenca=await fs.readFile(path.join(loglevelDir,nome),'utf8');await fs.appendFile(path.join(root,'js/IA_LOCAL_LICENSE.txt'),'\n\n--- loglevel (MIT) ---\n'+licenca);break;}catch{}}
 const stat=await fs.stat(path.join(root,'js/ia-local-worker.js'));
 console.log('Motor local empacotado:',stat.size,'bytes. Os pesos dos modelos são baixados apenas na ativação pelo usuário.');
+const cpuDir=modules?path.join(modules,'@huggingface/transformers'):path.dirname(path.dirname(require.resolve('@huggingface/transformers')));
+const cpuPkg=JSON.parse(await fs.readFile(path.join(cpuDir,'package.json'),'utf8'));
+if(cpuPkg.version!=='3.8.1')throw new Error('Use a versão validada de @huggingface/transformers: 3.8.1.');
+await build({entryPoints:[path.join(root,'source/ia-cpu-worker.entry.js')],outfile:path.join(root,'js/ia-cpu-worker.js'),bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true,legalComments:'inline',nodePaths:modules?[modules]:undefined,banner:{js:'/* IA por CPU: Transformers.js '+cpuPkg.version+'; fonte em source/ia-cpu-worker.entry.js. Licenças em IA_LOCAL_LICENSE.txt. */'}});
+const ortDir=modules?path.join(modules,'onnxruntime-web'):path.dirname(path.dirname(require.resolve('onnxruntime-web')));
+const assets=path.join(root,'js/ia-cpu');
+await fs.mkdir(assets,{recursive:true});
+for(const nome of ['ort-wasm-simd-threaded.mjs','ort-wasm-simd-threaded.wasm','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm'])await fs.copyFile(path.join(ortDir,'dist',nome),path.join(assets,nome));
+for(const [titulo,arquivo]of [['Transformers.js (Apache-2.0)',path.join(cpuDir,'LICENSE')],['ONNX Runtime (MIT)',path.join(root,'source/ONNX_RUNTIME_LICENSE.txt')]])await fs.appendFile(path.join(root,'js/IA_LOCAL_LICENSE.txt'),'\n\n--- '+titulo+' ---\n'+await fs.readFile(arquivo,'utf8'));
+const jinjaDir=modules?path.join(modules,'@huggingface/jinja'):path.dirname(path.dirname(require.resolve('@huggingface/jinja')));
+await fs.appendFile(path.join(root,'js/IA_LOCAL_LICENSE.txt'),'\n\n--- @huggingface/jinja ---\n'+await fs.readFile(path.join(jinjaDir,'LICENSE'),'utf8'));
+console.log('Motor CPU e WebAssembly preparados no próprio site. Pesos de Qwen3 0.6B são baixados no primeiro pedido.');
