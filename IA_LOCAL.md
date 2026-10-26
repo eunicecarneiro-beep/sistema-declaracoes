@@ -1,112 +1,76 @@
-# IA de linguagem no computador da escola
+# IA local com ativação automática
 
-Esta atualização acrescenta um modelo de linguagem aberto à página de documentos.
-Ele pode redigir pedidos novos, revisar textos e manter uma conversa em português.
-Há dois perfis: Qwen3 4B, de maior capacidade, e Qwen3 1.7B, de menor consumo.
-Esses modelos não são o ChatGPT nem têm desempenho garantido equivalente a ele.
-Os 58 modelos de documentos e os modelos oficiais continuam disponíveis.
+Em Documentos da Escola, descreva o pedido e clique em Preparar documento.
+O modo padrão ativa o modelo no primeiro pedido. Não é necessário usar
+Preparar IA agora, que apenas antecipa o carregamento.
 
-## Ativação
+Automático usa Qwen3 1.7B pela GPU quando há adaptador WebGPU; se não houver
+adaptador ou o carregamento pela GPU falhar, tenta Qwen3 0.6B pelo processador
+com Transformers.js 3.8.1, ONNX Runtime e WebAssembly. Qwen3 4B pode ser escolhido
+explicitamente. O perfil CPU não consulta nem exige WebGPU.
 
-1. Abra **Documentos da Escola** com uma conta de secretaria ou administração.
-2. Em **IA de linguagem neste computador**, selecione o perfil e clique em
-   **Baixar / ativar IA local**. O navegador verifica a compatibilidade.
-3. Espere a indicação **Modelo pronto**. O primeiro uso baixa arquivos que
-   podem ocupar alguns GB; não feche a página durante a preparação.
-4. O modo **Modelo de linguagem local** será selecionado após o carregamento.
-   Descreva os fatos, escolha o assunto ou deixe **Identificar pelo pedido**
-   e clique em **Preparar documento**.
-5. Use **Complementar pedido**, **Melhorar texto**, **Mais sucinto** ou
-   **Mais formal** para revisar. **Atualizar texto** usa os campos atuais
-   do formulário no modo de linguagem. Confira a prévia antes de emitir.
-6. Para perguntas gerais, abra **Conversar com a IA**. A opção de incluir o
-   documento atual como referência fica desmarcada até o operador escolhê-la.
-7. **Parar / liberar memória** encerra o processamento. Para usar novamente,
-   ative o modelo. É possível voltar a **Modelos e regras locais** a qualquer momento.
+O primeiro uso pelo processador baixa aproximadamente 630 MB. Os perfis GPU
+podem baixar alguns GB. O cache pode reutilizar os arquivos, mas o navegador
+pode removê-los por falta de espaço ou limpeza de dados. Memória, WebAssembly
+e acesso às fontes dos modelos continuam necessários. O modo CPU pode levar
+minutos para escrever. Políticas da organização podem impedir downloads ou
+execução. Nenhuma mudança de política do navegador é necessária ou realizada.
 
-O navegador precisa oferecer WebGPU, aceleração de hardware e memória suficiente.
-Use o perfil leve se o maior não carregar. A compatibilidade depende do navegador,
-da GPU e do sistema operacional. Não há um processamento remoto substituto.
-O cache pertence a cada navegador e computador; limpeza de dados ou falta de
-espaço pode exigir novo download. O pacote não inclui os pesos dos modelos.
+## Conferência e alternativa automática
 
-## O que fica local
+Falha de carregamento produz um rascunho pelos modelos e regras locais, com
+aviso explícito. A redação pelo processador usa um contexto compacto, montado
+a partir do rascunho e dos fatos informados. O formulário conserva a escolha
+do modelo, cabeçalho, numeração e assinatura.
 
-O motor WebLLM está empacotado no próprio site. O download inicial padrão busca
-somente arquivos dos quatro registros aprovados de Qwen3, com variantes para
-GPUs com ou sem `shader-f16`. Não há chave ou endpoint remoto de inferência.
-O pedido segue por mensagem a um worker, que executa a geração no computador.
-Requisições HTTP pelo motor são bloqueadas durante a geração. Esse bloqueio
-não impede o funcionamento normal de autenticação e cadastro do site no Supabase.
-O sistema como um todo continua sendo um site conectado; não é uma instalação
-completa da escola que possa funcionar sem internet.
+A resposta CPU passa por verificações de formatação, nomes reconhecidos,
+números, datas, comodato e presença de negação. Se essas verificações falharem,
+o sistema usa o rascunho dos modelos locais e informa isso. Essas verificações
+são heurísticas: podem rejeitar paráfrases corretas e não comprovam a fidelidade
+completa do texto. A conferência humana antes da emissão continua necessária.
 
-**Opções de instalação → Usar arquivos hospedados pela escola** é uma opção
-avançada e só funciona depois da instalação dos arquivos pela equipe técnica.
-Nesse modo, até os arquivos do modelo são solicitados apenas ao próprio domínio.
-Os pesos e suas licenças devem ficar em
-`modelos/<model_id>/resolve/main/`, com configuração, tokenizador e todos os
-shards de `ndarray-cache.json`; a biblioteca compilada correspondente fica em
-`modelos/<model_id>/modelo.wasm`. Os registros originais estão no catálogo
-de `@mlc-ai/web-llm` 0.2.85. O build copia a pasta `modelos/` quando ela existe,
-mas não baixa seus arquivos nem contorna limites de tamanho da hospedagem.
-A publicação padrão usa a primeira opção, com download das fontes oficiais.
+Os testes reais em Chromium 131, sem GPU e sem isolamento entre origens,
+confirmaram a execução do modelo pelo processador. Também encontraram
+respostas inadequadas e alterações de fatos; o perfil leve tem capacidade
+limitada. Não foi demonstrada qualidade equivalente ao ChatGPT nem validada
+a execução no computador gerenciado da escola.
 
-## Preservação e limites
+Cancelar e Parar / liberar memória interrompem o worker. Edições manuais
+feitas durante a geração aguardam aplicação explícita da sugestão. Desfazer
+restaura a versão anterior na sessão. Isso não salva o rascunho após fechar
+a página. O modo Modelos e regras locais dispensa download de pesos.
 
-O modelo recebe os fatos informados, o modelo escolhido, os campos pertinentes
-e, nas revisões, o texto atual. Servidores não relacionados ficam fora do contexto;
-um aluno não recebe dados de servidor por ter nome parecido. A IA não consulta
-um cadastro de estudantes nem confirma matrícula ou frequência escolar.
+## Privacidade e arquivos
 
-O corpo retorna em JSON e passa por validação de formato, modelo e texto.
-Conteúdo HTML ou respostas incompletas são recusados. Cabeçalho, numeração,
-destinatário e assinatura continuam montados pelo formulário. Essa validação
-não comprova a veracidade da redação; o modelo pode omitir ou inventar fatos.
+Não há chave paga nem endpoint de inferência remoto. O modelo roda em worker.
+A rede do worker só permite downloads GET/HEAD dos arquivos aprovados e fica
+bloqueada durante a geração. O restante do site continua conectado ao Supabase.
+Somente as opções de execução são guardadas nas preferências locais, sem os
+pedidos, conversas ou documentos.
 
-Cancelamento, incompatibilidade, falha ou limite de processamento mantêm o
-documento já exibido. Se o operador editar o documento durante a geração,
-a nova sugestão aguarda aplicação manual. **Desfazer** restaura a versão
-anterior na sessão. Isso não equivale a salvar um rascunho após fechar a página.
-Pedidos e conversas muito longos precisam ser divididos; não são cortados
-silenciosamente. **Nova conversa** limpa o histórico usado nas próximas respostas.
+O modelo CPU é onnx-community/Qwen3-0.6B-ONNX, revisão
+58ca03a5e7b354b480b1a82b34bde8dc7b854cc0, dtype q8. A execução utiliza uma
+thread, sem exigir SharedArrayBuffer ou alterações de isolamento do site.
+Os binários WebAssembly acompanham o build do próprio site.
 
-## Teste de aceitação no computador de uso
-
-Comece com dados fictícios. Este teste ainda precisa ser realizado com os pesos
-reais, na GPU e no navegador da escola:
-
-1. Ative o modelo e confirme o perfil carregado.
-2. Peça: “Faça uma declaração de que a escola recebeu 06 (seis) lixeiras
-   destinadas à coleta seletiva de materiais recicláveis do Projeto Montesul
-   (Associação Montes Claros de Catadores), no dia 23/10/2026, em decorrência
-   de uma palestra na escola.” Confira quantidade, finalidade, projeto e data.
-   Não deve ser exigido cadastro de servidor.
-3. Peça uma declaração de matrícula de **João Pedro Silva**, aluno fictício do
-   **2º ano E**, ano letivo **2026**, turno **vespertino**. Confira que não há
-   matrícula funcional nem afirmação automática de frequência ou aprovação.
-4. Peça uma revisão de um assunto diferente, com uma ressalva explícita:
-   “Os equipamentos foram emprestados; não houve doação.” Confira que a
-   ressalva permanece. Acrescente uma finalidade e teste **Desfazer**.
-5. Faça uma pergunta na conversa, depois uma pergunta que dependa da resposta
-   anterior. Confira português, coerência e capacidade para o trabalho real.
-6. Teste **Cancelar**, prévia, impressão/PDF e exportação Word. Avalie o tempo
-   de resposta e se o navegador permanece utilizável. Se necessário, use o perfil leve.
-
-Os testes automatizados verificam a integração com engine, GPU e rede simuladas,
-os exemplos dos modelos, o formulário em DOM simulado, a exportação e o build.
-Não medem qualidade da linguagem, velocidade, consumo real de memória ou
-conformidade visual da impressão no computador de uso.
+A origem Escola é avançada e exige instalação prévia pela equipe técnica.
+Para CPU, coloque configuração, tokenizador e onnx/model_quantized.onnx em
+modelos/onnx-community/Qwen3-0.6B-ONNX/. Para GPU, use
+modelos/<model_id>/resolve/main/ com todos os shards e configuração, mais
+modelos/<model_id>/modelo.wasm. Limites de tamanho da hospedagem continuam
+válidos; o build não instala pesos nem contorna esses limites.
 
 ## Manutenção
 
-O worker compilado é distribuído pronto. Para recompilar, instale as dependências
-fixadas com `npm ci` e execute `npm run build:ia`. O fonte fica em
-`source/ia-local-worker.entry.js`. Execute `npm test` e, quando `linkedom` estiver
-disponível no ambiente de teste, `node scripts/test-documentos-dom.mjs`.
-O teste de navegador `scripts/test-documentos-ui.mjs` requer Playwright e Chromium.
+npm ci instala as versões fixadas; npm run build compila os dois workers e
+prepara dist/. A configuração .npmrc dispensa o download de CUDA do pacote
+Node, que não é usado pelo site. Não envie node_modules ou pesos ao GitHub.
 
-Referências técnicas: [WebLLM](https://webllm.mlc.ai/docs/),
-[API do WebLLM](https://webllm.mlc.ai/docs/user/api_reference.html),
-[Qwen3 4B em MLC](https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC).
-As licenças do motor empacotado acompanham `js/IA_LOCAL_LICENSE.txt`.
+npm test verifica integração simulada, regressões documentais, rotas, sintaxe
+e build. scripts/test-documentos-dom.mjs exige linkedom no ambiente de teste.
+scripts/test-documentos-ui.mjs exige Playwright e Chromium; DOCUMENTOS_CHROMIUM
+permite indicar o executável. Testes simulados não medem a qualidade real.
+
+Referências: https://webllm.mlc.ai/docs/ e
+https://huggingface.co/docs/transformers.js/v3.8.1/index.
+Licenças em js/IA_LOCAL_LICENSE.txt.
