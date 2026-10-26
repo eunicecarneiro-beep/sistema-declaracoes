@@ -30,7 +30,14 @@ assert.equal(criado,0);await assert.rejects(cliente.gerar({mensagens,modo:'docum
 await cliente.carregar('qualidade');assert.equal(cliente.estado,'pronta');assert.equal(envios[0].acao,'carregar');assert.ok(!JSON.stringify(envios[0]).includes('Montesul'));
 const r=await cliente.gerar({mensagens,esquema:t.esquema(),modo:'documento'});assert.match(r.texto,/Montesul/);cliente.descarregar();assert.equal(terminado,1);assert.equal(cliente.estado,'inativa');
 console.log('PASSOU: sem download automático; ativação só envia perfil público; pedido vai por mensagem ao worker.');
-const incompat=t.criarCliente({workerFactory,navigator:{}});await assert.rejects(incompat.carregar(),/WebGPU/);
+const semGPU=t.criarCliente({workerFactory,navigator:{}});await semGPU.carregar();assert.equal(semGPU.motor,'cpu');assert.equal(envios.at(-1).dados.perfil,'cpu');semGPU.descarregar();
+const recusada=t.criarCliente({workerFactory,navigator:{gpu:{requestAdapter:async()=>null}}});await recusada.carregar('qualidade');assert.equal(recusada.motor,'cpu');recusada.descarregar();
+const forcarCPU=t.criarCliente({workerFactory,navigator:{gpu:{requestAdapter:()=>{throw new Error('Não deve consultar GPU no perfil CPU.');}}}});await forcarCPU.carregar('cpu');assert.equal(forcarCPU.motor,'cpu');forcarCPU.descarregar();
+let tentativas=[];
+const falhaGPU=t.criarCliente({navigator:nav,workerFactory:motor=>({terminate(){},postMessage(m){tentativas.push(motor);queueMicrotask(()=>this.onmessage({data:{id:m.id,...(motor==='gpu'?{erro:'Memória gráfica insuficiente.'}:{resultado:{modelo:'CPU'}})}}));}})});
+await falhaGPU.carregar();assert.deepEqual(tentativas,['gpu','cpu']);assert.equal(falhaGPU.motor,'cpu');falhaGPU.descarregar();
+const compacto=t.prepararDocumentoCPU(entrada);assert.equal(compacto.modelo,'recebimento');assert.ok(JSON.stringify(compacto.mensagens).includes('comodato'));assert.ok(!JSON.stringify(compacto.mensagens).includes('Servidor sem relação'));assert.ok(JSON.stringify(compacto.mensagens).length<4000);
+console.log('PASSOU: GPU ausente, adaptador recusado e falha na GPU selecionam CPU; perfil CPU não depende de GPU; contexto CPU é compacto.');
 const lento=t.criarCliente({workerFactory:()=>({terminate(){},postMessage(){}}),navigator:nav});const abort=new AbortController();const carregamento=lento.carregar('leve',{signal:abort.signal});await new Promise(r=>setImmediate(r));abort.abort();await assert.rejects(carregamento,/interrompida/);assert.equal(lento.estado,'inativa');
 console.log('PASSOU: incompatibilidade e cancelamento têm erro explícito e liberam a operação.');
 let concluirDiagnostico,workersTardios=0;
@@ -62,10 +69,25 @@ console.log('PASSOU: rede limitada a arquivos aprovados; nenhuma requisição HT
 await vm.runInContext("onmessage({data:{id:3,acao:'carregar',dados:{perfil:'qualidade',shaderF16:true,origem:'escola'}}})",ctxWorker);assert.ok(!mensagensWorker.at(-1).erro);assert.ok(String(rede.at(-1)[0]).startsWith('https://escola.example/modelos/'));
 await assert.rejects(vm.runInContext("fetch('https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC/resolve/main/config.json')",ctxWorker),/só pode baixar/);
 console.log('PASSOU: modo de hospedagem própria bloqueia até os downloads de fontes públicas.');
+// O worker CPU também tem uma barreira de rede e não consulta WebGPU.
+const cpuMensagens=[],cpuRede=[],cpuEnv={backends:{onnx:{wasm:{}}}};let cpuCtx;
+const fakeTokenizer={apply_chat_template(messages,options){assert.equal(options.enable_thinking,false);return{input_ids:{dims:[1,12]}};},decode(){return'Declaramos o recebimento em comodato.';}};
+class FakeStreamer{constructor(tokenizer,options){assert.equal(options.skip_prompt,true);}}
+cpuCtx=vm.createContext({env:cpuEnv,AutoTokenizer:{from_pretrained:async()=>fakeTokenizer},AutoModelForCausalLM:{from_pretrained:async(id,options)=>{
+  assert.equal(options.device,'wasm');assert.equal(options.dtype,'q8');assert.equal(cpuEnv.backends.onnx.wasm.numThreads,1);
+  await vm.runInContext("fetch('https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX/resolve/58ca03a5e7b354b480b1a82b34bde8dc7b854cc0/onnx/model_quantized.onnx')",cpuCtx);
+  return{generation_config:{eos_token_id:151645},generate:async()=>{await assert.rejects(vm.runInContext("fetch('https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX/resolve/58ca03a5e7b354b480b1a82b34bde8dc7b854cc0/config.json')",cpuCtx),/bloqueada/);return{tolist:()=>[[...Array(12).fill(0),10,151645]]};}};
+}},TextStreamer:FakeStreamer,URL,Request,Date,location:{href:'https://escola.example/js/ia-cpu-worker.js'},fetch:async(...args)=>{cpuRede.push(args);return new Response('{}');},postMessage:m=>cpuMensagens.push(m),console});
+vm.runInContext(fs.readFileSync(path.join(root,'source/ia-cpu-worker.entry.js'),'utf8').replace(/^import[^\n]+\n/,''),cpuCtx);
+await assert.rejects(vm.runInContext("fetch('https://exemplo.invalid/enviar',{method:'POST',body:'dado escolar'})",cpuCtx),/só pode baixar/);
+await vm.runInContext("onmessage({data:{id:1,acao:'carregar',dados:{perfil:'cpu',origem:'publica'}}})",cpuCtx);assert.ok(!cpuMensagens.at(-1).erro);
+await vm.runInContext("onmessage({data:{id:2,acao:'gerar',dados:{mensagens:[{role:'user',content:'Texto fictício'}],modo:'documento'}}})",cpuCtx);assert.ok(!cpuMensagens.at(-1).erro);assert.equal(cpuMensagens.at(-1).resultado.motivo,'stop');assert.equal(cpuRede.length,1);assert.equal(cpuRede[0][1].credentials,'omit');
+console.log('PASSOU: worker CPU usa WASM em uma thread, desativa thinking, valida downloads e bloqueia HTTP na geração. Engine simulada.');
 const headers=fs.readFileSync(path.join(root,'_headers'),'utf8');const blocos=headers.split(/\n\s*\n/).filter(Boolean).map(b=>({rota:b.split('\n')[0],linhas:b.split('\n').slice(1)}));
 assert.ok(!blocos.find(b=>b.rota==='/*').linhas.some(l=>l.includes('Content-Security-Policy:')),'Não pode haver CSP global conflitante com o worker.');
 for(const file of fs.readdirSync(root).filter(x=>x.endsWith('.html')))for(const rota of ['/'+file,'/'+file.replace(/\.html$/,'')])assert.ok(blocos.find(b=>b.rota===rota)?.linhas.some(l=>l.includes("frame-ancestors 'none'")),rota);
 for(const rota of ['/documentos-servidores','/documentos-servidores.html'])assert.ok(blocos.find(b=>b.rota===rota).linhas.some(l=>l.includes("worker-src 'self'")));
 const workerPolicy=blocos.find(b=>b.rota==='/js/ia-local-worker.js').linhas.join('\n');assert.ok(workerPolicy.includes("'wasm-unsafe-eval'"));assert.ok(!workerPolicy.includes("'unsafe-eval'"));assert.ok(!workerPolicy.includes('supabase'));
+const cpuPolicy=blocos.find(b=>b.rota==='/js/ia-cpu-worker.js').linhas.join('\n');assert.ok(cpuPolicy.includes("'wasm-unsafe-eval'"));assert.ok(!cpuPolicy.includes("'unsafe-eval'"));assert.ok(!cpuPolicy.includes('supabase'));
 console.log('PASSOU: CSP de páginas preservada; worker isolado tem apenas as permissões necessárias para o modelo.');
 console.log('Testes com engine, GPU e rede simuladas. Não validam a qualidade nem a velocidade de um modelo real no hardware do usuário.');
