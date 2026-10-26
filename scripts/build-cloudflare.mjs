@@ -23,6 +23,7 @@ for (const folder of ['js', 'css']) {
     }
   }
 }
+await cp(path.join(root,'js/ia-cpu'),path.join(output,'js/ia-cpu'),{recursive:true});
 // Instalação própria opcional. Os pesos nunca são baixados pelo build.
 try {
   if ((await stat(path.join(root, 'modelos'))).isDirectory()) {
