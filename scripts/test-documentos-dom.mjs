@@ -29,12 +29,16 @@ const tick=()=>new Promise(r=>setImmediate(r));
 async function acao(a){document.querySelector(`[data-acao="${a}"]`).click();for(let i=0;i<10&&document.querySelector('[data-acao="gerar"]').disabled;i++)await tick();const s=$('ia-extra-status').textContent;assert.ok(!s.includes('Não foi possível'),s);}
 async function gerar(pedido,modelo='auto'){set('ia-extra-modelo',modelo);set('ia-extra-pedido',pedido);await acao('gerar');}
 assert.ok($('ia-extra-pedido'),'Assistente montado');
-assert.equal($('ia-local-modo').value,'ia');assert.equal($('ia-local-perfil').value,'auto');
-set('ia-local-modo','modelos');
+assert.equal($('ia-local-modo').value,'modelos');assert.equal($('ia-local-perfil').value,'auto');
 await gerar('Faça uma declaração de recebimento de 06 (seis) lixeiras destinadas à coleta seletiva, fornecidas pelo Projeto Montesul (Associação Montes Claros de Catadores), no dia 23/10/2026, em decorrência da palestra realizada nesta unidade escolar.');
 assert.equal($('doc-modelo-amplo').value,'recebimento');assert.match($('doc-preview').textContent,/06 \(seis\) lixeiras/);assert.ok($('doc-principal-bloco').hidden);assert.ok(!$('doc-amplo-bloco').hidden);
 $('ia-extra-verificar').click();assert.doesNotMatch($('ia-extra-status').textContent,/Selecione o servidor/);
 console.log('PASSOU DOM: lixeiras, prévia e conferência sem exigir servidor.');
+assert.equal(ativacoes,0);assert.match($('ia-extra-entendimento').textContent,/Recebimento/);
+set('ia-extra-pedido','mude a data para 24/10/2026');await acao('complementar');
+assert.equal($('doc-data-fato').value,'2026-10-24');assert.match($('doc-preview').textContent,/24\/10\/2026/);assert.match($('ia-extra-entendimento').textContent,/24\/10\/2026/);assert.doesNotMatch($('doc-texto').value,/mude a data/);
+$('ia-extra-desfazer').click();assert.equal($('doc-data-fato').value,'2026-10-23');assert.match($('ia-extra-entendimento').textContent,/23\/10\/2026/);assert.equal(ativacoes,0);
+console.log('PASSOU DOM: modo rápido não carrega modelo; correção natural, prévia, dados identificados e desfazer sincronizados.');
 await gerar('Faça uma declaração de matrícula para o aluno João Pedro Silva, do 2º ano E, ano letivo 2026, turno vespertino.');
 assert.equal($('doc-pessoa').value,'João Pedro Silva');assert.match($('doc-preview').textContent,/João Pedro Silva/);assert.doesNotMatch($('doc-preview').textContent,/Montesul|lixeiras/);
 set('ia-extra-pedido','Finalidade: apresentação ao Bolsa Família.');await acao('complementar');assert.match($('doc-texto').value,/Bolsa Família/);
@@ -62,9 +66,13 @@ set('ia-extra-modelo','auto');set('ia-extra-pedido','Declaração de recebimento
 document.querySelector('[data-acao="gerar"]').click();await tick();assert.ok(entradaIA);assert.equal(ativacoes,1,'Preparar documento deve ativar a IA sem botão separado.');
 set('doc-texto','Correção manual que deve ser mantida durante a geração.');soltarIA();await tick();await tick();
 assert.match($('doc-texto').value,/Correção manual/);assert.ok(!$('ia-extra-aplicar').hidden);$('ia-extra-aplicar').click();assert.match($('doc-preview').textContent,/comodato/);
+set('ia-local-modo','modelos');const antesRefinar=ativacoes;
+$('ia-local-refinar').click();await tick();assert.equal(entradaIA.acao,'melhorar');assert.match(entradaIA.modelo_base,/comodato/);assert.equal(ativacoes,antesRefinar+1);soltarIA();await tick();await tick();assert.equal($('ia-local-modo').value,'modelos');assert.match($('doc-texto').value,/comodato/);
+console.log('PASSOU DOM: refinamento por IA é explícito, usa a minuta atual e conserva a preferência pelo modo rápido.');
 set('ia-local-pergunta','Exiba uma tag de código.');$('ia-local-conversar').click();await tick();await tick();assert.equal($('ia-local-resposta').textContent,'<script>conteúdo literal</script>');assert.equal($('ia-local-resposta').querySelector('script'),null);
+assert.equal($('ia-local-modo').value,'modelos','Conversar não deve ligar o modo demorado para os documentos.');
 console.log('PASSOU DOM: fluxo de IA local, preservação de edição concorrente e conversa com texto escapado. Engine e resposta simuladas.');
-falharAtivacao=true;await gerar('Faça uma declaração de matrícula para Ana Teste, 3º ano A, ano letivo 2026.');
+set('ia-local-modo','ia');falharAtivacao=true;await gerar('Faça uma declaração de matrícula para Ana Teste, 3º ano A, ano letivo 2026.');
 assert.match($('doc-texto').value,/Ana Teste/);assert.match($('ia-extra-status').textContent,/Este rascunho usa os modelos e regras locais/);assert.doesNotMatch($('doc-texto').value,/Montesul/);
 console.log('PASSOU DOM: falha na ativação produz documento pelos modelos prontos e informa a origem do rascunho.');
 console.log('PASSOU DOM: sem erros ou IDs duplicados. Verificação feita em DOM simulado, sem renderização de navegador.');
