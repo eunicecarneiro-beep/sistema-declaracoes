@@ -1,6 +1,6 @@
 # Assistente de documentos da escola
 
-A página `documentos-servidores.html` atende alunos, responsáveis, servidores, pessoas externas e situações institucionais. Há dois modos: modelos e regras locais, disponíveis sem download adicional, e um modelo de linguagem aberto executado no próprio navegador. Nenhum exige API paga de IA ou alteração no banco de dados. Veja `IA_LOCAL.md` para ativar e validar o modelo de linguagem.
+A página `documentos-servidores.html` atende alunos, responsáveis, servidores, pessoas externas e situações institucionais. A IA é ativada no primeiro pedido e escolhe GPU ou processador automaticamente. Os modelos e regras locais continuam disponíveis sem download adicional e são usados com aviso se o carregamento da IA falhar. Nenhum modo exige API paga de IA ou alteração no banco de dados. Veja `IA_LOCAL.md` para requisitos e validação.
 
 ## Cobertura
 

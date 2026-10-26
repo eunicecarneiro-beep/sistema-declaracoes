@@ -6,11 +6,12 @@ import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.DOCUMENTOS_CHROMIUM?{executablePath:process.env.DOCUMENTOS_CHROMIUM}:{})});
 const page=await browser.newPage({viewport:{width:1440,height:1050}});
 const erros=[];page.on('pageerror',e=>erros.push(e.message));
 await page.route('**/js/app.js*',route=>route.fulfill({contentType:'application/javascript',body:`
 globalThis.App={
+getCurrentPageFile:()=> 'documentos-servidores.html', toast:console.error,
 escapeHTML:v=>String(v).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c])),
 requireRoles:async()=>({perfil:'secretaria'}),getAll:async()=>[{id:'teste1',nome:'Maria Silva Teste',matricula:'123456',cargo:'PEB I'}],
 layout:(a,b,html)=>document.getElementById('app').innerHTML=html};
@@ -18,6 +19,8 @@ layout:(a,b,html)=>document.getElementById('app').innerHTML=html};
 await page.route('**/*.supabase.co/**',route=>route.abort());
 await page.goto('http://127.0.0.1:8765/documentos-servidores.html');
 await page.locator('#ia-extra-pedido').waitFor();
+assert.equal(await page.locator('#ia-local-modo').inputValue(),'ia');
+await page.locator('#ia-local-modo').selectOption('modelos');
 const gerar=async(pedido,modelo='auto')=>{
  await page.locator('#ia-extra-modelo').selectOption(modelo);
  await page.locator('#ia-extra-pedido').fill(pedido);

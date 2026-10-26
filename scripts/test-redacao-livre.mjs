@@ -5,10 +5,10 @@ import { test } from 'node:test';
 
 const root = new URL('../', import.meta.url);
 const script = readFileSync(new URL('js/documentos-servidores.js', root), 'utf8');
-const start = script.indexOf('const AssistenteDocumentalLocal =');
+const start = script.indexOf('const AssistenteDocumentalLegado =');
 const end = script.indexOf('/* Integra', start);
 const context = vm.createContext({});
-vm.runInContext(readFileSync(new URL('js/redacao-livre.js', root), 'utf8') + '\n' + script.slice(start,end) + '\nglobalThis.motor = AssistenteDocumentalLocal;', context);
+vm.runInContext(readFileSync(new URL('js/redacao-livre.js', root), 'utf8') + '\n' + script.slice(start,end) + '\nglobalThis.motor = AssistenteDocumentalLegado;', context);
 const gerar = (pedido, extra={}) => context.motor.preparar({acao:'gerar',pedido,hoje:'2026-10-23',funcionarios:[],contexto:{tipo:'declaracao',campos:{'doc-data':'2026-10-23'}},...extra});
 const texto = r => r.paragrafos.join('\n\n');
 const exemplo = `Declaramos, para os devidos fins, que a **Escola Municipal Professora Eunice Carneiro** recebeu, no dia **23 de outubro de 2026**, **06 (seis) lixeiras destinadas à coleta seletiva de materiais recicláveis**, fornecidas pelo **Projeto Montesul (Associação Montes Claros de Catadores)**, em decorrência da palestra realizada nesta unidade escolar.

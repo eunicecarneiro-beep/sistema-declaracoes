@@ -100,6 +100,11 @@ await test('Build publica arquivos do site e exclui SQL, testes, documentação 
   assert.equal(fs.readFileSync(path.join(dir,'login.html'),'utf8'),fs.readFileSync(path.join(root,'login.html'),'utf8'));
 });
 await test('Sintaxe dos scripts JavaScript válida', () => {
-  for (const name of fs.readdirSync(path.join(root,'js')).filter(x=>x.endsWith('.js'))) new vm.Script(code(name), { filename: name });
+  for (const name of fs.readdirSync(path.join(root,'js')).filter(x=>x.endsWith('.js'))) {
+    if(name==='ia-cpu-worker.js')execFileSync(process.execPath,['--input-type=module','--check'],{input:code(name),stdio:['pipe','pipe','pipe']});
+    else new vm.Script(code(name), { filename: name });
+  }
+  for(const name of ['ort-wasm-simd-threaded.mjs','ort-wasm-simd-threaded.jsep.mjs'])assert.ok(fs.existsSync(path.join(root,'dist/js/ia-cpu',name)));
+  for(const name of ['ort-wasm-simd-threaded.wasm','ort-wasm-simd-threaded.jsep.wasm'])assert.ok(fs.statSync(path.join(root,'dist/js/ia-cpu',name)).size<25*1024*1024,'Cada arquivo precisa caber no Cloudflare Pages.');
 });
 console.log(JSON.stringify({ ambiente: 'Node VM com HTTP simulado e build local; sem sessão nem alteração no Supabase.', grupos: results.length, testes: results }));

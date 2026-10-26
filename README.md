@@ -13,8 +13,8 @@ Nunca coloque `service_role` ou chaves secretas nos arquivos do site.
 
 Mantenha os HTML na raiz, os scripts em `js/` e o CSS em `css/`.
 Veja `CLOUDFLARE.md` para o build e a pasta de saída.
-O motor de IA do navegador já está empacotado em `js/ia-local-worker.js`;
-não é necessário recompilá-lo para publicar. Não publique `node_modules`.
+O comando `npm run build` compila os motores de IA e prepara `dist/`.
+O Cloudflare instala as dependências fixadas antes do build. Não publique `node_modules`.
 
 ## Assistente documental e IA local
 
@@ -23,7 +23,10 @@ oficiais de servidores. `IA_LOCAL.md` explica o modelo de linguagem aberto,
 ativação, requisitos, privacidade e teste de aceitação no computador da escola.
 O uso dos modelos prontos dispensa download de pesos e WebGPU.
 O modo de linguagem usa Qwen3 localmente, sem API de IA nem chave paga.
-O download inicial do modelo é separado da geração dos textos.
+A ativação acontece no primeiro pedido. O modo automático escolhe WebGPU
+ou WebAssembly pelo processador quando a GPU não está disponível. Arquivos
+baixados podem ser reutilizados pelo cache do navegador. Falhas de carregamento
+usam os modelos prontos e deixam isso explícito no resultado.
 
 `SQL_SUPABASE.sql` agora é um complemento para a estrutura existente,
 com verificações e transação. Ele não é um instalador de banco vazio.
