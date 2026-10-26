@@ -1,6 +1,6 @@
 # Assistente de documentos da escola
 
-A página `documentos-servidores.html` atende alunos, responsáveis, servidores, pessoas externas e situações institucionais. A IA é ativada no primeiro pedido e escolhe GPU ou processador automaticamente. Os modelos e regras locais continuam disponíveis sem download adicional e são usados com aviso se o carregamento da IA falhar. Nenhum modo exige API paga de IA ou alteração no banco de dados. Veja `IA_LOCAL.md` para requisitos e validação.
+A página `documentos-servidores.html` atende alunos, responsáveis, servidores, pessoas externas e situações institucionais. O padrão Rápido interpreta os pedidos conhecidos e monta a minuta sem baixar ou iniciar um modelo de linguagem. A revisão por IA é opcional, pelo botão Refinar documento com IA ou pelo seletor de modo. Nenhum modo exige API paga de IA ou alteração no banco de dados. Veja `IA_LOCAL.md` para requisitos e limites.
 
 ## Cobertura
 
@@ -18,10 +18,11 @@ Os textos são minutas para conferência. Percentuais de frequência, aprovaçã
 ## Uso
 
 1. Abra **Documentos da Escola** e descreva o pedido no assistente. O modo **Identificar pelo pedido** escolhe um modelo quando encontra uma regra correspondente. Também é possível escolher um assunto explicitamente, inclusive sem escrever um pedido inicial.
-2. Clique em **Preparar documento**. Confira os dados extraídos e os detalhes preservados no texto.
+2. Clique em **Preparar documento**. Confira os dados identificados nos campos e os detalhes preservados no texto. Expressões como “comprovante de que o aluno estuda aqui”, “terceiro ano B” e “de tarde” têm interpretação local para os modelos correspondentes.
 3. Preencha as pendências indicadas. Os botões de pendência levam ao campo correspondente. Clique em **Atualizar texto** para recompor o documento com os campos corrigidos.
-4. Para acrescentar informações, use **Complementar pedido**. **Desfazer** restaura o texto e os campos anteriores. Edições manuais são preservadas nos complementos; confira sua correspondência com os campos estruturados.
+4. Para acrescentar informações ou corrigir o documento atual, use **Complementar pedido**. Exemplos: “mude a data para 24/10/2026”, “na verdade foram 8 lixeiras”, “troque o nome para Maria Oliveira” e “troque \"texto atual\" por \"novo texto\"”. **Desfazer** restaura texto, campos e dados identificados. Se o valor dos campos diferir do texto editado, o assistente pergunta em vez de adivinhar. A data de emissão é separada da data do fato: use “mude a data de emissão para ...” para alterar somente a emissão. Correções de linguagem natural são tratadas nos modelos amplos; os modelos oficiais de servidores conservam o fluxo anterior.
 5. Confira a prévia e use a impressão/PDF ou a exportação Word. O formato oficial de memorando é mantido. Nenhum documento é assinado ou protocolado automaticamente.
+6. Para outra sugestão de redação, use **Refinar documento com IA**. O modelo recebe a minuta atual, com as limitações descritas em `IA_LOCAL.md`; a revisão pode demorar e não comprova os fatos.
 
 **Exemplo de recebimento**
 
