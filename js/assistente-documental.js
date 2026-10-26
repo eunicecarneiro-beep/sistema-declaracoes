@@ -103,7 +103,8 @@
   add('autorizacao','Autorização para atividade (minuta para assinatura)','autorizacao','autorizacao',pessoa + ' doc-responsavel-amplo ' + evento + ' doc-fatos');
   add('recibo','Recibo de materiais / documentos','recibo','recebimento',material + ' doc-pessoa');
   const catalogo = Object.freeze(modelos);
-  const porId = id => catalogo.find(m => m.id === id);
+  const indiceModelos = new Map(catalogo.map(m => [m.id,m]));
+  const porId = id => indiceModelos.get(id);
   const CAMPOS = Object.freeze([...Object.keys(F), 'doc-modelo-amplo','doc-genero-amplo','doc-texto-gerado','doc-dados-reconhecidos']);
   const generos = Object.freeze({ declaracao:'DECLARAÇÃO', memorando:'MEMORANDO', requerimento:'REQUERIMENTO', oficio:'OFÍCIO', comunicado:'COMUNICADO', convocacao:'CONVOCAÇÃO', relatorio:'RELATÓRIO', ata:'ATA', termo:'TERMO', autorizacao:'AUTORIZAÇÃO', recibo:'RECIBO' });
   const MESES = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -122,19 +123,26 @@
   }
   function seguro(x,max,rotulo) { if(typeof x!=='string'||x.length>max)throw new Error('Confira o tamanho de '+rotulo+'.'); if(/<\/?[a-z]|```/i.test(x))throw new Error('Use somente texto, sem HTML ou código, em '+rotulo+'.');return limpar(x); }
   const escaparRegex=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const aliases=new Map(Object.entries(F).flatMap(([id,d])=>d[2].map(a=>[a,id])));
+  const padraoRotulos='(^|[\\n;,]|[.!?]\\s+|\\s{2,})[ \\t]*('+[...aliases.keys()].sort((a,b)=>b.length-a.length).map(escaparRegex).join('|')+')[ \\t]*:[ \\t]*';
   function extrairRotulos(texto) {
-    const aliases=new Map(Object.entries(F).flatMap(([id,d])=>d[2].map(a=>[a,id])));
-    const re=new RegExp('(^|[\\n;,]|[.!?]\\s+|\\s{2,})[ \\t]*('+[...aliases.keys()].sort((a,b)=>b.length-a.length).map(escaparRegex).join('|')+')[ \\t]*:[ \\t]*','gm');
+    const re=new RegExp(padraoRotulos,'gm');
     const encontrados=[...normalizar(texto).matchAll(re)], campos={}, intervalos=[];
     encontrados.forEach((m,i)=>{const ini=m.index+m[0].length;const fim=Math.min(i+1<encontrados.length?encontrados[i+1].index:texto.length, texto.indexOf('\n',ini)<0?texto.length:texto.indexOf('\n',ini));campos[aliases.get(m[2])]=texto.slice(ini,fim).trim().replace(/[;,.]+$/,'').trim();intervalos.push([m.index,fim]);});
     let livre='',inicio=0; for(const[a,b]of intervalos){livre+=texto.slice(inicio,a)+'\n';inicio=b;} livre+=texto.slice(inicio);
     return {campos,livre:limpar(livre)};
   }
   function tirarInstrucao(texto) {
-    return limpar(texto).replace(/^\s*(?:(?:oi|chat|por favor)[, :]+)?(?:(?:eu\s+)?(?:preciso|quero|gostaria)(?:\s+(?:que\s+(?:voce\s+)?(?:faca|faça|crie|elabore|redija)|de))?\s+|(?:faça|faca|crie|elabore|prepare|redija|gere)\s+)?(?:um(?:a)?\s+)?(?:declara[cç][aã]o|memorando|of[ií]cio|requerimento|comunicado|aviso|convoca[cç][aã]o|relat[oó]rio|ata|termo|autoriza[cç][aã]o|recibo)(?:\s+(?:institucional|personalizad[oa]|livre))?(?:\s+(?:sobre|informando que|declarando que|para (?:declarar|informar) que|dizendo que)|\s*[:,-])?\s*/i,'').trim();
+    let t=limpar(texto).replace(/^(?:(?:oi|ol[aá]|chat|bom dia|boa tarde|boa noite|por favor|pfv)[,!:. ]+)*/iu,'');
+    t=t.replace(/^(?:(?:voc[eê]|vc)\s+)?(?:pode|poderia|consegue)\s+(?:me\s+)?/iu,'')
+      .replace(/^(?:eu\s+)?(?:preciso|quero|gostaria)(?:\s+de|\s+que\s+(?:(?:voc[eê]|vc)\s+)?)?\s+/iu,'')
+      .replace(/^(?:me\s+)?(?:fa[cç]a|fazer|crie|criar|elabore|elaborar|prepare|preparar|redija|redigir|gere|gerar|monte|montar|mand[ae]r?)\s+(?:(?:para|pra)\s+mim\s+)?/iu,'');
+    t=t.replace(/^(?:um(?:a)?\s+)?(?:declara[cç][aã]o|memorando|memo|of[ií]cio|requerimento|comprovante|comunicado|aviso|convoca[cç][aã]o|relat[oó]rio|ata|termo|autoriza[cç][aã]o|recibo)(?:\s+(?:institucional|personalizad[oa]|livre))?(?:\s+(?:sobre|informando|declarando|dizendo|comprovando|para (?:declarar|informar|comprovar))(?=\s|$)|\s*[:,-])?\s*/iu,'');
+    t=t.replace(/^(?:comprovar|declarar|atestar|confirmar)\s+(?=que\b)/iu,'');
+    return t.replace(/^(?:de\s+)?que\s+/iu,'que ').trim();
   }
   function reconhecer(pedido, campos = {}) {
-    const n=normalizar(pedido).replace(/\b(?:declaracoa|declarasao)\b/g,'declaracao').replace(/\bmemoradno\b/g,'memorando'), explicito=/\b(declaracao|memorando|requerimento|oficio|comunicado|aviso|convocacao|relatorio|ata|termo|autorizacao|recibo)\b/.exec(n)?.[1];
+    const n=normalizar(pedido).replace(/\b(?:declaracoa|declarasao)\b/g,'declaracao').replace(/\b(?:memoradno|memo)\b/g,'memorando'), explicito=/\b(declaracao|memorando|requerimento|oficio|comunicado|aviso|convocacao|relatorio|ata|termo|autorizacao|recibo)\b/.exec(n)?.[1];
     const negacao=/\b(?:nao|nunca|sem)\b/.test(n);
     if(explicito==='requerimento'&&!/\bservidor|\bfuncional/.test(n))return 'requerimento-amplo';
     if(explicito==='recibo')return 'recibo';
@@ -144,16 +152,16 @@
     if(explicito==='convocacao')return 'convocacao';
     if(explicito==='comunicado'||explicito==='aviso')return 'comunicado';
     if(explicito==='termo')return /devol/.test(n)?'termo-devolucao':/entreg/.test(n)?'termo-entrega':/receb/.test(n)?'termo-recebimento':'termo-livre';
-    if(explicito==='oficio')return /encaminh/.test(n)?'oficio-encaminhamento':/respost|respond/.test(n)?'oficio-resposta':/solicit|pedid|providenc/.test(n)?'oficio-solicitacao':'oficio-livre';
-    const declaracao=explicito==='declaracao'||(!explicito&&/\b(?:declarar|declaramos|recebeu|recebemos|compareceu|matriculad[oa])\b/.test(n));
+    if(explicito==='oficio')return /encaminh/.test(n)?'oficio-encaminhamento':/respost|respond/.test(n)?'oficio-resposta':/solicit|pedid|pedind|requer|providenc/.test(n)?'oficio-solicitacao':'oficio-livre';
+    const declaracao=explicito==='declaracao'||(!explicito&&/\b(?:declarar|declaramos|comprovante|comprovar|comprovando|atestar|recebeu|recebemos|ganhamos|compareceu|matriculad[oa])\b/.test(n));
     if(declaracao) {
       if(negacao)return 'declaracao-livre';
       if(/\bfuncional\b/.test(n))return 'legado:declaracao';
-      if(/\b(?:recebimento|recebeu|recebemos|recebid[oa]s?)\b/.test(n))return 'recebimento';
+      if(/\b(?:recebimento|recebeu|recebemos|ganhamos|recebid[oa]s?)\b/.test(n))return 'recebimento';
       if(/\b(?:devolucao|devolveu|devolvemos)\b/.test(n))return 'devolucao';
       if(/\b(?:entrega|entregou|entregamos|entregue)\b/.test(n))return 'entrega';
       if(/\bdoacao\b/.test(n))return 'doacao';
-      if(/\bcomparec|\bpresenca/.test(n))return /\b(?:responsavel|mae|pai|genitor)\b/.test(n)?'comparecimento-responsavel-amplo':/\balun[oa]|\bestudante/.test(n)?'comparecimento-aluno':'comparecimento-pessoa';
+      if(/\bcomparec|\bpresenca|\b(?:veio|esteve)\s+(?:aqui|na escola|a escola)\b/.test(n))return /\b(?:responsavel|mae|pai|genitor)\b/.test(n)?'comparecimento-responsavel-amplo':/\balun[oa]|\bestudante/.test(n)?'comparecimento-aluno':'comparecimento-pessoa';
       if(/\bservidor|\bcontratad[oa]\b/.test(n)&&!/\balun[oa]|\bestudante/.test(n))return 'legado:declaracao';
       if(/\bmatricula|\bmatriculad/.test(n)&&/\bfrequencia|\bfrequenta/.test(n))return 'matricula-frequencia';
       if(/\bfrequencia|\bfrequenta/.test(n))return 'frequencia';
@@ -163,6 +171,7 @@
       if(/\bvaga\b/.test(n))return 'vaga';
       if(/\bturno|\bhorario escolar/.test(n)&&!/\bmatricula|\bmatriculad/.test(n))return 'turno';
       if(/\bmatricula|\bmatriculad/.test(n))return 'matricula';
+      if(/\b(?:alun[oa]|estudante)\b/.test(n)&&/\b(?:estuda|estudando|cursa)\b/.test(n))return 'matricula';
       if(/\bparticip/.test(n))return /\breuniao|\bconselho/.test(n)?'reuniao':'participacao';
       if(/\b(?:realizacao|realizou|promoveu|palestra)\b/.test(n))return 'realizacao';
       if(/\bservico|\bmanutencao/.test(n))return 'servico';
@@ -186,14 +195,30 @@
     if(campos['doc-pessoa'] && campos['doc-turma'] && !explicito)return 'declaracao-livre';
     return 'memo-livre';
   }
-  function extrairNaturais(texto, c, hoje, avisos) {
+  function extrairNaturais(texto, c, hoje, avisos, modelo) {
     const n=normalizar(texto), pegar=(id,re)=>{if(c[id])return;const m=re.exec(texto);if(m)c[id]=limpar(m[1]).replace(/[,.; ]+$/,'');};
-    pegar('doc-pessoa',/\b(?:alun[oa]|estudante|participante|visitante)\s*(?:de nome|chamad[oa]|:)??\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:do|da)\s+\d|\s+(?:est[aá]|encontra|matriculad|compareceu|participou|frequenta|concluiu|recebeu|esteve|no dia|nascid)|[,;\n.]|$)/iu);
-    pegar('doc-responsavel-amplo',/\b(?:respons[aá]vel|m[aã]e|pai)\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:compareceu|participou|esteve|pelo|pela|do aluno|da aluna)|[,;\n.]|$)/iu);
+    if(['memorando','oficio'].includes(modelo?.genero)){
+      const destinatario=/^(?:para\s+|à\s+|ao\s+)(.+?)\s*,?\s+(?=(?:solicitando|pedindo|requerendo|encaminhando)\b)/iu.exec(texto);
+      const id=modelo.genero==='memorando'?'doc-para':'doc-destino';
+      if(destinatario&&!c[id]){
+        c[id]=limpar(destinatario[1]).replace(/,$/,'');
+        if(c['doc-fatos']?.startsWith(destinatario[0]))c['doc-fatos']=c['doc-fatos'].slice(destinatario[0].length).replace(/^(?:solicitando|pedindo|requerendo)\s+/iu,'solicitar ').replace(/^encaminhando\s+/iu,'encaminhar ');
+      }
+    }
+    pegar('doc-pessoa',/\b(?:alun[oa]|estudante|participante|visitante)\s*(?:de nome|chamad[oa]|:)?\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:do|da|no|na)\s+(?:\d|primeir|segund|terceir|quart|quint)|\s+(?:que\s+)?(?:est[aá]|encontra|matriculad|compareceu|participou|frequenta|concluiu|recebeu|esteve|estuda|cursa|veio|no dia|nascid)|[,;\n.]|$)/iu);
+    pegar('doc-pessoa',/^(?:que\s+)?([\p{L}][\p{L}'’ -]{2,100}?)\s+(?:est[aá]|encontra-se)\s+matriculad[oa]\b/iu);
+    pegar('doc-responsavel-amplo',/\b(?:respons[aá]vel|m[aã]e|pai)\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:compareceu|participou|esteve|veio|pelo|pela|do aluno|da aluna)|[,;\n.]|$)/iu);
     pegar('doc-turma',/\b(?:turma|matriculad[oa]\s+n[oa]|d[oa])\s*(\d{1,2}\s*[º°ªo]?\s*(?:ano|s[eé]rie)\s*(?:[A-F]\b)?)/iu);
+    pegar('doc-turma',/\b(?:turma|d[oa]|n[oa])\s*(\d\s*[A-F])\b/iu);
+    if(!c['doc-turma']){
+      const m=/\b(primeir[oa]|segund[oa]|terceir[oa]|quart[oa]|quint[oa])\s+(?:ano|s[eé]rie)(?:\s+([A-F])\b)?/iu.exec(texto);
+      if(m){const numero={primeiro:1,segundo:2,terceiro:3,quarto:4,quinto:5}[normalizar(m[1]).replace(/a$/,'o')];c['doc-turma']=numero+'º ano'+(m[2]?' '+m[2].toUpperCase():'');}
+    }
     pegar('doc-ano-letivo',/\bano letivo\s*(?:de|:)?\s*(\d{4})\b/iu);
+    if(!c['doc-ano-letivo']&&/\b(?:neste|nesse|este|esse) ano\b/.test(n))c['doc-ano-letivo']=hoje.slice(0,4);
     pegar('doc-turno-amplo',/\bturno\s+(matutino|vespertino|noturno|integral)\b/iu);
     if(!c['doc-turno-amplo'])pegar('doc-turno-amplo',/\b(matutino|vespertino|noturno|integral)\b/iu);
+    if(!c['doc-turno-amplo']){const m=/\b(?:de|da|pela|a|à)\s+(manh[aã]|tarde|noite)\b/iu.exec(texto);if(m)c['doc-turno-amplo']={manha:'matutino',tarde:'vespertino',noite:'noturno'}[normalizar(m[1])];}
     pegar('doc-finalidade-ampla',/\bpara\s+(apresenta[cç][aã]o\s+[^.;\n]+|comprova[cç][aã]o\s+[^.;\n]+|fins\s+de\s+[^.;\n]+|instruir\s+[^.;\n]+)/iu);
     if(!c['doc-situacao-ampla']&&/\bfrequenta(?:ndo)? regularmente\b/.test(n))c['doc-situacao-ampla']='Frequenta regularmente as atividades escolares';
     if(!c['doc-situacao-ampla'])pegar('doc-situacao-ampla',/\bfrequ[eê]ncia\s*(?:de|:)\s*(\d{1,3}(?:[,.]\d{1,2})?\s*%)/iu);
@@ -205,7 +230,7 @@
     const h=/\b(?:das|de)\s*(\d{1,2}(?:(?::|h)\d{2})?h?)\s*(?:às|as|a|at[eé](?: as| às)?)\s*(\d{1,2}(?:(?::|h)\d{2})?h?)\b/iu.exec(texto);
     if(h){c['doc-entrada-amplo']||=h[1];c['doc-saida-amplo']||=h[2];}
     if(!c['doc-bens']) {
-      const m=/\b(?:recebeu|recebemos|recebimento\s+de|entregou|entregamos|entrega\s+de|devolveu|devolvemos|devolu[cç][aã]o\s+de|doa[cç][aã]o\s+de)\s*(?:,\s*(?:no dia\s+)?[^,]+,\s*)?(.{2,240}?)(?=,\s*(?:fornecid|entreg|doad|cedid|pelo|pela|do Projeto|da Associa|em decorr)|\s+(?:fornecid|doad|cedid|pelo Projeto|pela Associa|do Projeto|da Associa|no dia|em\s+\d|em decorr)|[;\n]|$)/iu.exec(texto);
+      const m=/\b(?:recebeu|recebemos|ganhamos|recebimento\s+de|entregou|entregamos|entrega\s+de|devolveu|devolvemos|devolu[cç][aã]o\s+de|doa[cç][aã]o\s+de)\s*(?:,\s*(?:no dia\s+)?[^,]+,\s*)?(.{2,240}?)(?=,\s*(?:fornecid|entreg|doad|cedid|pelo|pela|do Projeto|da Associa|em decorr)|\s+(?:fornecid|doad|cedid|pelo Projeto|pela Associa|do Projeto|da Associa|no dia|em\s+\d|em decorr)|[;\n]|$)/iu.exec(texto);
       if(m)c['doc-bens']=m[1].replace(/[. ]+$/,'');
     }
     // Extrai apenas trechos com forma reconhecida. O texto livre é preservado no documento.
@@ -222,6 +247,68 @@
     if(c['doc-periodo-inicio']&&c['doc-periodo-fim']&&c['doc-periodo-fim']<c['doc-periodo-inicio'])throw new Error('O fim do período deve ser igual ou posterior ao início.');
     if(c['doc-entrada-amplo']&&c['doc-saida-amplo']&&c['doc-saida-amplo']<=c['doc-entrada-amplo'])throw new Error('Confira os horários: a saída deve ser posterior à entrada. Para períodos que atravessam a meia-noite, descreva as datas e horários em Fatos.');
     if(c['doc-numero']&&!/^\d{1,8}(?:\/\d{4})?$/.test(c['doc-numero']))throw new Error('Informe um número de documento válido, com até oito algarismos.');
+  }
+  function organizarRelato(texto){
+    return limpar(texto).replace(/^(?:de\s+)?que\s+/iu,'')
+      .replace(/^(?:de\s+)?recebimento\s+de\s+/iu,'a '+ESCOLA+' recebeu ')
+      .replace(/^(?:(?:n[oó]s|a gente)\s+)?(?:recebemos|ganhamos)\s+/iu,'a '+ESCOLA+' recebeu ')
+      .replace(/^a gente\s+(?:recebeu|ganhou)\s+/iu,'a '+ESCOLA+' recebeu ')
+      .replace(/^(?:(?:a\s+)?(?:nossa|esta|essa)\s+escola|a escola(?!\s+municipal))\b/iu,'a '+ESCOLA);
+  }
+  function substituirTrecho(texto,anterior,novo){
+    if(!anterior)return texto;
+    return texto.replace(new RegExp('(^|[^\\p{L}\\p{N}])'+escaparRegex(anterior)+'(?=$|[^\\p{L}\\p{N}])','gu'),(_m,borda)=>borda+novo);
+  }
+  function substituirCampo(texto,id,anterior,novo,hoje){
+    if(id==='doc-data')return texto; // Emissão pertence ao cabeçalho, não muda a data do fato.
+    if(F[id]?.[1]==='date'&&dataValida(anterior)){
+      for(const d of datas(texto,hoje).filter(d=>d.valor===anterior).reverse())texto=texto.slice(0,d.index)+br(novo)+texto.slice(d.fim);
+      return texto;
+    }
+    return substituirTrecho(texto,anterior,novo);
+  }
+  function acrescentarAntesFecho(texto,adicional){
+    const fecho=/(?:\n\s*\n)?(?:Por ser express[aã]o da verdade[^\n]*|Nestes termos, pe[cç]o deferimento\.?)(?:\s*)$/iu.exec(texto);
+    return fecho?texto.slice(0,fecho.index).trim()+'\n\n'+frase(adicional)+'\n\n'+fecho[0].trim():texto.trim()+'\n\n'+frase(adicional);
+  }
+  function interpretarComplemento(pedido,campos,corpo,hoje){
+    const alterados={},substituicoes=[],perguntas=[],livres=[];
+    const perguntar=pergunta=>perguntas.push({campo:'ia-extra-pedido',pergunta});
+    const mapa={nome:'doc-pessoa','nome do aluno':'doc-pessoa','nome da aluna':'doc-pessoa',aluno:'doc-pessoa',aluna:'doc-pessoa',estudante:'doc-pessoa','nome do responsavel':'doc-responsavel-amplo','nome da responsavel':'doc-responsavel-amplo',turma:'doc-turma',data:'doc-data-fato','data do fato':'doc-data-fato','data de emissao':'doc-data',turno:'doc-turno-amplo',projeto:'doc-projeto',finalidade:'doc-finalidade-ampla',quantidade:'doc-bens'};
+    const nomes=Object.keys(mapa).sort((a,b)=>b.length-a.length).join('|');
+    let detectado=false;
+    for(const parte of pedido.split(/[;\n]+|\s+e\s+(?=(?:troque|altere|mude|corrija|inclua|adicione|acrescente)\b)/iu).map(limpar).filter(Boolean)){
+      const n=normalizar(parte);
+      const rotulo=/^([^:]+):/.exec(n);if(rotulo&&aliases.has(rotulo[1].trim())){livres.push(parte);continue;}
+      const literal=/^(?:troque|substitua|altere)\s+["“'](.+?)["”']\s+(?:por|para)\s+["“'](.+?)["”']\s*[.!]?$/iu.exec(parte);
+      if(literal){detectado=true;if(substituirTrecho(corpo,literal[1],'')===corpo)perguntar('Não encontrei “'+literal[1]+'” no documento atual. Confira o trecho que deseja substituir.');else substituicoes.push({antes:literal[1],depois:literal[2]});continue;}
+      const m=new RegExp('^(?:(?:na verdade|corrigindo)[, ]+)?(?:(?:troque|altere|mude|corrija|atualize|coloque)\\s+)?(?:o |a )?('+nomes+')(?:\\s+(?:correto|correta|certo|certa))?\\s*(?:para|por|e|:|=)\\s+(.+?)\\s*[.!]?$','iu').exec(n);
+      const quantidade=/^(?:na verdade[, ]*)?(?:foram|s[aã]o)\s+(\d+\s+[^,;.]+?)\s*[.!]?$/iu.exec(parte);
+      if(m||quantidade){
+        detectado=true;
+        const chave=m?.[1]||'quantidade',id=mapa[chave];
+        let valor=m?parte.slice(m.index+m[0].lastIndexOf(m[2])).replace(/[.!]+$/,'').trim():quantidade[1];
+        let quantidadeNova='';
+        if(chave==='nome'&&campos['doc-responsavel-amplo']&&campos['doc-pessoa']){perguntar('Qual nome deseja corrigir? Use “nome do aluno” ou “nome do responsável”.');continue;}
+        const anterior=campos[id];
+        if(!anterior){perguntar('Não identifiquei o valor atual de '+(F[id]?.[0]||chave)+'. Preencha o campo correspondente ou indique o trecho entre aspas.');continue;}
+        if(id==='doc-bens'){
+          const atual=/^\d+(?:\s*\([\p{L} ]+\))?/u.exec(anterior),novo=/^(\d+)(?:\s+(.+))?$/u.exec(valor);
+          if(!atual||!novo){perguntar('Informe a quantidade em algarismos e, se necessário, o material.');continue;}
+          const sufixo=limpar(anterior.slice(atual[0].length));
+          if(novo[2]&&!normalizar(sufixo).startsWith(normalizar(novo[2]))){perguntar('O material informado é diferente do atual. Indique o trecho completo entre aspas para substituí-lo.');continue;}
+          valor=novo[1]+' '+sufixo;
+          if(campos['doc-quantidade-ampla'])quantidadeNova=novo[1];
+        }
+        const constaNoCorpo=id==='doc-data'||(F[id]?.[1]==='date'?datas(corpo,hoje).some(d=>d.valor===anterior):substituirTrecho(corpo,anterior,'')!==corpo);
+        if(!constaNoCorpo){perguntar('O valor atual de '+F[id][0]+' nos campos difere do texto. Indique o trecho do documento entre aspas para corrigi-lo.');continue;}
+        if(quantidadeNova)alterados['doc-quantidade-ampla']=quantidadeNova;
+        alterados[id]=valor;continue;
+      }
+      if(/^(?:troque|altere|mude|corrija|substitua|na verdade|corrigindo)\b/iu.test(parte)){detectado=true;perguntar('Indique o que deve mudar, por exemplo: “mude a data para 24/10/2026” ou “troque "texto atual" por "novo texto"”.');continue;}
+      livres.push(parte.replace(/^(?:inclua|adicione|acrescente)\s+(?:tamb[eé]m\s+)?(?:a informa[cç][aã]o de\s+)?(?:que\s+)?/iu,''));
+    }
+    return{campos:alterados,substituicoes,perguntas,livre:livres.join('\n'),detectado};
   }
   function redigir(modelo, c, perguntar) {
     const obter=(id,rotulo)=>c[id]||(perguntar(id,rotulo||F[id][0]),'[INFORMAR '+(rotulo||F[id][0]).toLocaleUpperCase('pt-BR')+']');
@@ -270,7 +357,9 @@
       case 'autorizacao':p=[`Eu, ${obter('doc-responsavel-amplo','nome de quem autoriza')}, autorizo a participação de ${nome()} em ${atividade()}, em ${data()}${local()}.`];break;
       default: {
         const fatos=obter('doc-fatos','fatos que devem constar no documento');
-        p=[modelo.genero==='declaracao'&&!/^declaramos\b/i.test(fatos)?(/^que\s/i.test(fatos)?'Declaramos, para os devidos fins, '+terminar(fatos):'Declaramos, para os devidos fins, o seguinte: '+frase(fatos)):frase(fatos)];
+        const relato=organizarRelato(fatos);
+        const narrativo=/\b(?:recebeu|recebemos|receber[aá]|realizou|realizar[aá]|participou|compareceu|est[aá]|esteve|foi|ser[aá]|houve|ocorreu|aconteceu)\b/iu.test(relato);
+        p=[modelo.genero==='declaracao'&&!/^declaramos\b/i.test(fatos)?(/^que\s/i.test(fatos)||narrativo?'Declaramos, para os devidos fins, que '+terminar(relato):'Declaramos, para os devidos fins, o seguinte: '+frase(fatos)):frase(fatos)];
       }
     }
     // Para pedidos narrativos completos, conserva a descrição e dá a ela forma de declaração.
@@ -278,19 +367,25 @@
     if(c['doc-fatos']&&modelo.genero==='declaracao'&&['recebimento','entrega','devolucao'].includes(modelo.estrutura)) {
       const verbo={recebimento:'recebeu',entrega:'entregou',devolucao:'devolveu'}[modelo.estrutura];
       const re=new RegExp('^(?:de\\s+)?'+(modelo.estrutura==='devolucao'?'devolu[cç][aã]o':modelo.estrutura)+'\\s+(?:de|dos|das)\\s+','i');
-      let relato=c['doc-fatos'].replace(/^declaramos,?\s*(?:para os devidos fins,?\s*)?/i,'').replace(/^que\s+/i,'');
+      let relato=organizarRelato(c['doc-fatos'].replace(/^declaramos,?\s*(?:para os devidos fins,?\s*)?/i,''));
       if(re.test(relato)) {
         relato='a '+ESCOLA+' '+verbo+' '+relato.replace(re,'');
         p[0]='Declaramos, para os devidos fins, que '+terminar(relato);fatosUsados=true;
       } else if(new RegExp('\\b'+verbo+'\\b','i').test(relato)&&!/^(?:para|de)\b/i.test(relato)) {
-        relato=relato.replace(/^a escola\b/i,'a '+ESCOLA);
+        relato=relato.replace(/^a escola(?!\s+municipal)\b/i,'a '+ESCOLA);
         p[0]='Declaramos, para os devidos fins, que '+terminar(relato);fatosUsados=true;
       }
     }
     if(c['doc-fatos']&&!fatosUsados&&!['livre','resposta','informacao','relatorio','ata'].includes(modelo.estrutura)) {
-      const normal=s=>normalizar(s).replace(/[^a-z0-9%]+/g,' ').split(' ');
+      const normal=s=>normalizar(s).replace(/\b(\d{1,2})h(\d{2})?\b/g,(_m,h,min)=>h+':'+(min||'00')).replace(/\b0+(\d+)/g,'$1').replace(/[^a-z0-9%]+/g,' ').split(' ');
       const cobertos=new Set(normal(p.join(' ')+Object.values(c).filter((v,i,a)=>v!==c['doc-fatos']&&v!==c['doc-texto-gerado']).join(' ')));
-      const termosAdministrativos=new Set(normal('a o as os um uma de do da dos das no na nos nas para por pelo pela pelos pelas em e que esta esta nesta neste escola aluno aluna estudante declaracao matricula matriculado matriculada ano letivo turma turno frequencia escolar seu sua com ao aos precisa preciso quero faca fazer sobre favor'));
+      const termosAdministrativos=new Set(normal('a o as os um uma de do da dos das no na nos nas para por pelo pela pelos pelas em e que esta esta nesta neste escola aluno aluna estudante declaracao matricula matriculado matriculada ano letivo turma turno frequencia escolar seu sua com ao aos precisa preciso quero faca fazer sobre favor solicitar solicite solicitacao pedir'));
+      if(c['doc-pessoa']&&['matricula','matricula-frequencia'].includes(modelo.estrutura))for(const t of ['estuda','estudando','cursa','aqui'])termosAdministrativos.add(t);
+      if(c['doc-turno-amplo'])for(const t of ['manha','tarde','noite'])termosAdministrativos.add(t);
+      if(c['doc-turma']){const numero=/^\d+/.exec(c['doc-turma'])?.[0],ordinais=['','primeiro','segundo','terceiro','quarto','quinto'];if(ordinais[+numero])for(const t of [ordinais[+numero],ordinais[+numero].replace(/o$/,'a')])termosAdministrativos.add(t);}
+      if(c['doc-data-fato'])for(const t of ['hoje','ontem','amanha'])termosAdministrativos.add(t);
+      if(modelo.estrutura==='comparecimento')for(const t of ['veio','aqui'])termosAdministrativos.add(t);
+      if(modelo.id==='comparecimento-responsavel-amplo')for(const t of ['mae','pai','responsavel'])termosAdministrativos.add(t);
       const faltantes=normal(c['doc-fatos']).filter(t=>t.length>2&&!cobertos.has(t)&&!termosAdministrativos.has(t));
       if(faltantes.length)p.push('Informações complementares: '+frase(c['doc-fatos']));
     }
@@ -313,7 +408,9 @@
     const pedido=seguro(entrada.pedido||'',12000,'pedido'), referencia=seguro(entrada.referencia||'',16000,'referência');
     const base=entrada.contexto?.campos||{}, hoje=dataValida(entrada.hoje||'')?entrada.hoje:hojeBrasil();
     const c={};for(const id of CAMPOS)if(typeof base[id]==='string')c[id]=seguro(base[id],id==='doc-texto-gerado'?24000:16000,'campo '+id);
-    const extra=extrairRotulos(pedido), avisos=[], perguntas=[];
+    const correcao=acao==='complementar'?interpretarComplemento(pedido,c,entrada.modelo_base||'',hoje):{campos:{},substituicoes:[],perguntas:[],livre:pedido,detectado:false};
+    const extra=extrairRotulos(correcao.livre), avisos=[], perguntas=[...correcao.perguntas];
+    Object.assign(extra.campos,correcao.campos);
     const perguntar=(campo,nome)=>{if(!perguntas.some(x=>x.campo===campo))perguntas.push({campo,pergunta:'Informe: '+nome+'.'});};
     const selecionado=limpar(entrada.modelo_escolhido||'');
     if(acao==='complementar'&&!porId(c['doc-modelo-amplo'])) {
@@ -345,10 +442,15 @@
       if(acao==='complementar') {
         if(livre)c['doc-complementos']=[c['doc-complementos'],frase(livre)].filter(Boolean).join('\n');
       } else if(livre)c['doc-fatos']=c['doc-fatos']?[c['doc-fatos'],livre].join('\n'):livre;
-      extrairNaturais(extra.livre,c,hoje,avisos);
+      extrairNaturais(livre,c,hoje,avisos,modelo);
       if(referencia)c['doc-complementos']=[c['doc-complementos'],referencia].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join('\n');
     }
     validarValores(c,hoje);
+    if(correcao.detectado){
+      for(const id of Object.keys(correcao.campos))for(const texto of ['doc-fatos','doc-complementos'])if(c[texto]&&base[id])c[texto]=substituirCampo(c[texto],id,base[id],c[id],hoje);
+      for(const s of correcao.substituicoes)for(const id of Object.keys(c))if(!['doc-dados-reconhecidos','doc-texto-gerado'].includes(id))c[id]=substituirTrecho(c[id],s.antes,s.depois);
+      validarValores(c,hoje);
+    }
     if((acao==='complementar'||entrada.somente_campos)&&c['doc-fatos']&&base['doc-dados-reconhecidos']) {
       let anteriores={};try{anteriores=JSON.parse(base['doc-dados-reconhecidos']);}catch{}
       for(const[id,anterior]of Object.entries(anteriores)) {
@@ -364,11 +466,13 @@
       c['doc-demanda']=c['doc-fatos'].replace(/^(?:solicitar|solicite|solicitamos|solicito|requerer|requeiro|pedir|peço|peco|encaminhar|encaminhe|encaminhamos)\s+/i,'').replace(/^para\s+(?:solicitar|pedir|requerer|encaminhar)\s+/i,'');
     }
     let paragrafos=redigir(modelo,c,perguntar);
-    if(acao==='complementar'&&entrada.modelo_base&&entrada.modelo_base!==base['doc-texto-gerado']) {
+    if(acao==='complementar'&&entrada.modelo_base&&(correcao.detectado||entrada.modelo_base!==base['doc-texto-gerado'])) {
       let original=seguro(entrada.modelo_base,24000,'texto editado');
-      for(const[k,valor]of Object.entries(extra.campos)){if(base[k]&&base[k]!==valor)original=original.split(base[k]).join(valor);}
-      const adicional=tirarInstrucao(extra.livre);if(adicional)original+='\n\n'+frase(adicional);
-      if(referencia&&!original.includes(referencia))original+='\n\n'+referencia;
+      for(const k of Object.keys(extra.campos))if(base[k]&&base[k]!==c[k])original=substituirCampo(original,k,base[k],c[k],hoje);
+      for(const s of correcao.substituicoes)original=substituirTrecho(original,s.antes,s.depois);
+      datas(original,hoje); // Recusa datas impossíveis introduzidas por uma substituição literal.
+      const adicional=tirarInstrucao(extra.livre);if(adicional)original=acrescentarAntesFecho(original,adicional);
+      if(referencia&&!original.includes(referencia))original=acrescentarAntesFecho(original,referencia);
       paragrafos=original.split(/\n\s*\n/).filter(Boolean);
       avisos.push('Suas alterações manuais foram preservadas. Confira se os novos campos também precisam ser ajustados no texto.');
     }
@@ -377,7 +481,7 @@
     const texto=paragrafos.join('\n\n');if(texto.length>24000||paragrafos.length>40||paragrafos.some(p=>p.length>16000))throw new Error('O documento ficou longo. Reduza os fatos ou a referência.');
     c['doc-texto-gerado']=texto;
     c['doc-dados-reconhecidos']=JSON.stringify(Object.fromEntries(Object.entries(c).filter(([id,v])=>F[id]&&!['doc-fatos','doc-complementos','doc-documentos-amplos'].includes(id)&&v.length<=1000)));
-    return {tipo:modelo.tipo,campos:c,principal_id:'',secundario_id:'',paragrafos,perguntas,avisos,resumo:modelo.nome+' — rascunho preparado.'};
+    return {tipo:modelo.tipo,campos:c,principal_id:'',secundario_id:'',paragrafos,perguntas,avisos,resumo:correcao.detectado?'Correção do documento atual — '+modelo.nome+'.':modelo.nome+' — rascunho preparado.'};
   }
-  global.AssistenteDocumentalAmplo=Object.freeze({preparar,pendencias,modelos:catalogo,campos:CAMPOS,definicoes:F,generos,porId,dataValida,versao:'20261023-amplo-1'});
+  global.AssistenteDocumentalAmplo=Object.freeze({preparar,pendencias,modelos:catalogo,campos:CAMPOS,definicoes:F,generos,porId,dataValida,versao:'20261026-rapido-1'});
 })(globalThis);
