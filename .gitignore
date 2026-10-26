@@ -1,3 +1,6 @@
 node_modules/
 dist/
 modelos/
+js/ia-local-worker.js
+js/ia-cpu-worker.js
+js/ia-cpu/
