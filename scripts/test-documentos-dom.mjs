@@ -19,8 +19,8 @@ window.open=()=>{const popup={document:{open(){},write(h){popup.html=h;},close()
 const ctx=vm.createContext({document,window,Event,HTMLElement,App,Intl,Date,TextEncoder,TextDecoder,Uint8Array,Blob,AbortController,DOMException,URL:{createObjectURL(b){downloads.push(b);return'blob:test';},revokeObjectURL(){}},setTimeout,clearTimeout,requestAnimationFrame:fn=>fn(),console:{log(){},warn(){},error:e=>logs.push(String(e))},Option:function(text,value){const o=document.createElement('option');o.textContent=text;o.value=value;return o;},navigator:{clipboard:{writeText:async()=>{}}},confirm:()=>true,alert:x=>logs.push(x)});
 for(const f of ['redacao-livre.js','assistente-documental.js','ia-local.js'])vm.runInContext(fs.readFileSync(path.join(root,'js',f),'utf8'),ctx,{filename:f});
 const helperIA=ctx.IAInternaLocal._teste;
-let observadorIA,entradaIA,soltarIA;
-ctx.IAInternaLocal={cliente:{observar:fn=>{observadorIA=fn;},carregar:async()=>{observadorIA({estado:'carregando',detalhe:'Carregando simulação'});observadorIA({estado:'pronta',detalhe:'Pronta'});},descarregar(){observadorIA({estado:'inativa'});}},redigir:async e=>{entradaIA=e;await new Promise(r=>soltarIA=r);return helperIA.validarResposta({modelo:'recebimento',assunto:'Recebimento de materiais',paragrafos:['Declaramos que a escola recebeu seis lixeiras em comodato do Projeto Montesul em 23/10/2026.'],pendencias:[],avisos:[]},e);},conversar:async()=>'<script>conteúdo literal</script>',novaConversa(){}};
+let observadorIA,entradaIA,soltarIA,ativacoes=0,falharAtivacao=false;
+ctx.IAInternaLocal={cliente:{observar:fn=>{observadorIA=fn;},carregar:async()=>{ativacoes++;if(falharAtivacao)throw new Error('Download indisponível no teste.');observadorIA({estado:'carregando',detalhe:'Carregando simulação'});observadorIA({estado:'pronta',detalhe:'Pronta'});},descarregar(){observadorIA({estado:'inativa'});}},redigir:async e=>{entradaIA=e;await new Promise(r=>soltarIA=r);return helperIA.validarResposta({modelo:'recebimento',assunto:'Recebimento de materiais',paragrafos:['Declaramos que a escola recebeu seis lixeiras em comodato do Projeto Montesul em 23/10/2026.'],pendencias:[],avisos:[]},e);},conversar:async()=>'<script>conteúdo literal</script>',novaConversa(){}};
 vm.runInContext(fs.readFileSync(path.join(root,'js/documentos-servidores.js'),'utf8'),ctx,{filename:'documentos-servidores.js'});
 await vm.runInContext('DocumentosServidoresPage.init()',ctx);
 const $=id=>document.getElementById(id);
@@ -29,6 +29,8 @@ const tick=()=>new Promise(r=>setImmediate(r));
 async function acao(a){document.querySelector(`[data-acao="${a}"]`).click();for(let i=0;i<10&&document.querySelector('[data-acao="gerar"]').disabled;i++)await tick();const s=$('ia-extra-status').textContent;assert.ok(!s.includes('Não foi possível'),s);}
 async function gerar(pedido,modelo='auto'){set('ia-extra-modelo',modelo);set('ia-extra-pedido',pedido);await acao('gerar');}
 assert.ok($('ia-extra-pedido'),'Assistente montado');
+assert.equal($('ia-local-modo').value,'ia');assert.equal($('ia-local-perfil').value,'auto');
+set('ia-local-modo','modelos');
 await gerar('Faça uma declaração de recebimento de 06 (seis) lixeiras destinadas à coleta seletiva, fornecidas pelo Projeto Montesul (Associação Montes Claros de Catadores), no dia 23/10/2026, em decorrência da palestra realizada nesta unidade escolar.');
 assert.equal($('doc-modelo-amplo').value,'recebimento');assert.match($('doc-preview').textContent,/06 \(seis\) lixeiras/);assert.ok($('doc-principal-bloco').hidden);assert.ok(!$('doc-amplo-bloco').hidden);
 $('ia-extra-verificar').click();assert.doesNotMatch($('ia-extra-status').textContent,/Selecione o servidor/);
@@ -55,12 +57,15 @@ console.log('PASSOU DOM: ofício possui título próprio e exportação Word.');
 assert.deepEqual(logs,[]);const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);assert.equal(new Set(ids).size,ids.length,'Não pode haver IDs duplicados.');
 for(const m of ctx.AssistenteDocumentalAmplo.modelos){await gerar('',m.id);assert.equal($('doc-modelo-amplo').value,m.id);assert.ok(!$('doc-amplo-bloco').hidden);assert.match($('doc-preview').textContent,new RegExp(ctx.AssistenteDocumentalAmplo.generos[m.genero]));}
 console.log('PASSOU DOM: os 58 modelos estão integrados ao formulário e à prévia.');
-assert.equal($('ia-local-modo').value,'modelos');$('ia-local-ativar').click();await tick();assert.equal($('ia-local-modo').value,'ia');
+assert.equal(ativacoes,0,'Os modelos prontos não devem iniciar download.');set('ia-local-modo','ia');
 set('ia-extra-modelo','auto');set('ia-extra-pedido','Declaração de recebimento de seis lixeiras em comodato do Projeto Montesul em 23/10/2026.');
-document.querySelector('[data-acao="gerar"]').click();await tick();assert.ok(entradaIA);
+document.querySelector('[data-acao="gerar"]').click();await tick();assert.ok(entradaIA);assert.equal(ativacoes,1,'Preparar documento deve ativar a IA sem botão separado.');
 set('doc-texto','Correção manual que deve ser mantida durante a geração.');soltarIA();await tick();await tick();
 assert.match($('doc-texto').value,/Correção manual/);assert.ok(!$('ia-extra-aplicar').hidden);$('ia-extra-aplicar').click();assert.match($('doc-preview').textContent,/comodato/);
 set('ia-local-pergunta','Exiba uma tag de código.');$('ia-local-conversar').click();await tick();await tick();assert.equal($('ia-local-resposta').textContent,'<script>conteúdo literal</script>');assert.equal($('ia-local-resposta').querySelector('script'),null);
 console.log('PASSOU DOM: fluxo de IA local, preservação de edição concorrente e conversa com texto escapado. Engine e resposta simuladas.');
+falharAtivacao=true;await gerar('Faça uma declaração de matrícula para Ana Teste, 3º ano A, ano letivo 2026.');
+assert.match($('doc-texto').value,/Ana Teste/);assert.match($('ia-extra-status').textContent,/Este rascunho usa os modelos e regras locais/);assert.doesNotMatch($('doc-texto').value,/Montesul/);
+console.log('PASSOU DOM: falha na ativação produz documento pelos modelos prontos e informa a origem do rascunho.');
 console.log('PASSOU DOM: sem erros ou IDs duplicados. Verificação feita em DOM simulado, sem renderização de navegador.');
 process.exit(0);
