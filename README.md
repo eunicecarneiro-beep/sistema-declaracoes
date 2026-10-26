@@ -23,7 +23,9 @@ oficiais de servidores. `IA_LOCAL.md` explica o modelo de linguagem aberto,
 ativação, requisitos, privacidade e teste de aceitação no computador da escola.
 O uso dos modelos prontos dispensa download de pesos e WebGPU.
 O modo de linguagem usa Qwen3 localmente, sem API de IA nem chave paga.
-A ativação acontece no primeiro pedido. O modo automático escolhe WebGPU
+O padrão Rápido interpreta o pedido e monta a minuta sem carregar pesos.
+Refinar documento com IA é opcional e usa o texto atual. Quando escolhido,
+o perfil de execução automático escolhe WebGPU
 ou WebAssembly pelo processador quando a GPU não está disponível. Arquivos
 baixados podem ser reutilizados pelo cache do navegador. Falhas de carregamento
 usam os modelos prontos e deixam isso explícito no resultado.

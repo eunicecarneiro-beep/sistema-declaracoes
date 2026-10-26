@@ -100,4 +100,81 @@ test('Texto completo colado mantém o tratamento já publicado de declarações 
  const p=preparar({pedido:'Declaramos, para os devidos fins, que a **Escola Municipal Professora Eunice Carneiro** recebeu, no dia **23 de outubro de 2026**, **06 (seis) lixeiras**, fornecidas pelo **Projeto Montesul**.\nPor ser expressão da verdade, firmamos a presente declaração.'});
  assert.equal(p.tipo,'declaracao-livre');assert.doesNotMatch(texto(p),/\*\*|INFORMAR SERVIDOR/);assert.equal((texto(p).match(/Por ser expressão da verdade/g)||[]).length,1);
 });
+test('Pedido com saudação e abreviação preserva comodato e não copia comandos',()=>{
+ const p=preparar({pedido:'Oi chat, vc pode me fazer uma declaração de que nossa escola recebeu 6 lixeiras do Projeto Montesul em 23/10/2026, em comodato. Não houve doação.'});
+ assert.match(texto(p),/Escola Municipal Professora Eunice Carneiro recebeu 6 lixeiras/);assert.match(texto(p),/Não houve doação/);
+ assert.doesNotMatch(texto(p),/Oi chat|vc pode|me fazer|Municipal Professora Eunice Carneiro Municipal/);
+});
+test('Comprovante de aluno com ano por extenso e turno informal vira matrícula',()=>{
+ const p=preparar({pedido:'Preciso de um comprovante de que o aluno João Pedro Silva estuda aqui, no terceiro ano B, de tarde, neste ano.'});
+ assert.equal(p.campos['doc-modelo-amplo'],'matricula');assert.equal(p.campos['doc-pessoa'],'João Pedro Silva');assert.equal(p.campos['doc-turma'],'3º ano B');assert.equal(p.campos['doc-turno-amplo'],'vespertino');assert.equal(p.campos['doc-ano-letivo'],'2026');
+ assert.equal(p.perguntas.length,0);assert.doesNotMatch(texto(p),/Informações complementares|Preciso|comprovante/);
+});
+test('Solicitação informal de ofício tem pedido único e conserva justificativa',()=>{
+ const p=preparar({pedido:'Pode fazer um ofício para solicitar o conserto do telhado da biblioteca. Justificativa: infiltração.'});
+ assert.equal(p.campos['doc-modelo-amplo'],'oficio-solicitacao');assert.match(texto(p),/^Solicitamos o conserto/);assert.match(texto(p),/Infiltração/);assert.equal((texto(p).match(/conserto/g)||[]).length,1);
+});
+test('Ofício narrativo separa destinatário, pedido e justificativa',()=>{
+ const p=preparar({pedido:'Preciso de um ofício para a Secretaria Municipal de Educação solicitando o conserto do telhado da biblioteca. Justificativa: infiltração após as chuvas.'});
+ assert.equal(p.campos['doc-destino'],'a Secretaria Municipal de Educação');assert.equal(p.campos['doc-modelo-amplo'],'oficio-solicitacao');assert.match(texto(p),/^Solicitamos o conserto/);assert.doesNotMatch(texto(p),/Solicitamos para|solicitando/);assert.match(texto(p),/Infiltração após as chuvas/);
+});
+test('Comparecimento em linguagem cotidiana reconhece responsável, data e horários',()=>{
+ const p=preparar({pedido:'Quero um comprovante de que a mãe Maria Souza veio aqui na escola hoje das 9h às 11h.'});
+ assert.equal(p.campos['doc-modelo-amplo'],'comparecimento-responsavel-amplo');assert.equal(p.campos['doc-responsavel-amplo'],'Maria Souza');assert.equal(p.campos['doc-data-fato'],'2026-10-23');assert.equal(p.campos['doc-entrada-amplo'],'09:00');assert.equal(p.campos['doc-saida-amplo'],'11:00');assert.doesNotMatch(texto(p),/Informações complementares|Quero um/);
+});
+test('Descrição de frequência continua exigindo confirmação dos registros',()=>{
+ const p=preparar({pedido:'Preciso de um comprovante de frequência do aluno Pedro Teste, do 4º ano C.'});
+ assert.equal(p.campos['doc-modelo-amplo'],'frequencia');assert.ok(p.perguntas.some(q=>q.campo==='doc-situacao-ampla'));assert.doesNotMatch(texto(p),/100%|Frequenta regularmente/);
+});
+const recebimento=()=>preparar({pedido:'Declaração de recebimento de 6 lixeiras do Projeto Montesul em 23/10/2026 para coleta seletiva.'});
+const complementar=(p,pedido,base=texto(p))=>preparar({acao:'complementar',pedido,contexto:{tipo:p.tipo,campos:p.campos},modelo_base:base});
+test('Correção natural de data altera fato e mantém emissão e outros detalhes',()=>{
+ const p=recebimento(),q=complementar(p,'mude a data para 24/10/2026');
+ assert.equal(q.campos['doc-data-fato'],'2026-10-24');assert.equal(q.campos['doc-data'],'2026-10-23');assert.match(texto(q),/24\/10\/2026/);assert.match(texto(q),/6 lixeiras do Projeto Montesul/);assert.doesNotMatch(texto(q),/23\/10\/2026|mude a data|Municipal Professora Eunice Carneiro Municipal/);
+});
+test('Correção de emissão não muda a data do acontecimento quando coincidem',()=>{
+ const p=recebimento(),q=complementar(p,'mude a data de emissão para 26/10/2026');
+ assert.equal(q.campos['doc-data'],'2026-10-26');assert.equal(q.campos['doc-data-fato'],'2026-10-23');assert.equal(texto(q),texto(p));
+});
+test('Correção de quantidade não altera data nem projeto e sincroniza os campos',()=>{
+ const p=recebimento(),q=complementar(p,'na verdade foram 8 lixeiras');
+ assert.equal(q.campos['doc-bens'],'8 lixeiras');assert.match(texto(q),/8 lixeiras/);assert.match(texto(q),/23\/10\/2026 para coleta seletiva/);assert.doesNotMatch(texto(q),/6 lixeiras|na verdade/);
+ const r=preparar({pedido:'',somente_campos:true,contexto:{tipo:q.tipo,campos:q.campos}});assert.match(texto(r),/8 lixeiras/);assert.doesNotMatch(texto(r),/6 lixeiras/);
+});
+test('Troca de projeto e data em um complemento mantém correções manuais',()=>{
+ const p=recebimento(),q=complementar(p,'troque o projeto para Projeto Reciclar; mude a data para 24/10/2026',texto(p)+'\n\nRessalva conferida pela secretaria.');
+ assert.equal(q.campos['doc-projeto'],'Projeto Reciclar');assert.match(texto(q),/24\/10\/2026/);assert.match(texto(q),/Ressalva conferida/);assert.doesNotMatch(texto(q),/Montesul|23\/10\/2026|troque o projeto/);
+});
+test('Troca de nome e turma mantém o documento e não cria outro aluno',()=>{
+ const p=preparar({pedido:'Declaração de matrícula. Aluno: João Silva; Turma: 2º ano E; Ano letivo: 2026.'});
+ const q=complementar(p,'troque o nome para Maria Oliveira; mude a turma para 3º ano A');
+ assert.equal(q.campos['doc-pessoa'],'Maria Oliveira');assert.equal(q.campos['doc-turma'],'3º ano A');assert.equal(q.campos['doc-modelo-amplo'],'matricula');assert.match(texto(q),/Maria Oliveira/);assert.doesNotMatch(texto(q),/João Silva|2º ano E|troque o nome/);
+});
+test('Substituição entre aspas conserva o restante da minuta',()=>{
+ const p=recebimento(),q=complementar(p,'troque "coleta seletiva" por "educação ambiental"');
+ assert.match(texto(q),/educação ambiental/);assert.match(texto(q),/6 lixeiras do Projeto Montesul em 23\/10\/2026/);assert.doesNotMatch(texto(q),/coleta seletiva|troque/);
+});
+test('Substituição inexistente e correção incompleta perguntam sem alterar o corpo',()=>{
+ for(const pedido of ['mude a data','troque "Montes" por "Reciclar"']){const p=recebimento(),q=complementar(p,pedido);assert.equal(texto(q),texto(p));assert.ok(q.perguntas.some(q=>q.campo==='ia-extra-pedido'));}
+});
+test('Nome editado manualmente diferente dos campos exige esclarecimento',()=>{
+ const p=preparar({pedido:'Declaração de matrícula. Aluno: João Silva; Turma: 2º ano E.'}),editado=texto(p).replace('João Silva','Maria Teste');
+ const q=complementar(p,'mude o nome para Ana Souza',editado);
+ assert.equal(texto(q),editado);assert.equal(q.campos['doc-pessoa'],'João Silva');assert.ok(q.perguntas.some(q=>/difere do texto/.test(q.pergunta)));
+});
+test('Acrescentar fato conserva negação e inclui o parágrafo antes do encerramento',()=>{
+ const p=recebimento(),q=complementar(p,'inclua que não houve doação');
+ assert.match(texto(q),/Não houve doação/);assert.doesNotMatch(texto(q),/Inclua que/);assert.ok(texto(q).indexOf('Não houve doação')<texto(q).indexOf('Por ser expressão'));assert.match(texto(q),/6 lixeiras/);
+});
+test('Correção de quantidade por extenso não deixa número antigo entre parênteses',()=>{
+ const p=preparar({pedido:'Declaração de recebimento de 06 (seis) lixeiras do Projeto Montesul em 23/10/2026.'}),q=complementar(p,'mude a quantidade para 8');
+ assert.match(texto(q),/8 lixeiras/);assert.doesNotMatch(texto(q),/06|seis/);
+});
+test('Correções recusam datas impossíveis inclusive nas substituições literais',()=>{
+ for(const pedido of ['mude a data para 31/02/2026','troque "23/10/2026" por "31/02/2026"'])assert.throws(()=>complementar(recebimento(),pedido),/inválida/);
+});
+test('Ressalva sem doação e planejamento futuro não viram recebimento concluído',()=>{
+ const p=preparar({pedido:'Faça uma declaração de que nossa escola vai receber 6 lixeiras do Projeto Montesul em 30/10/2026. Ainda não houve entrega.'});
+ assert.match(texto(p),/vai receber/);assert.match(texto(p),/Ainda não houve entrega/);assert.doesNotMatch(texto(p),/escola recebeu|Carneiro recebeu/);
+});
 console.log(JSON.stringify({grupos:total,modelosNovos:ctx.AssistenteDocumentalAmplo.modelos.length,ambiente:'Node VM, dados fictícios; sem alterações no banco'}));
