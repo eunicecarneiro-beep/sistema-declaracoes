@@ -3497,8 +3497,12 @@ const AssistenteDocumentalLocal = Object.freeze({
       const idsPreferencias=['ia-local-perfil','ia-local-origem','ia-local-modo'];
       // Guarda somente opções de execução; pedidos e dados escolares não são persistidos aqui.
       try{
-        const salvo=JSON.parse(globalThis.localStorage?.getItem('ia-documentos-preferencias-v3')||'{}');
-        for(const id of idsPreferencias)if([...$(id).options].some(o=>o.value===salvo[id]))$(id).value=salvo[id];
+        const versaoAtual=globalThis.localStorage?.getItem('ia-documentos-preferencias-v3');
+        const salvo=JSON.parse(versaoAtual||globalThis.localStorage?.getItem('ia-documentos-preferencias-v2')||'{}');
+        for(const id of idsPreferencias){
+          if(!versaoAtual&&id==='ia-local-modo')continue;
+          if([...$(id).options].some(o=>o.value===salvo[id]))$(id).value=salvo[id];
+        }
       }catch{}
       for(const id of idsPreferencias)$(id).addEventListener('change',()=>{try{globalThis.localStorage?.setItem('ia-documentos-preferencias-v3',JSON.stringify(Object.fromEntries(idsPreferencias.map(x=>[x,valor(x)]))));}catch{}});
       local.cliente.observar(s=>{
