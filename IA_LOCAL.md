@@ -1,10 +1,19 @@
-# IA local com ativação automática
+# Modo rápido e IA local opcional
 
 Em Documentos da Escola, descreva o pedido e clique em Preparar documento.
-O modo padrão ativa o modelo no primeiro pedido. Não é necessário usar
-Preparar IA agora, que apenas antecipa o carregamento.
+O padrão é Rápido: interpretação por regras e modelos documentais, sem
+carregamento de pesos, inicialização de GPU ou geração por modelo de linguagem.
+Confira os dados identificados nos campos e a prévia. Pedidos fora das regras
+podem exigir escolha de assunto, informações adicionais ou edição manual.
 
-Automático usa Qwen3 1.7B pela GPU quando há adaptador WebGPU; se não houver
+Refinar documento com IA revisa explicitamente a minuta atual. A opção
+IA local no seletor usa o modelo de linguagem também na preparação dos textos.
+Essas opções continuam sujeitas ao download e ao tempo de processamento abaixo.
+O refinamento e a conversa não mudam automaticamente a preferência pelo modo
+rápido. As novas preferências usam outra versão para que a configuração antiga
+de ativação automática não mantenha a espera pelo modelo como padrão.
+
+No perfil de execução Automático, a IA usa Qwen3 1.7B pela GPU quando há adaptador WebGPU; se não houver
 adaptador ou o carregamento pela GPU falhar, tenta Qwen3 0.6B pelo processador
 com Transformers.js 3.8.1, ONNX Runtime e WebAssembly. Qwen3 4B pode ser escolhido
 explicitamente. O perfil CPU não consulta nem exige WebGPU.
