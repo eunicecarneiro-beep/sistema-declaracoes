@@ -3332,18 +3332,19 @@ const AssistenteDocumentalLocal = Object.freeze({
       <h3>Assistente de documentos da escola</h3>
       <div id="ia-local-painel" style="border:1px solid #adc7df;border-radius:9px;padding:12px;margin:12px 0">
         <strong>IA de linguagem neste computador</strong>
-        <p>Converse e redija com um modelo aberto executado no navegador. A primeira ativação baixa vários arquivos, que podem ocupar alguns GB. As fontes públicas recebem o download do modelo; seus pedidos são processados no computador. Este recurso exige WebGPU e memória disponível.</p>
-        <label for="ia-local-perfil">Modelo local</label>
-        <select id="ia-local-perfil"><option value="qualidade">Qwen3 4B — maior capacidade</option><option value="leve">Qwen3 1.7B — menor consumo</option></select>
+        <p>Descreva o pedido e clique em Preparar documento. O modo automático escolhe a GPU disponível ou usa o processador. A primeira utilização baixa o modelo: cerca de 630 MB no processador ou alguns GB na GPU. Os pedidos são processados neste computador. A IA pelo processador pode levar alguns minutos para escrever.</p>
+        <label for="ia-local-perfil">Como executar a IA</label>
+        <select id="ia-local-perfil"><option value="auto">Automático — escolher para este computador</option><option value="cpu">Qwen3 0.6B — processador, sem GPU</option><option value="leve">Qwen3 1.7B — GPU, menor consumo</option><option value="qualidade">Qwen3 4B — GPU, maior capacidade</option></select>
         <details><summary>Opções de instalação</summary>
           <label for="ia-local-origem">Origem dos arquivos do modelo</label>
           <select id="ia-local-origem"><option value="publica">Baixar os arquivos das fontes oficiais</option><option value="escola">Usar arquivos hospedados pela escola</option></select>
           <p>Use a segunda opção somente se a equipe técnica já instalou os modelos no endereço da escola. Os modelos não acompanham a atualização do site. A geração dos textos acontece neste computador em ambas as opções.</p>
         </details>
-        <div class="ia-botoes"><button type="button" id="ia-local-ativar">Baixar / ativar IA local</button><button type="button" id="ia-local-parar">Parar / liberar memória</button></div>
-        <div id="ia-local-situacao" role="status" aria-live="polite">IA de linguagem ainda não carregada. Nenhum modelo é baixado automaticamente.</div>
+        <div class="ia-botoes"><button type="button" id="ia-local-ativar">Preparar IA agora</button><button type="button" id="ia-local-parar">Parar / liberar memória</button></div>
+        <div id="ia-local-situacao" role="status" aria-live="polite">A IA será preparada automaticamente no primeiro pedido. Os arquivos baixados poderão ser reutilizados neste navegador.</div>
+        <progress id="ia-local-progresso" max="1" hidden style="width:100%" aria-label="Download do arquivo do modelo"></progress>
         <label for="ia-local-modo">Como preparar o texto</label>
-        <select id="ia-local-modo"><option value="modelos">Modelos e regras locais</option><option value="ia">Modelo de linguagem local</option></select>
+        <select id="ia-local-modo"><option value="ia">IA local — ativar automaticamente</option><option value="modelos">Modelos e regras locais — sem download</option></select>
         <p>O modo selecionado será usado pelos botões Preparar, Complementar e Melhorar texto. A IA pode cometer erros; confira a redação e os fatos.</p>
         <details><summary>Conversar com a IA</summary>
           <label for="ia-local-pergunta">Pergunta ou pedido livre</label><textarea id="ia-local-pergunta" maxlength="8000" placeholder="Peça uma explicação, ideias ou ajuda com um texto."></textarea>
@@ -3357,7 +3358,7 @@ const AssistenteDocumentalLocal = Object.freeze({
       <p>Descreva os fatos ou escolha um modelo: recebimento de materiais de um projeto, matrícula de aluno, comparecimento, manutenção e outros assuntos. Alunos e pessoas externas podem ser informados diretamente.</p>
       <p>
         Descreva os fatos e escolha o modo de preparação. Os modelos prontos usam regras locais.
-        Com a IA de linguagem ativada, você pode redigir e revisar pedidos mais variados.
+        A IA é ativada no primeiro pedido para redigir e revisar textos mais variados.
         Confira o resultado antes de emitir. Não há envio do texto para um serviço externo de IA.
       </p>
       <label for="ia-extra-pedido">
@@ -3468,19 +3469,38 @@ const AssistenteDocumentalLocal = Object.freeze({
     const historico = [];
     const iaLinguagem=()=>valor('ia-local-modo')==='ia';
     let controladorConversa=null;
+    let ativacaoIA=null;
+    async function garantirIA(signal){
+      if(signal?.aborted)throw new DOMException('Operação interrompida.','AbortError');
+      if(!globalThis.IAInternaLocal)throw new Error('O módulo de IA não está disponível.');
+      if(!ativacaoIA)ativacaoIA=IAInternaLocal.cliente.carregar(valor('ia-local-perfil'),{origem:valor('ia-local-origem'),signal}).finally(()=>{ativacaoIA=null;});
+      await ativacaoIA;
+      if(signal?.aborted)throw new DOMException('Operação interrompida.','AbortError');
+    }
     if(globalThis.IAInternaLocal){
       const local=IAInternaLocal;
+      const idsPreferencias=['ia-local-perfil','ia-local-origem','ia-local-modo'];
+      // Guarda somente opções de execução; pedidos e dados escolares não são persistidos aqui.
+      try{
+        const salvo=JSON.parse(globalThis.localStorage?.getItem('ia-documentos-preferencias-v2')||'{}');
+        for(const id of idsPreferencias)if([...$(id).options].some(o=>o.value===salvo[id]))$(id).value=salvo[id];
+      }catch{}
+      for(const id of idsPreferencias)$(id).addEventListener('change',()=>{try{globalThis.localStorage?.setItem('ia-documentos-preferencias-v2',JSON.stringify(Object.fromEntries(idsPreferencias.map(x=>[x,valor(x)]))));}catch{}});
       let estadoAnteriorIA='inativa';
       local.cliente.observar(s=>{
         if(!$('ia-local-situacao'))return;
         $('ia-local-situacao').textContent=s.detalhe||s.estado;
         $('ia-local-ativar').disabled=['carregando','gerando'].includes(s.estado);
+        for(const id of idsPreferencias)$(id).disabled=['carregando','gerando'].includes(s.estado);
+        const progresso=$('ia-local-progresso');
+        progresso.hidden=s.estado!=='carregando'||!Number.isFinite(s.progresso);
+        if(!progresso.hidden)progresso.value=s.progresso;
         if(s.estado==='pronta'&&estadoAnteriorIA==='carregando')$('ia-local-modo').value='ia';
         estadoAnteriorIA=s.estado;
       });
       $('ia-local-ativar').onclick=async()=>{
-        try{await App.requireRoles(['administrador','secretaria']);await local.cliente.carregar(valor('ia-local-perfil'),{origem:valor('ia-local-origem')});}
-        catch(e){$('ia-local-situacao').textContent='Não foi possível ativar a IA local: '+e.message;}
+        try{await App.requireRoles(['administrador','secretaria']);await garantirIA();}
+        catch(e){if(e.name!=='AbortError')$('ia-local-situacao').textContent='A IA não pôde ser preparada. Os modelos prontos continuam disponíveis. '+e.message;}
       };
       $('ia-local-parar').onclick=()=>{controller?.abort();controladorConversa?.abort();local.cliente.descarregar();};
       $('ia-local-conversar').onclick=async()=>{
@@ -3490,6 +3510,7 @@ const AssistenteDocumentalLocal = Object.freeze({
         $('ia-local-resposta').textContent='Pensando neste computador…';
         try{
           await App.requireRoles(['administrador','secretaria']);
+          await garantirIA(atual.signal);
           const resposta=await local.conversar(valor('ia-local-pergunta'),{signal:atual.signal,documento:$('ia-local-incluir').checked?valor('doc-texto'):''});
           if(!atual.signal.aborted)$('ia-local-resposta').textContent=resposta;
         }catch(e){if(!atual.signal.aborted)$('ia-local-resposta').textContent='Não foi possível responder: '+e.message;}
@@ -3876,9 +3897,16 @@ const AssistenteDocumentalLocal = Object.freeze({
         secundario_id: preservar ? pessoa('doc-secundario')?.id || '' : '',
         modelo_base: preservar ? valor('doc-texto') : ''
       };
-      const plano = iaLinguagem()
-        ? await IAInternaLocal.redigir(entrada,{signal})
-        : AssistenteDocumentalLocal.preparar(entrada);
+      let plano;
+      if(iaLinguagem()){
+        let falhaAtivacao='';
+        try{await garantirIA(signal);}
+        catch(e){if(signal.aborted||e.name==='AbortError')throw e;falhaAtivacao=e.message;}
+        if(falhaAtivacao){
+          plano=AssistenteDocumentalLocal.preparar(entrada);
+          plano.avisos.unshift('A IA não foi carregada. Este rascunho usa os modelos e regras locais. Motivo: '+falhaAtivacao);
+        }else plano=await IAInternaLocal.redigir(entrada,{signal});
+      }else plano=AssistenteDocumentalLocal.preparar(entrada);
       if (signal.aborted) throw new DOMException('Opera\u00e7\u00e3o interrompida.', 'AbortError');
       return validar(plano);
     }
@@ -3919,7 +3947,7 @@ const AssistenteDocumentalLocal = Object.freeze({
       const controle = controller;
       const timeout = setTimeout(
         () => controle.abort(),
-        iaLinguagem() ? 250000 : 45000
+        iaLinguagem() ? 2400000 : 45000
       );
       const botoes = painel.querySelectorAll(
         '[data-acao],#ia-extra-novo,' +
