@@ -18,6 +18,8 @@ const App={escapeHTML:v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 window.open=()=>{const popup={document:{open(){},write(h){popup.html=h;},close(){},querySelectorAll(){return[];}},addEventListener(){},focus(){},close(){}};popups.push(popup);return popup;};
 const ctx=vm.createContext({document,window,Event,HTMLElement,App,Intl,Date,TextEncoder,TextDecoder,Uint8Array,Blob,AbortController,DOMException,URL:{createObjectURL(b){downloads.push(b);return'blob:test';},revokeObjectURL(){}},setTimeout,clearTimeout,requestAnimationFrame:fn=>fn(),console:{log(){},warn(){},error:e=>logs.push(String(e))},Option:function(text,value){const o=document.createElement('option');o.textContent=text;o.value=value;return o;},navigator:{clipboard:{writeText:async()=>{}}},confirm:()=>true,alert:x=>logs.push(x)});
 for(const f of ['redacao-livre.js','assistente-documental.js','ia-local.js'])vm.runInContext(fs.readFileSync(path.join(root,'js',f),'utf8'),ctx,{filename:f});
+const preferencias=new Map([['ia-documentos-preferencias-v2',JSON.stringify({'ia-local-modo':'ia','ia-local-perfil':'cpu','ia-local-origem':'escola'})]]);
+ctx.localStorage={getItem:k=>preferencias.get(k)||null,setItem:(k,v)=>preferencias.set(k,v)};
 const helperIA=ctx.IAInternaLocal._teste;
 let observadorIA,entradaIA,soltarIA,ativacoes=0,falharAtivacao=false;
 ctx.IAInternaLocal={cliente:{observar:fn=>{observadorIA=fn;},carregar:async()=>{ativacoes++;if(falharAtivacao)throw new Error('Download indisponível no teste.');observadorIA({estado:'carregando',detalhe:'Carregando simulação'});observadorIA({estado:'pronta',detalhe:'Pronta'});},descarregar(){observadorIA({estado:'inativa'});}},redigir:async e=>{entradaIA=e;await new Promise(r=>soltarIA=r);return helperIA.validarResposta({modelo:'recebimento',assunto:'Recebimento de materiais',paragrafos:['Declaramos que a escola recebeu seis lixeiras em comodato do Projeto Montesul em 23/10/2026.'],pendencias:[],avisos:[]},e);},conversar:async()=>'<script>conteúdo literal</script>',novaConversa(){}};
@@ -29,7 +31,8 @@ const tick=()=>new Promise(r=>setImmediate(r));
 async function acao(a){document.querySelector(`[data-acao="${a}"]`).click();for(let i=0;i<10&&document.querySelector('[data-acao="gerar"]').disabled;i++)await tick();const s=$('ia-extra-status').textContent;assert.ok(!s.includes('Não foi possível'),s);}
 async function gerar(pedido,modelo='auto'){set('ia-extra-modelo',modelo);set('ia-extra-pedido',pedido);await acao('gerar');}
 assert.ok($('ia-extra-pedido'),'Assistente montado');
-assert.equal($('ia-local-modo').value,'modelos');assert.equal($('ia-local-perfil').value,'auto');
+assert.equal($('ia-local-modo').value,'modelos');assert.equal($('ia-local-perfil').value,'cpu');assert.equal($('ia-local-origem').value,'escola');
+console.log('PASSOU DOM: migração começa no modo rápido e preserva perfil e origem dos modelos configurados anteriormente.');
 await gerar('Faça uma declaração de recebimento de 06 (seis) lixeiras destinadas à coleta seletiva, fornecidas pelo Projeto Montesul (Associação Montes Claros de Catadores), no dia 23/10/2026, em decorrência da palestra realizada nesta unidade escolar.');
 assert.equal($('doc-modelo-amplo').value,'recebimento');assert.match($('doc-preview').textContent,/06 \(seis\) lixeiras/);assert.ok($('doc-principal-bloco').hidden);assert.ok(!$('doc-amplo-bloco').hidden);
 $('ia-extra-verificar').click();assert.doesNotMatch($('ia-extra-status').textContent,/Selecione o servidor/);
