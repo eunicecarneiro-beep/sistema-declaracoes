@@ -13,6 +13,8 @@ const RelatoriosPage = {
         decls,
       funcionarioId:
         "todos",
+      pesquisaFuncionario:
+        "",
       tipo:
         "todos",
       inicio:
@@ -96,6 +98,26 @@ const RelatoriosPage = {
             0 0 0 3px
             rgba(37,99,235,.1);
         }
+        .rel-func-pesquisa { position:relative; min-width:0; }
+        .rel-func-pesquisa input { padding-right:38px; }
+        .rel-func-limpar {
+          position:absolute; right:5px; top:5px; width:32px; height:32px;
+          border:0; border-radius:5px; background:transparent;
+          color:#475467; cursor:pointer; font-size:20px;
+        }
+        .rel-func-limpar:hover { background:#eaf0fa; }
+        .rel-func-opcoes {
+          position:absolute; top:calc(100% + 5px); left:0; right:0;
+          max-height:280px; overflow-y:auto; z-index:50;
+          background:#fff; border:1px solid #d1d5db; border-radius:8px;
+          box-shadow:0 8px 24px #10182820;
+        }
+        .rel-func-opcoes[hidden], .rel-func-limpar[hidden] { display:none; }
+        .rel-func-opcao { padding:10px 12px; cursor:pointer; overflow-wrap:anywhere; }
+        .rel-func-opcao:hover, .rel-func-opcao.ativa { background:#eff6ff; color:#1d4ed8; }
+        .rel-func-opcao small { display:block; color:#667085; margin-top:3px; }
+        .rel-func-vazio { padding:12px; color:#667085; font-size:13px; }
+        .rel-func-status { margin:10px 0 0; color:#667085; font-size:13px; }
         .stat-card-custom {
           background:#ffffff;
           border:1px solid #e5e7eb;
@@ -196,45 +218,16 @@ const RelatoriosPage = {
             >
               Funcionário
             </label>
-            <select
-              class="filter-control"
-              id="filtroFuncionario"
-            >
-              <option value="todos">
-                Todos os funcionários
-              </option>
-              ${funcs
-                .slice()
-                .sort((a,b) => {
-                  const nomeA =
-                    String(
-                      a.nome || ""
-                    ).trim();
-                  const nomeB =
-                    String(
-                      b.nome || ""
-                    ).trim();
-                  return nomeA.localeCompare(
-                    nomeB,
-                    "pt-BR",
-                    {
-                      sensitivity:"base"
-                    }
-                  );
-                })
-                .map(
-                  f => `
-                    <option
-                      value="${App.escapeHTML(f.id)}"
-                    >
-                      ${App.escapeHTML(
-                        f.nome
-                      )}
-                    </option>
-                  `
-                )
-                .join("")}
-            </select>
+            <div class="rel-func-pesquisa" id="pesquisaFuncionarioRelatorio">
+              <input class="filter-control" id="filtroFuncionario" type="text"
+                role="combobox" aria-autocomplete="list" aria-expanded="false"
+                aria-controls="opcoesFuncionarioRelatorio" aria-describedby="statusPesquisaFuncionario"
+                placeholder="Digite o nome ou matrícula..." autocomplete="off" maxlength="220">
+              <button type="button" class="rel-func-limpar" id="limparFuncionarioRelatorio"
+                aria-label="Mostrar todos os funcionários" hidden>×</button>
+              <div class="rel-func-opcoes" id="opcoesFuncionarioRelatorio" role="listbox"
+                aria-label="Funcionários encontrados" hidden></div>
+            </div>
           </div>
           <!-- TIPO -->
           <div class="filter-group">
@@ -314,6 +307,10 @@ const RelatoriosPage = {
             </select>
           </div>
         </div>
+        <p class="rel-func-status" id="statusPesquisaFuncionario" role="status"
+          aria-live="polite" aria-atomic="true">
+          Todos os funcionários. Digite um nome ou matrícula para pesquisar.
+        </p>
         <div
           class="ordenacao-info"
         >
@@ -338,19 +335,111 @@ const RelatoriosPage = {
   /* ===================================================
      EVENTOS
   =================================================== */
+  normalizarPesquisaFuncionario(texto) {
+    return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/\s+/g, " ").trim();
+  },
+  funcionariosEncontrados(texto) {
+    const pesquisa = this.normalizarPesquisaFuncionario(texto);
+    return this.state.funcionarios.filter(f =>
+      this.normalizarPesquisaFuncionario(`${f.nome || ""} ${f.matricula || ""}`).includes(pesquisa)
+    ).sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", { sensitivity:"base" }));
+  },
+  configurarPesquisaFuncionario() {
+    const campo = document.getElementById("filtroFuncionario");
+    const lista = document.getElementById("opcoesFuncionarioRelatorio");
+    const limpar = document.getElementById("limparFuncionarioRelatorio");
+    const status = document.getElementById("statusPesquisaFuncionario");
+    const grupo = document.getElementById("pesquisaFuncionarioRelatorio");
+    let opcoes = [];
+    let indice = -1;
+    const fechar = () => {
+      lista.hidden = true;
+      campo.setAttribute("aria-expanded", "false");
+      campo.removeAttribute("aria-activedescendant");
+      indice = -1;
+    };
+    const mostrar = () => {
+      const pesquisa = this.normalizarPesquisaFuncionario(this.state.pesquisaFuncionario);
+      opcoes = this.funcionariosEncontrados(pesquisa);
+      if (!pesquisa) opcoes.unshift({ id:"todos", nome:"Todos os funcionários" });
+      indice = -1;
+      campo.removeAttribute("aria-activedescendant");
+      lista.innerHTML = opcoes.length ? opcoes.map((f, i) => {
+        const detalhes = [f.matricula ? `Matrícula: ${f.matricula}` : "", f.cargo || ""].filter(Boolean).join(" · ");
+        return `<div class="rel-func-opcao" id="rel-func-opcao-${i}" role="option"
+          aria-selected="${String(f.id) === this.state.funcionarioId}" data-indice="${i}">
+          ${App.escapeHTML(f.nome || "")}${detalhes ? `<small>${App.escapeHTML(detalhes)}</small>` : ""}</div>`;
+      }).join("") : '<div class="rel-func-vazio">Nenhum funcionário encontrado.</div>';
+      lista.hidden = false;
+      campo.setAttribute("aria-expanded", "true");
+      if (pesquisa) status.textContent = opcoes.length
+        ? `${opcoes.length} funcionário(s) encontrado(s). Selecione uma pessoa para filtrar somente por ela.`
+        : "Nenhum funcionário encontrado. Tente outro nome ou matrícula.";
+    };
+    const selecionar = opcao => {
+      this.state.funcionarioId = String(opcao.id);
+      this.state.pesquisaFuncionario = "";
+      campo.value = opcao.id === "todos" ? "" : `${opcao.nome || ""}${opcao.matricula ? ` — ${opcao.matricula}` : ""}`;
+      limpar.hidden = !campo.value;
+      status.textContent = opcao.id === "todos"
+        ? "Todos os funcionários. Digite um nome ou matrícula para pesquisar."
+        : `Relatório de ${campo.value}.`;
+      fechar();
+      this.render();
+    };
+    campo.addEventListener("focus", mostrar);
+    campo.addEventListener("input", () => {
+      this.state.funcionarioId = "todos";
+      this.state.pesquisaFuncionario = campo.value;
+      limpar.hidden = !campo.value;
+      if (!this.normalizarPesquisaFuncionario(campo.value)) {
+        status.textContent = "Todos os funcionários. Digite um nome ou matrícula para pesquisar.";
+      }
+      mostrar();
+      this.render();
+    });
+    campo.addEventListener("keydown", e => {
+      if (e.isComposing) return;
+      if (e.key === "Escape" || e.key === "Tab") { fechar(); return; }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (lista.hidden) mostrar();
+        if (!opcoes.length) return;
+        indice = e.key === "ArrowDown" ? (indice + 1) % opcoes.length
+          : (indice <= 0 ? opcoes.length : indice) - 1;
+        Array.from(lista.querySelectorAll('[role="option"]')).forEach((el, i) => {
+          el.classList.toggle("ativa", i === indice);
+          el.setAttribute("aria-selected", String(i === indice));
+          if (i === indice) {
+            campo.setAttribute("aria-activedescendant", el.id);
+            el.scrollIntoView?.({ block:"nearest" });
+          }
+        });
+      } else if (e.key === "Enter" && !lista.hidden) {
+        e.preventDefault();
+        if (indice >= 0) selecionar(opcoes[indice]);
+        else if (opcoes.length === 1) selecionar(opcoes[0]);
+      }
+    });
+    lista.addEventListener("pointerdown", e => e.preventDefault());
+    lista.addEventListener("click", e => {
+      const alvo = e.target.closest("[data-indice]");
+      if (alvo && lista.contains(alvo)) selecionar(opcoes[Number(alvo.dataset.indice)]);
+    });
+    limpar.addEventListener("click", () => {
+      selecionar({ id:"todos" });
+      campo.focus();
+    });
+    grupo.addEventListener("focusout", e => { if (!grupo.contains(e.relatedTarget)) fechar(); });
+    // Remove a escuta anterior se a página for inicializada novamente.
+    this.pesquisaFuncionarioEventos?.abort();
+    this.pesquisaFuncionarioEventos = new AbortController();
+    document.addEventListener("pointerdown", e => { if (!grupo.contains(e.target)) fechar(); },
+      { signal:this.pesquisaFuncionarioEventos.signal });
+  },
   bindEvents() {
-    document
-      .getElementById(
-        "filtroFuncionario"
-      )
-      ?.addEventListener(
-        "change",
-        e => {
-          this.state.funcionarioId =
-            e.target.value;
-          this.render();
-        }
-      );
+    this.configurarPesquisaFuncionario();
     document
       .getElementById(
         "filtroTipo"
@@ -455,8 +544,12 @@ const RelatoriosPage = {
       inicio,
       fim
     } = this.state;
+    const pesquisa = this.normalizarPesquisaFuncionario(this.state.pesquisaFuncionario);
+    const idsPesquisa = pesquisa && funcionarioId === "todos"
+      ? new Set(this.funcionariosEncontrados(pesquisa).map(f => String(f.id))) : null;
     return declaracoes.filter(
       d => {
+        if (idsPesquisa && !idsPesquisa.has(String(d.funcionarioId))) return false;
         if (
           funcionarioId !==
           "todos"
