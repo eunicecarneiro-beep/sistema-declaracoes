@@ -3164,6 +3164,122 @@ const AssistenteDocumentalLocal = Object.freeze({
     'doc-setor', 'doc-saudacao', 'doc-despedida',
     'ds-assinante', 'ds-cargo'
   ]);
+  // Os roteiros usam os mesmos rótulos reconhecidos pelo assistente.
+  function roteiroDoPedido(id) {
+    const cabecalho = [
+      'Número: [número do documento/ano]', 'Para: [destinatário]',
+      'A/C: [pessoa responsável, se houver]', 'Setor: [setor de destino]'
+    ];
+    const oficiais = {
+      declaracao: ['Servidor: [nome completo ou matrícula]', 'Finalidade: [para que precisa da declaração]'],
+      requerimento: ['Para: [destinatário]', 'Servidor: [nome completo ou matrícula]', 'Pedido: [o que está requerendo]', 'Justificativa: [motivo do pedido]'],
+      prorrogacao: ['Servidor: [nome completo ou matrícula]', 'Data inicial: [dd/mm/aaaa]', 'Prazo: [quantidade de dias corridos]', 'Titular: [servidor afastado, se houver]', 'Motivo do afastamento: [se houver substituição]', 'Justificativa: [motivo da prorrogação]'],
+      substituicao: ['Titular: [nome completo ou matrícula do servidor afastado]', 'Cargo: [função a substituir]', 'Motivo do afastamento: [situação informada]', 'Data inicial: [dd/mm/aaaa]', 'Prazo: [quantidade de dias corridos]', 'Substituto: [nome ou matrícula, se houver indicação]', 'Justificativa: [necessidade da substituição]'],
+      contratacao: ['Servidor: [nome ou matrícula relacionado à vaga]', 'Cargo: [função a contratar]', 'Motivo do afastamento: [situação da vaga]', 'Data inicial: [dd/mm/aaaa, se conhecida]', 'Justificativa: [necessidade da contratação]'],
+      calendario: ['Data original: [dd/mm/aaaa]', 'Nova data: [dd/mm/aaaa]', 'Justificativa: [motivo da alteração]'],
+      transporte: ['Data da visita: [dd/mm/aaaa]', 'Quantidade de estudantes: [total]', 'Turmas: [anos e turmas]', 'Turno: [turno da atividade]', 'Local de destino: [nome e endereço]', 'Horário de embarque: [hh:mm]', 'Horário de retorno: [hh:mm]', 'Início da visita: [hh:mm, se definido]', 'Fim da visita: [hh:mm, se definido]', 'Objetivo pedagógico: [finalidade da visita]'],
+      zeladoria: ['Quantidade de profissionais: [total solicitado]', 'Justificativa: [necessidade da escola]', 'Pedido: [informações adicionais, se houver]'],
+      estagio: ['Servidor: [nome completo ou matrícula]', 'Instituição: [local do estágio]', 'Compatibilidade de horários: [horários do estágio e do trabalho]', 'Justificativa: [contexto e motivo do pedido]'],
+      avanco: ['Nome do estudante: [nome completo]', 'Turma: [ano e turma]', 'Justificativa: [contexto e motivo da avaliação]', 'Documentos anexos: [documentos que acompanham o pedido]']
+    };
+    if (id.startsWith('legado:') && oficiais[id.slice(7)]) {
+      const tipo = id.slice(7);
+      return [...(['declaracao', 'requerimento'].includes(tipo) ? [] : cabecalho), ...oficiais[tipo]].join('\n');
+    }
+    const modelo = AssistenteDocumentalAmplo.porId(id);
+    if (!modelo) return [
+      'Assunto: [tipo de documento e assunto]',
+      'Fatos: [o que aconteceu, onde e quem participou]',
+      'Nome completo: [pessoa envolvida, se houver]',
+      'Data: [dd/mm/aaaa do acontecimento]',
+      'Pedido: [o que precisa solicitar, se houver]',
+      'Finalidade: [para que será usado o documento]',
+      'Complementos: [outros detalhes, se houver]'
+    ].join('\n');
+    const linhas = {
+      'doc-pessoa': 'Nome completo: [nome da pessoa interessada]',
+      'doc-identificacao': 'Identificação: [matrícula ou registro, se necessário]',
+      'doc-qualificacao': 'Qualificação: [vínculo ou função, se necessário]',
+      'doc-turma': 'Turma: [ano e turma do aluno]',
+      'doc-ano-letivo': 'Ano letivo: [aaaa]',
+      'doc-turno-amplo': 'Turno: [matutino, vespertino ou integral]',
+      'doc-responsavel-amplo': 'Responsável: [nome completo, se aplicável]',
+      'doc-data-fato': 'Data do fato: [dd/mm/aaaa]',
+      'doc-periodo-inicio': 'Data inicial: [dd/mm/aaaa, se houver período]',
+      'doc-periodo-fim': 'Data final: [dd/mm/aaaa, se houver período]',
+      'doc-prazo-amplo': 'Prazo: [quantidade de dias, se definida]',
+      'doc-entrada-amplo': 'Horário de entrada: [hh:mm]',
+      'doc-saida-amplo': 'Horário de saída: [hh:mm]',
+      'doc-projeto': 'Projeto: [nome da instituição, projeto ou fornecedor]',
+      'doc-recebedor': 'Recebedor: [quem recebe os materiais]',
+      'doc-bens': 'Materiais: [descrição dos itens ou documentos]',
+      'doc-quantidade-ampla': 'Quantidade: [quantidade e unidade, se aplicável]',
+      'doc-atividade': 'Atividade: [nome e descrição do evento ou serviço]',
+      'doc-local-amplo': 'Local: [onde ocorreu ou ocorrerá, se aplicável]',
+      'doc-finalidade-ampla': 'Justificativa: [motivo e finalidade do pedido]',
+      'doc-situacao-ampla': 'Situação: [informação confirmada nos registros]',
+      'doc-demanda': 'Pedido: [providência ou solicitação detalhada]',
+      'doc-fatos': 'Fatos: [contexto, pessoas envolvidas e informações confirmadas]',
+      'doc-documentos-amplos': 'Anexos: [documentos ou referência, se houver]',
+      'doc-acoes': 'Encaminhamentos: [decisões ou providências informadas]'
+    };
+    if (modelo.campos.includes('doc-turma')) linhas['doc-pessoa'] = 'Nome do aluno: [nome completo]';
+    if (id === 'comparecimento-responsavel-amplo' || id === 'autorizacao') {
+      linhas['doc-pessoa'] = 'Nome do aluno: [nome completo]';
+      linhas['doc-responsavel-amplo'] = 'Responsável: [nome completo de quem compareceu ou autoriza]';
+    }
+    if (id === 'memo-renovacao') {
+      linhas['doc-pessoa'] = 'Servidor: [nome completo]';
+      linhas['doc-periodo-inicio'] = 'Data inicial: [dd/mm/aaaa da renovação]';
+      linhas['doc-periodo-fim'] = 'Data final: [dd/mm/aaaa, se definida]';
+    }
+    const situacoes = {
+      frequencia:'percentual ou situação de frequência no período',
+      'matricula-frequencia':'percentual ou situação de frequência no período',
+      escolaridade:'etapa cursada e situação escolar confirmada',
+      conclusao:'etapa ou ano concluído e ano de conclusão',
+      transferencia:'situação da transferência e data conforme os registros',
+      vaga:'disponibilidade ou reserva de vaga, turma e ano letivo'
+    };
+    if (situacoes[id]) linhas['doc-situacao-ampla'] = `Situação: [${situacoes[id]}]`;
+    const demandas = {
+      materiais:['itens, quantidades e unidades solicitadas', 'necessidade e materiais disponíveis na escola'],
+      equipamentos:['equipamentos ou móveis e quantidades', 'local de uso e situação dos equipamentos atuais'],
+      manutencao:['reparo necessário e local afetado', 'problema encontrado, quando começou e impacto nas atividades'],
+      informatica:['suporte, equipamento ou conexão a verificar', 'falha observada e impacto no atendimento'],
+      alimentacao:['alimentos, quantidades ou providência solicitada', 'situação da merenda e estudantes atendidos'],
+      agua:['providência para água ou energia', 'local, período da interrupção e atividades afetadas'],
+      seguranca:['medida de segurança solicitada', 'ocorrência, local, data e risco observado'],
+      acessibilidade:['adaptação ou recurso solicitado', 'barreira identificada e local de utilização'],
+      formacao:['tema, público e formação solicitada', 'necessidade da equipe e período proposto'],
+      remanejamento:['movimentação de pessoal solicitada', 'nome, matrícula, cargo e lotação atual e pretendida'],
+      'carga-horaria':['alteração de jornada solicitada', 'nome, matrícula, cargo, jornada atual e proposta e data inicial'],
+      abono:['análise de abono e datas solicitadas', 'nome, matrícula e motivo da ausência conforme a declaração'],
+      documentacao:['documentos a solicitar ou regularizar', 'pessoa ou processo envolvido, pendência e prazo'],
+      recursos:['apoio ou recursos, quantidades e prazo', 'atividade atendida e necessidade da escola'],
+      'projeto-escolar':['apoio ou providência para o projeto', 'nome do projeto, data, local e participantes'],
+      inclusao:['apoio ou atendimento educacional solicitado', 'estudante, turma e necessidade de atendimento'],
+      'busca-ativa':['acompanhamento ou providência solicitada', 'estudante, turma, período de ausência e contatos já realizados']
+    }[id.replace(/^memo-/, '')];
+    if (demandas) {
+      linhas['doc-demanda'] = `Pedido: [${demandas[0]}]`;
+      linhas['doc-fatos'] = `Fatos: [${demandas[1]}]`;
+    }
+    if (modelo.estrutura === 'encaminhamento') linhas['doc-demanda'] = 'Pedido: [o que está encaminhando e a providência esperada]';
+    if (modelo.estrutura === 'resposta') {
+      linhas['doc-demanda'] = 'Pedido: [número, data e assunto da solicitação respondida]';
+      linhas['doc-fatos'] = 'Fatos: [resposta e informações confirmadas]';
+    }
+    if (id === 'ata') {
+      linhas['doc-pessoa'] = 'Nome completo: [participantes da reunião]';
+      linhas['doc-fatos'] = 'Fatos: [pauta e registros da reunião]';
+    }
+    const titulo = ['memorando', 'oficio'].includes(modelo.genero) ? cabecalho
+      : modelo.genero === 'requerimento' ? ['Para: [destinatário]'] : [];
+    const corpo = modelo.campos.map(campo => linhas[campo]);
+    if (!modelo.campos.includes('doc-finalidade-ampla')) corpo.push('Finalidade: [para que será usado, se necessário]');
+    return [...titulo, ...corpo].join('\n');
+  }
   function tipoAtual() {
     return valor('ds-modelo') === 'comparecimento-responsavel'
       ? 'comparecimento-responsavel'
@@ -3394,15 +3510,15 @@ const AssistenteDocumentalLocal = Object.freeze({
       <label for="ia-extra-pedido">
         O que voc\u00ea precisa?
       </label>
-      <p>Voc\u00ea pode pedir declara\u00e7\u00f5es sobre projetos, recebimentos,
-        acontecimentos e estudantes. Informe o que ocorreu, quando e quem participou.
-        Para documentos funcionais, informe o nome completo ou a matr\u00edcula do servidor.
-        Tamb\u00e9m pode usar: Fatos:, Data do acontecimento:, Fornecedor:,
-        Servidor:, Titular:, Data inicial:, Data final: e Justificativa:.</p>
+      <p id="ia-extra-roteiro-ajuda">Escolha o assunto / modelo para ver o formato do pedido.
+        Use Inserir formato para preencher as informações depois de cada rótulo,
+        ou escreva seu pedido livremente.
+        Os itens indicados como opcionais ou condicionais só precisam ser informados quando se aplicarem.</p>
+      <button type="button" id="ia-extra-inserir-roteiro" style="margin-bottom:8px">Inserir formato para preencher</button>
       <textarea
         id="ia-extra-pedido"
         maxlength="12000"
-        placeholder="Ex.: Fa\u00e7a uma declara\u00e7\u00e3o de que a escola recebeu 6 lixeiras para coleta seletiva do Projeto Montesul em 23/10/2026, ap\u00f3s uma palestra. Voc\u00ea tamb\u00e9m pode colar um texto para organizar."
+        aria-describedby="ia-extra-roteiro-ajuda"
       ></textarea>
       <details>
         <summary>
@@ -3472,6 +3588,27 @@ const AssistenteDocumentalLocal = Object.freeze({
     const container = textoOriginal.closest('.docs-panel');
     if (!container) return;
     container.prepend(painel);
+    const atualizarRoteiro = () => {
+      const pedido = $('ia-extra-pedido');
+      pedido.placeholder = roteiroDoPedido(valor('ia-extra-modelo'));
+      pedido.rows = Math.min(15, Math.max(7, pedido.placeholder.split('\n').length));
+      $('ia-extra-inserir-roteiro').hidden = Boolean(pedido.value.trim());
+    };
+    $('ia-extra-modelo').addEventListener('change', atualizarRoteiro);
+    $('ia-extra-modelo').addEventListener('input', atualizarRoteiro);
+    $('ia-extra-pedido').addEventListener('input', () => {
+      $('ia-extra-inserir-roteiro').hidden = Boolean(valor('ia-extra-pedido'));
+    });
+    $('ia-extra-inserir-roteiro').onclick = () => {
+      const pedido = $('ia-extra-pedido');
+      if (pedido.value.trim()) return;
+      pedido.value = roteiroDoPedido(valor('ia-extra-modelo')).split('\n')
+        .map(linha => linha.slice(0, linha.indexOf(':') + 1) + ' ').join('\n');
+      pedido.dispatchEvent(new Event('input', { bubbles:true }));
+      pedido.focus();
+      pedido.setSelectionRange?.(pedido.value.indexOf(':') + 2, pedido.value.indexOf(':') + 2);
+    };
+    atualizarRoteiro();
     const descricao = document.querySelector('.page-header p');
     if(descricao)descricao.textContent='Documentos para alunos, responsáveis, servidores, projetos e outras situações da escola. Escolha um assunto no assistente ou descreva os fatos.';
     if (!$('doc-afastamento')) {
@@ -3995,7 +4132,7 @@ const AssistenteDocumentalLocal = Object.freeze({
         iaLinguagem()||forcarIA ? 2400000 : 45000
       );
       const botoes = painel.querySelectorAll(
-        '[data-acao],#ia-extra-novo,' +
+        '[data-acao],#ia-extra-novo,#ia-extra-inserir-roteiro,' +
         '#ia-extra-desfazer,#ia-extra-aplicar,#ia-local-refinar'
       );
       botoes.forEach(b => b.disabled = true);
@@ -4082,6 +4219,7 @@ const AssistenteDocumentalLocal = Object.freeze({
       $('ia-extra-pedido').value = '';
       $('ia-extra-referencia').value = '';
       $('ia-extra-modelo').value = 'auto';
+      atualizarRoteiro();
       $('ia-extra-aplicar').hidden = true;
       perguntas();
       mensagem(
