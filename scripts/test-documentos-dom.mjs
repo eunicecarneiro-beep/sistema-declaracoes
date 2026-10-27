@@ -31,6 +31,35 @@ const tick=()=>new Promise(r=>setImmediate(r));
 async function acao(a){document.querySelector(`[data-acao="${a}"]`).click();for(let i=0;i<10&&document.querySelector('[data-acao="gerar"]').disabled;i++)await tick();const s=$('ia-extra-status').textContent;assert.ok(!s.includes('Não foi possível'),s);}
 async function gerar(pedido,modelo='auto'){set('ia-extra-modelo',modelo);set('ia-extra-pedido',pedido);await acao('gerar');}
 assert.ok($('ia-extra-pedido'),'Assistente montado');
+const normalizarRotulo=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const aliasesRoteiro=new Set(Object.values(ctx.AssistenteDocumentalAmplo.definicoes).flatMap(d=>Array.from(d[2])));
+for(const m of ctx.AssistenteDocumentalAmplo.modelos){
+  set('ia-extra-modelo',m.id);
+  const guia=$('ia-extra-pedido').placeholder;
+  assert.ok(guia.includes('\n')&&!guia.includes('undefined'),m.id);
+  for(const linha of guia.split('\n'))assert.ok(aliasesRoteiro.has(normalizarRotulo(linha.split(':')[0])),m.id+': '+linha);
+  if(['memorando','oficio'].includes(m.genero))assert.match(guia,/Número:.*\nPara:.*\nA\/C:.*\nSetor:/);
+}
+for(const o of $('ia-extra-modelo').options){
+  if(!o.value.startsWith('legado:'))continue;
+  set('ia-extra-modelo',o.value);
+  assert.ok($('ia-extra-pedido').placeholder.split('\n').length>=2,o.value);
+}
+set('ia-extra-modelo','matricula');
+assert.match($('ia-extra-pedido').placeholder,/Nome do aluno:.*\nIdentificação:.*\nTurma:.*\nAno letivo:/);
+$('ia-extra-inserir-roteiro').click();
+assert.match($('ia-extra-pedido').value,/Nome do aluno: \nIdentificação: \nTurma: /);
+assert.doesNotMatch($('ia-extra-pedido').value,/\[|\]/,'Roteiro inserido não contém instruções que possam virar fatos.');
+const esqueleto=$('ia-extra-pedido').value;
+set('ia-extra-modelo','legado:prorrogacao');
+assert.equal($('ia-extra-pedido').value,esqueleto,'Trocar modelo preserva texto preenchido.');
+assert.match($('ia-extra-pedido').placeholder,/Servidor:.*\nData inicial:.*\nPrazo:/);
+assert.ok($('ia-extra-inserir-roteiro').hidden);
+$('ia-extra-novo').click();
+assert.equal($('ia-extra-modelo').value,'auto');
+assert.match($('ia-extra-pedido').placeholder,/^Assunto:/);
+assert.ok(!$('ia-extra-inserir-roteiro').hidden);
+console.log('PASSOU DOM: roteiros dos 69 modelos, rótulos reconhecidos, inserção sem exemplos, preservação do pedido e reinício.');
 assert.equal($('ia-local-modo').value,'modelos');assert.equal($('ia-local-perfil').value,'cpu');assert.equal($('ia-local-origem').value,'escola');
 console.log('PASSOU DOM: migração começa no modo rápido e preserva perfil e origem dos modelos configurados anteriormente.');
 await gerar('Faça uma declaração de recebimento de 06 (seis) lixeiras destinadas à coleta seletiva, fornecidas pelo Projeto Montesul (Associação Montes Claros de Catadores), no dia 23/10/2026, em decorrência da palestra realizada nesta unidade escolar.');
