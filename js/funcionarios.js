@@ -16,6 +16,39 @@
 /* =========================================================
    LISTA DE FUNCIONÁRIOS
    ========================================================= */
+const CargosFuncionarios = Object.freeze({
+  lista: Object.freeze([
+    "AJUDANTE DE SERVIÇOS GERAIS",
+    "ASEB",
+    "AUX. DOCENCIA",
+    "CANTINEIRA",
+    "DIRETOR",
+    "INSPETOR DE ALUNO",
+    "PEB I APOIO",
+    "PEB I EVENTUAL",
+    "PEB I COMPLEMENTAÇÃO",
+    "PEB I REGENTE",
+    "PEB I SALA DE RECURSO",
+    "PEB II E.D.F",
+    "PEB II INGLES",
+    "READ",
+    "SEC",
+    "SERVENTE DE ZELADORIA",
+    "SUPERVISOR",
+    "TECNICO INFO."
+  ]),
+  opcoes(atual = "") {
+    const selecionado = String(atual || "").trim();
+    return `<option value="" disabled ${this.lista.includes(selecionado) ? "" : "selected"}>Selecione o cargo</option>` +
+      this.lista.map(cargo => `<option value="${App.escapeHTML(cargo)}" ${cargo === selecionado ? "selected" : ""}>${App.escapeHTML(cargo)}</option>`).join("");
+  },
+  validar(valor) {
+    const cargo = String(valor || "").trim();
+    if (!this.lista.includes(cargo)) throw new Error("Selecione um dos cargos disponíveis na lista.");
+    return cargo;
+  }
+});
+
 const FuncionariosPage = {
   state: {
     funcionarios: [],
@@ -462,35 +495,7 @@ const FuncionariosPage = {
      OPÇÕES DE CARGO
      ======================================================= */
   cargosDisponiveis() {
-    const cargos =
-      this.state.funcionarios
-        .map(
-          f =>
-            String(
-              f.cargo ||
-              ""
-            ).trim()
-        )
-        .filter(
-          cargo =>
-            cargo !== ""
-        );
-    return [
-      ...new Set(
-        cargos
-      )
-    ]
-      .sort(
-        (a,b) =>
-          a.localeCompare(
-            b,
-            "pt-BR",
-            {
-              sensitivity:
-                "base"
-            }
-          )
-      );
+    return CargosFuncionarios.lista;
   },
   atualizarOpcoesCargo() {
     const select =
@@ -1851,16 +1856,17 @@ const FuncionarioPage = {
               <label
                 for="cargo"
               >
-                Cargo / Função
+                Cargo / Função *
               </label>
-              <input
+              <select
                 id="cargo"
                 class="input"
-                value="${this.esc(
-                  f.cargo
-                )}"
-                placeholder="Ex.: PEB I REGENTE"
-              >
+                required
+                aria-describedby="cargoAjuda"
+              >${CargosFuncionarios.opcoes(f.cargo)}</select>
+              <small id="cargoAjuda" class="fx-info">${f.cargo && !CargosFuncionarios.lista.includes(String(f.cargo).trim())
+                ? `Cargo registrado: ${this.esc(f.cargo)}. Selecione um cargo da lista para salvar a ficha.`
+                : "Selecione um dos cargos definidos para a escola."}</small>
             </div>
             <div class="field">
               <label
@@ -2337,10 +2343,7 @@ const FuncionarioPage = {
             get(
               "endereco"
             ).trim(),
-          cargo:
-            get(
-              "cargo"
-            ).trim(),
+          cargo: CargosFuncionarios.validar(get("cargo")),
           setor:
             get(
               "setor"
@@ -2604,13 +2607,13 @@ const NovoFuncionarioPage = {
               <label
                 for="cargo"
               >
-                Cargo / Função
+                Cargo / Função *
               </label>
-              <input
+              <select
                 id="cargo"
                 class="input"
-                placeholder="Ex.: PEB I REGENTE"
-              >
+                required
+              >${CargosFuncionarios.opcoes()}</select>
             </div>
             <div class="field">
               <label
@@ -3034,10 +3037,7 @@ const NovoFuncionarioPage = {
             get(
               "endereco"
             ).trim(),
-          cargo:
-            get(
-              "cargo"
-            ).trim(),
+          cargo: CargosFuncionarios.validar(get("cargo")),
           setor:
             get(
               "setor"
