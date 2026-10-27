@@ -177,4 +177,64 @@ test('Ressalva sem doação e planejamento futuro não viram recebimento conclu�
  const p=preparar({pedido:'Faça uma declaração de que nossa escola vai receber 6 lixeiras do Projeto Montesul em 30/10/2026. Ainda não houve entrega.'});
  assert.match(texto(p),/vai receber/);assert.match(texto(p),/Ainda não houve entrega/);assert.doesNotMatch(texto(p),/escola recebeu|Carneiro recebeu/);
 });
+const pedidoRenovacao='faça um memorando numero 30, falando sobre a renovação de contrato da servidora Maria Clara Alves da Silva, a partir da data de 22/12/2026 por mais 356 dias apartir da data , sendo necessário para a continuidade de atividades administrativas e correlatas';
+const renovacao=()=>preparar({pedido:pedidoRenovacao});
+const revisar=(p,acao,base=texto(p))=>preparar({acao,pedido:'',contexto:{tipo:p.tipo,campos:p.campos},modelo_base:base});
+test('Pedido narrativo de renovação extrai número, nome, data inicial e prazo sem rótulos',()=>{
+ const p=renovacao();assert.equal(p.campos['doc-modelo-amplo'],'memo-renovacao');assert.equal(p.campos['doc-numero'],'30');assert.equal(p.campos['doc-pessoa'],'Maria Clara Alves da Silva');assert.equal(p.campos['doc-periodo-inicio'],'2026-12-22');assert.equal(p.campos['doc-prazo-amplo'],'356 dias');
+ assert.match(texto(p),/^Solicitamos a renovação do contrato da servidora Maria Clara Alves da Silva/);assert.match(texto(p),/assegurar a continuidade das atividades administrativas e correlatas/);assert.equal((texto(p).match(/Maria Clara Alves da Silva/g)||[]).length,1);assert.doesNotMatch(texto(p),/falando sobre|apartir|numero 30|Informações complementares|INFORMAR SERVIDOR/);
+});
+test('Numeração inicial aceita abreviações e ano sem capturar a data ou o prazo',()=>{
+ for(const titulo of ['memorando número 30','memorando n° 30','memo nº 030','memorando n.º 30/2026','memorando 30/2026','ofício n. 30/2026']){
+  const p=preparar({pedido:'Pode me fazer um '+titulo+', solicitando o conserto do telhado em 22/12/2026 por 356 dias.'});assert.match(p.campos['doc-numero'],/^0?30(?:\/2026)?$/);assert.doesNotMatch(texto(p),/número 30|nº 030|n.º 30/);
+ }
+});
+test('Número citado em referência não vira o número do novo memorando',()=>{
+ const p=preparar({pedido:'Faça um memorando de resposta ao memorando número 28/2026. Fatos: o processo está em análise.'});assert.ok(!p.campos['doc-numero']);
+});
+test('Numeração com ano é preservada e o ano diferente da emissão é sinalizado',()=>{
+ const p=preparar({pedido:'Memorando 30/2025 sobre solicitação de materiais.'});assert.equal(p.campos['doc-numero'],'30/2025');assert.ok(p.avisos.some(x=>/ano da numeração/.test(x)));assert.deepEqual(JSON.parse(JSON.stringify(ctx.AssistenteDocumentalAmplo.numeracao('30/2025','2026-10-23'))),{numero:'30',ano:'2025'});
+});
+test('Mais formal reformula o pedido de renovação e preserva dados e edições manuais',()=>{
+ const p=renovacao(),q=revisar(p,'formalizar',texto(p)+'\n\nRessalva: a renovação não foi aprovada.');assert.notEqual(texto(q),texto(p));assert.match(texto(q),/análise e a adoção das providências administrativas necessárias à renovação/);for(const t of ['Maria Clara Alves da Silva','356 dias','22/12/2026','a renovação não foi aprovada'])assert.ok(texto(q).includes(t));assert.equal(q.campos['doc-numero'],'30');
+});
+test('Deixe mais formal no complemento funciona como comando sem entrar no documento',()=>{
+ const p=renovacao(),q=complementar(p,'deixe ele mais formal');assert.match(texto(q),/providências administrativas necessárias à renovação/);assert.doesNotMatch(texto(q),/deixe|mais formal/);assert.equal(q.campos['doc-modelo-amplo'],'memo-renovacao');
+});
+test('Complete o texto desenvolve o encaminhamento sem criar fatos nem duplicar parágrafos',()=>{
+ const p=renovacao(),q=complementar(p,'complemente o texto'),r=complementar(q,'deixe o memorando mais completo');assert.match(texto(q),/Diante do exposto/);assert.equal((texto(r).match(/Diante do exposto/g)||[]).length,1);assert.equal((texto(r).match(/356 dias/g)||[]).length,1);assert.doesNotMatch(texto(r),/aprovad|bom desempenho|Lei |complemente o texto|deixe o memorando/);
+});
+test('Revisão e inclusão de fato no mesmo complemento preservam a negação',()=>{
+ const q=complementar(renovacao(),'deixe mais formal e inclua que não houve autorização para a renovação');assert.match(texto(q),/providências administrativas necessárias/);assert.match(texto(q),/Não houve autorização para a renovação/);assert.doesNotMatch(texto(q),/deixe mais formal|inclua que/);
+});
+test('Correção do número altera o cabeçalho sem trocar quantidades do corpo',()=>{
+ const p=renovacao(),q=complementar(p,'mude o número do memorando para 31',texto(p)+'\n\nReferência: memorando 30/2025.');assert.equal(q.campos['doc-numero'],'31');assert.match(texto(q),/356 dias/);assert.match(texto(q),/Referência: memorando 30\/2025/);
+});
+test('Número e destinatário ausentes podem ser preenchidos no complemento',()=>{
+ const p=preparar({pedido:'Faça um memorando solicitando materiais.'}),q=complementar(p,'o número é 30; coloque o destinatário para Secretaria Municipal de Educação; mude o setor para Gestão de Pessoas');assert.equal(q.campos['doc-numero'],'30');assert.equal(q.campos['doc-para'],'Secretaria Municipal de Educação');assert.equal(q.campos['doc-setor'],'Gestão de Pessoas');assert.equal(texto(q),texto(p));
+});
+test('Alterar prazo e data inicial mantém a emissão e os demais fatos da renovação',()=>{
+ const p=renovacao(),q=complementar(p,'altere o prazo para 365 dias; mude a data para 23/12/2026');assert.equal(q.campos['doc-prazo-amplo'],'365 dias');assert.equal(q.campos['doc-periodo-inicio'],'2026-12-23');assert.equal(q.campos['doc-data'],p.campos['doc-data']);assert.match(texto(q),/365 dias/);assert.match(texto(q),/23\/12\/2026/);assert.doesNotMatch(texto(q),/356|22\/12\/2026/);
+});
+test('Complemento de cabeçalho com rótulo conserva a formalização do corpo',()=>{
+ const p=revisar(renovacao(),'formalizar'),q=complementar(p,'Número: 32; Para: Secretaria Municipal de Educação.');assert.equal(q.campos['doc-numero'],'32');assert.equal(texto(q),texto(p));
+});
+test('Renovação sem motivo informado não inventa justificativa nem aprovação',()=>{
+ const p=preparar({pedido:'Memorando 30 para renovação do contrato da servidora Ana Souza, a partir de 22/12/2026 por 356 dias.'});assert.doesNotMatch(texto(p),/continuidade|desempenho|aprovad|autorizad/);
+});
+test('Detalhe adicional de renovação fora dos campos é preservado',()=>{
+ const p=preparar({pedido:'Memorando 30 sobre renovação do contrato da servidora Ana Souza, a partir de 22/12/2026 por 356 dias, com carga horária de 30 horas semanais.'});assert.match(texto(p),/30 horas semanais/);
+});
+test('Negação de renovação não vira solicitação positiva',()=>{
+ const p=preparar({pedido:'Memorando 30 informando que não haverá renovação do contrato da servidora Ana Souza.'});assert.notEqual(p.campos['doc-modelo-amplo'],'memo-renovacao');assert.match(texto(p),/não haverá renovação/);
+});
+test('Modelo oficial escolhido conserva cadastro e reconhece número narrativo',()=>{
+ const p=preparar({modelo_escolhido:'legado:prorrogacao',pedido:'Memorando número 30. Servidor: Maria Silva Teste; Data inicial: 22/12/2026; Prazo: 356; Justificativa: continuidade do atendimento.',funcionarios:[{id:'teste1',nome:'Maria Silva Teste',matricula:'123456',cargo:'PEB I'}]});assert.equal(p.tipo,'prorrogacao');assert.equal(p.principal_id,'teste1');assert.equal(p.campos['doc-numero'],'30');
+});
+test('Pedido de reparo coloquial ganha redação administrativa sem perder motivo',()=>{
+ const p=preparar({pedido:'Faça um memorando número 42, precisamos que consertem o telhado da biblioteca porque está entrando água na sala.'});assert.match(texto(p),/^Solicitamos o reparo do telhado da biblioteca/);assert.match(texto(p),/está entrando água na sala/);
+});
+test('Revisão protege nomes, citações, identificação e negações',()=>{
+ const p=renovacao(),base='A gente precisa de apoio pra Maria Clara Alves da Silva em 22/12/2026.\n\nNão houve autorização. Referência: "pra ontem", matrícula 123456, prazo de 356 dias.';const q=revisar(p,'formalizar',base);assert.match(texto(q),/^Solicitamos apoio para Maria Clara Alves da Silva/);for(const t of ['Não houve autorização','"pra ontem"','123456','356 dias','22/12/2026'])assert.ok(texto(q).includes(t));
+});
 console.log(JSON.stringify({grupos:total,modelosNovos:ctx.AssistenteDocumentalAmplo.modelos.length,ambiente:'Node VM, dados fictícios; sem alterações no banco'}));
