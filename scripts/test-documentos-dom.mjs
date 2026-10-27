@@ -54,6 +54,14 @@ console.log('PASSOU DOM: formulário de frequência completa o texto.');
 await gerar('Faça um memorando solicitando o reparo do telhado da biblioteca. Justificativa: infiltração após as chuvas; Número: 25; Para: Setor de Infraestrutura; Setor: Manutenção Escolar.');
 assert.equal($('doc-modelo-amplo').value,'memo-manutencao');assert.ok(document.querySelector('.memo-header'));assert.match($('doc-preview').textContent,/telhado/);
 console.log('PASSOU DOM: manutenção usa o memorando oficial.');
+await gerar('faça um memorando numero 30, falando sobre a renovação de contrato da servidora Maria Clara Alves da Silva, a partir da data de 22/12/2026 por mais 356 dias apartir da data, sendo necessário para a continuidade de atividades administrativas e correlatas');
+assert.equal($('doc-numero').value,'30');assert.equal($('doc-modelo-amplo').value,'memo-renovacao');assert.match($('doc-preview').textContent,/30\/2026/);assert.match($('ia-extra-entendimento').textContent,/Número: 30/);assert.match($('ia-extra-entendimento').textContent,/Prazo: 356 dias/);
+await acao('formalizar');assert.match($('doc-texto').value,/providências administrativas necessárias à renovação/);
+set('ia-extra-pedido','altere o prazo para 365 dias; mude o número para 31');await acao('complementar');assert.equal($('doc-numero').value,'31');assert.match($('doc-preview').textContent,/31\/2026/);assert.match($('doc-texto').value,/365 dias/);assert.doesNotMatch($('doc-texto').value,/356 dias/);assert.match($('ia-extra-entendimento').textContent,/Prazo: 365 dias/);
+$('ia-extra-desfazer').click();assert.equal($('doc-numero').value,'30');assert.match($('doc-texto').value,/356 dias/);assert.match($('doc-texto').value,/providências administrativas necessárias/);
+set('ia-extra-pedido','complemente o texto');await acao('complementar');assert.match($('doc-texto').value,/Diante do exposto/);assert.doesNotMatch($('doc-texto').value,/complemente o texto/);assert.equal(ativacoes,0);
+await gerar('Memorando 030/2025 sobre solicitação de materiais.');assert.match($('doc-preview').textContent,/030\/2025/);assert.doesNotMatch($('doc-preview').textContent,/030\/2025\/2026/);
+console.log('PASSOU DOM: número no cabeçalho, prazo e pessoa reconhecidos; formalização, complemento, correções, desfazer e ano da numeração integrados sem carregar IA.');
 await gerar('Servidor: Maria Silva Teste; Data inicial: 23/10/2026; Prazo: 30; Justificativa: manter o atendimento.','legado:prorrogacao');
 assert.equal($('doc-tipo').value,'prorrogacao');assert.equal($('doc-fim').value,'2026-11-21');assert.ok(!$('doc-principal-bloco').hidden);
 console.log('PASSOU DOM: prorrogação continua utilizando o cadastro e a contagem de dias.');
@@ -63,7 +71,7 @@ $('doc-word').click();await tick();assert.equal(downloads.length,1);const export
 console.log('PASSOU DOM: ofício possui título próprio e exportação Word.');
 assert.deepEqual(logs,[]);const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);assert.equal(new Set(ids).size,ids.length,'Não pode haver IDs duplicados.');
 for(const m of ctx.AssistenteDocumentalAmplo.modelos){await gerar('',m.id);assert.equal($('doc-modelo-amplo').value,m.id);assert.ok(!$('doc-amplo-bloco').hidden);assert.match($('doc-preview').textContent,new RegExp(ctx.AssistenteDocumentalAmplo.generos[m.genero]));}
-console.log('PASSOU DOM: os 58 modelos estão integrados ao formulário e à prévia.');
+console.log('PASSOU DOM: os '+ctx.AssistenteDocumentalAmplo.modelos.length+' modelos estão integrados ao formulário e à prévia.');
 assert.equal(ativacoes,0,'Os modelos prontos não devem iniciar download.');set('ia-local-modo','ia');
 set('ia-extra-modelo','auto');set('ia-extra-pedido','Declaração de recebimento de seis lixeiras em comodato do Projeto Montesul em 23/10/2026.');
 document.querySelector('[data-acao="gerar"]').click();await tick();assert.ok(entradaIA);assert.equal(ativacoes,1,'Preparar documento deve ativar a IA sem botão separado.');

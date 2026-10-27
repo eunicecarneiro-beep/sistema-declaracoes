@@ -18,7 +18,7 @@ O Cloudflare instala as dependências fixadas antes do build. Não publique `nod
 
 ## Assistente documental e IA local
 
-`DOCUMENTOS_ASSISTENTE.md` descreve os 58 modelos adicionais e os modelos
+`DOCUMENTOS_ASSISTENTE.md` descreve os 59 modelos adicionais e os modelos
 oficiais de servidores. `IA_LOCAL.md` explica o modelo de linguagem aberto,
 ativação, requisitos, privacidade e teste de aceitação no computador da escola.
 O uso dos modelos prontos dispensa download de pesos e WebGPU.

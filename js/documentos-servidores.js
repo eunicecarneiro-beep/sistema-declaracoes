@@ -21,6 +21,9 @@ const DocumentosServidoresPage = (() => {
   function camposAmplo() {
     return Object.fromEntries((globalThis.AssistenteDocumentalAmplo?.campos || []).map(id => [id, valor(id)]));
   }
+  function numeracaoAtual() {
+    return globalThis.AssistenteDocumentalAmplo?.numeracao(valor('doc-numero'),valor('doc-data')) || {numero:valor('doc-numero'),ano:valor('doc-data').slice(0,4)||String(new Date().getFullYear())};
+  }
   function ensureMemoStyle() {
     if (document.getElementById('estilo-memorando-oficial')) return;
     const s = document.createElement('style');
@@ -41,8 +44,8 @@ const DocumentosServidoresPage = (() => {
   }
   function corpoMemorando() {
     const sig = assinatura();
-    const numeracao = pad(valor('doc-numero'),'N\u00ba DO MEMORANDO');
-    const anoMemo = valor('doc-data').slice(0,4) || String(new Date().getFullYear());
+    const numeracao = pad(numeracaoAtual().numero,'N\u00ba DO MEMORANDO');
+    const anoMemo = numeracaoAtual().ano;
     const parags = limpa(valor('doc-texto')).split(/\n\s*\n/).filter(Boolean);
     return `<article class="memo-sheet">
       <table class="memo-header"><colgroup><col style="width:20%"><col style="width:30%"><col style="width:29%"><col style="width:21%"></colgroup>
@@ -190,7 +193,7 @@ const DocumentosServidoresPage = (() => {
     const amplo = modeloAmplo();
     if (amplo) {
       const titulo = amplo.genero === 'termo' ? amplo.nome.toLocaleUpperCase('pt-BR') : AssistenteDocumentalAmplo.generos[amplo.genero];
-      const numero = ['memorando','oficio'].includes(amplo.genero) && valor('doc-numero') ? ` Nº ${valor('doc-numero')}/${valor('doc-data').slice(0,4)}` : '';
+      const numero = ['memorando','oficio'].includes(amplo.genero) && valor('doc-numero') ? ` Nº ${numeracaoAtual().numero}/${numeracaoAtual().ano}` : '';
       return {titulo:titulo+numero,ehMemo:amplo.genero==='memorando'};
     }
     const tipo = valor('doc-tipo');
@@ -200,7 +203,7 @@ const DocumentosServidoresPage = (() => {
       prorrogacao:'MEMORANDO', substituicao:'MEMORANDO',
       contratacao:'MEMORANDO', memorando:'MEMORANDO'
     }[tipo] || 'DOCUMENTO';
-    const numero = ehMemo ? ` N\u00ba ${valor('doc-numero') || '____'}/${valor('doc-data').slice(0, 4) || new Date().getFullYear()}` : '';
+    const numero = ehMemo ? ` N\u00ba ${numeracaoAtual().numero || '____'}/${numeracaoAtual().ano}` : '';
     return { titulo: titulo + numero, ehMemo };
   }
 
@@ -539,7 +542,7 @@ const DocumentosServidoresPage = (() => {
     situacao('Documento aberto para revis\u00e3o final e impress\u00e3o. Use \u201cSalvar como PDF\u201d no navegador.', 'ok');
   }
   async function copiar() {
-    const text = ehMemo() ? `MEMORANDO N\u00ba ${valor('doc-numero')}/${valor('doc-data').slice(0,4)}\nData: ${dt(valor('doc-data'))}\nDe: ${assinatura().nome} \u2014 ${assinatura().cargo}\nPara: ${valor('doc-para')}\nA/C: ${valor('doc-ac')}\n${valor('doc-setor')}\nASSUNTO: ${valor('doc-assunto')}\n\n${valor('doc-saudacao')}\n\n${valor('doc-texto')}\n\n${valor('doc-despedida')}\n\n${assinatura().nome}\n${assinatura().cargo}` : `${cabecalho().titulo}\nMontes Claros/MG, ${dataExtenso(valor('doc-data'))}\n${valor('doc-destino')}\nAssunto: ${valor('doc-assunto')}\n\n${valor('doc-texto')}\n\n${assinatura().nome}\n${assinatura().cargo}`;
+    const text = ehMemo() ? `MEMORANDO N\u00ba ${numeracaoAtual().numero}/${numeracaoAtual().ano}\nData: ${dt(valor('doc-data'))}\nDe: ${assinatura().nome} \u2014 ${assinatura().cargo}\nPara: ${valor('doc-para')}\nA/C: ${valor('doc-ac')}\n${valor('doc-setor')}\nASSUNTO: ${valor('doc-assunto')}\n\n${valor('doc-saudacao')}\n\n${valor('doc-texto')}\n\n${valor('doc-despedida')}\n\n${assinatura().nome}\n${assinatura().cargo}` : `${cabecalho().titulo}\nMontes Claros/MG, ${dataExtenso(valor('doc-data'))}\n${valor('doc-destino')}\nAssunto: ${valor('doc-assunto')}\n\n${valor('doc-texto')}\n\n${assinatura().nome}\n${assinatura().cargo}`;
     try {
       await navigator.clipboard.writeText(text);
       situacao('Texto copiado. Voc\u00ea pode col\u00e1-lo no 1Doc, Word ou e-mail.', 'ok');
@@ -684,8 +687,8 @@ const DocumentosServidoresPage = (() => {
     const sig=assinatura();
     const replacements={
       '{{DATA}}':dt(valor('doc-data')),
-      '{{NUMERO}}':valor('doc-numero'),
-      '{{ANO}}':valor('doc-data').slice(0,4),
+      '{{NUMERO}}':numeracaoAtual().numero,
+      '{{ANO}}':numeracaoAtual().ano,
       '{{ASSINANTE}}':sig.nome,
       '{{CARGO_ASSINANTE}}':sig.cargo,
       '{{PARA}}':valor('doc-para'),
@@ -732,7 +735,7 @@ const DocumentosServidoresPage = (() => {
       const blob=zipStored(files);
       const url=URL.createObjectURL(blob),a=document.createElement('a');
       a.href=url;
-      a.download=`MEMORANDO_${valor('doc-numero')}_${valor('doc-data').slice(0,4)}.docx`;
+      a.download=`MEMORANDO_${numeracaoAtual().numero}_${numeracaoAtual().ano}.docx`;
       document.body.appendChild(a);a.click();a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),60000);
       situacao('Word .docx gerado a partir do modelo original. Confira dados, assinatura e quebras de p\u00e1gina antes do protocolo.','ok');
@@ -2780,13 +2783,13 @@ const AssistenteDocumentalLegado = (() => {
     if (principal && secundario && principal.id === secundario.id) throw new Error('O servidor principal e o secund\u00e1rio devem ser pessoas diferentes.');
     return { principal, secundario };
   }
-  function revisar(texto, acao, cadastro = []) {
+  function revisar(texto, acao, cadastro = [], campos = {}) {
     let t = textoSeguro(texto, 24000, 'texto do documento');
     if (!t) throw new Error('Escreva ou prepare o documento antes de revisar.');
     const protecoes = [];
     const guardar = valor => { const i = protecoes.push(valor) - 1; return `\uE000${String.fromCharCode(0xE100 + (i >>> 8), 0xE100 + (i & 255))}\uE001`; };
     // Protege nomes, identificadores, datas, quantidades e trechos entre aspas.
-    const nomes = cadastro.map(f => limpo(f.nome || f.nome_completo)).filter(Boolean).sort((a, b) => b.length - a.length);
+    const nomes = [...cadastro.map(f => limpo(f.nome || f.nome_completo)),...['doc-pessoa','doc-responsavel-amplo','doc-projeto','doc-identificacao'].map(id=>limpo(campos[id]))].filter(Boolean).sort((a, b) => b.length - a.length);
     if (nomes.length) t = t.replace(new RegExp(nomes.map(rx).join('|'), 'gi'), guardar);
     t = t.replace(/\[[^\]]*\]|\{\{[^}]*\}\}|https?:\/\/\S+|\b[^\s@]+@[^\s@]+\.[^\s@]+\b|[\u201c"][^\u201d"\n]+[\u201d"]|\b\d[\d./:,-]*\b/g, guardar);
     const trocas = [
@@ -2799,7 +2802,20 @@ const AssistenteDocumentalLegado = (() => {
       [/\bnescessidade\b/gi, 'necessidade'], [/\bsolicita\u00e7ao\b/gi, 'solicita\u00e7\u00e3o']
     ];
     if (acao === 'formalizar') trocas.push([/\ba gente solicita\b/gi, 'solicitamos'],
-      [/\ba gente precisa de\b/gi, 'necessitamos de'], [/\bpra\b/gi, 'para'], [/\bpro\b/gi, 'para o']);
+      [/\bpra\b/gi, 'para'], [/\bpro\b/gi, 'para o']);
+    if (acao !== 'resumir') trocas.push(
+      [/(^|\n\s*\n)(?:a gente precisa de|precisamos de|estamos precisando de|gostar[ií]amos de pedir|gostaria de pedir|venho pedir)\s+/gi, '$1Solicitamos '],
+      [/\bapartir\b/gi, 'a partir'], [/\ba partir da data de\b/gi, 'a partir de'],
+      [/\bcontinuidade de atividades administrativas\b/gi, 'continuidade das atividades administrativas'],
+      [/\bpra\b/gi, 'para'], [/\bpro\b/gi, 'para o'], [/\bt[aá](?=\s)/gi, 'está'],
+      [/(^|\n\s*\n)(?:pedimos|solicitamos)\s+(?:que\s+)?(?:arrumem|consertem|reparem)\s+(o|a|os|as)\s+/gi, (_m,borda,a)=>borda+'Solicitamos o reparo '+({o:'do',a:'da',os:'dos',as:'das'}[a.toLowerCase()])+' ']
+    );
+    if (acao === 'formalizar') trocas.push(
+      [/(^|\n\s*\n)Solicitamos a renova[cç][aã]o do contrato\b/gi, '$1Solicitamos a análise e a adoção das providências administrativas necessárias à renovação do contrato'],
+      [/(^|\n\s*\n)A gente informa\b/gi, '$1Informamos'],
+      [/(^|\n\s*\n)A gente pede\b/gi, '$1Solicitamos'],
+      [/(^|\n\s*\n)Informações complementares:\s*/gi, '$1Informações adicionais: ']
+    );
     for (const [re, v] of trocas) t = t.replace(re, v);
     t = t.replace(/[ \t]+/g, ' ').replace(/ +([,;.!?])/g, '$1').replace(/\n{3,}/g, '\n\n');
     let partes = t.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
@@ -2835,7 +2851,7 @@ const AssistenteDocumentalLegado = (() => {
     for (const [id, valor] of Object.entries(base)) if (CAMPOS.has(id) && typeof valor === 'string') dados[id] = textoSeguro(valor, 16000, 'campo ' + id);
     if (['melhorar', 'resumir', 'formalizar'].includes(acao)) {
       const original = textoSeguro(entrada.modelo_base || '', 24000, 'texto do documento');
-      const texto = revisar(original, acao, cadastro);
+      const texto = revisar(original, acao, cadastro, base);
       avisar(acao === 'resumir' ? 'A redu\u00e7\u00e3o \u00e9 conservadora: preserva as informa\u00e7\u00f5es e encurta express\u00f5es de reda\u00e7\u00e3o.' : 'A revis\u00e3o local aplica ajustes limitados de reda\u00e7\u00e3o. Confira a gram\u00e1tica e os fatos.');
       if (texto === original) avisar('N\u00e3o encontrei ajustes autom\u00e1ticos seguros para esse texto. Voc\u00ea pode edit\u00e1-lo no formul\u00e1rio.');
       return retornar(TIPOS.includes(contexto.tipo) ? contexto.tipo : 'memorando', texto, {}, 'Revis\u00e3o local conclu\u00edda.');
@@ -3343,7 +3359,7 @@ const AssistenteDocumentalLocal = Object.freeze({
       <h3>Assistente de documentos da escola</h3>
       <div id="ia-local-painel" style="border:1px solid #adc7df;border-radius:9px;padding:12px;margin:12px 0">
         <strong>Prepare o documento pelo seu pedido</strong>
-        <p>O modo Rápido interpreta os pedidos conhecidos e monta a minuta sem baixar um modelo de IA. Você pode escrever de forma natural e usar Complementar pedido para corrigir o documento: “mude a data para 24/10/2026” ou “troque o nome para Ana Silva”. Confira os dados identificados e a prévia.</p>
+        <p>O modo Rápido interpreta os pedidos conhecidos e monta a minuta sem baixar um modelo de IA. Você pode escrever “memorando número 30” no pedido. Em Complementar pedido, escreva a alteração ou informação nova: “mude o número para 31”, “altere o prazo para 365 dias” ou “deixe o texto mais formal”. Confira os dados identificados e a prévia.</p>
         <label for="ia-local-modo">Como preparar o texto</label>
         <select id="ia-local-modo"><option value="modelos">Rápido — interpretação e modelos locais (recomendado)</option><option value="ia">IA local — redação livre, mais demorada</option></select>
         <div class="ia-botoes"><button type="button" id="ia-local-refinar">Refinar documento com IA</button></div>
@@ -3549,8 +3565,8 @@ const AssistenteDocumentalLocal = Object.freeze({
     function mostrarEntendimento(){
       const area=$('ia-extra-entendimento'),modelo=AssistenteDocumentalAmplo.porId(valor('doc-modelo-amplo'));
       const linhas=[modelo?.nome||[...$('doc-tipo').options].find(o=>o.value===valor('doc-tipo'))?.textContent||'Documento escolar'];
-      for(const [id,nome]of [['doc-pessoa','Pessoa'],['doc-responsavel-amplo','Responsável'],['doc-turma','Turma'],['doc-turno-amplo','Turno'],['doc-data-fato','Data do fato'],['doc-projeto','Projeto / origem'],['doc-bens','Materiais']]){
-        let v=valor(id);if(!v||!modelo?.campos.includes(id))continue;
+      for(const [id,nome]of [['doc-numero','Número'],['doc-para','Destinatário'],['doc-setor','Setor'],['doc-assunto','Assunto'],['doc-pessoa','Pessoa'],['doc-responsavel-amplo','Responsável'],['doc-turma','Turma'],['doc-turno-amplo','Turno'],['doc-data-fato','Data do fato'],['doc-periodo-inicio','Início'],['doc-periodo-fim','Término'],['doc-prazo-amplo','Prazo'],['doc-projeto','Projeto / origem'],['doc-bens','Materiais']]){
+        let v=valor(id);if(!v||(!['doc-numero','doc-para','doc-setor','doc-assunto'].includes(id)&&!modelo?.campos.includes(id)))continue;
         if(/^\d{4}-\d{2}-\d{2}$/.test(v))v=v.slice(8)+'/'+v.slice(5,7)+'/'+v.slice(0,4);
         linhas.push(nome+': '+v);
       }

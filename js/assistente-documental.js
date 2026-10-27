@@ -8,7 +8,7 @@
   const terminar = x => { const s = limpar(x).replace(/[;,. ]+$/, ''); return s ? s + (/[!?]$/.test(s) ? '' : '.') : ''; };
   const frase = x => { const s = terminar(x); return s ? s[0].toLocaleUpperCase('pt-BR') + s.slice(1) : ''; };
   const F = Object.freeze({
-    'doc-pessoa': ['Nome da pessoa interessada', 'text', ['nome completo', 'pessoa', 'interessado', 'interessada', 'nome do aluno', 'nome da aluna', 'aluno', 'aluna', 'estudante', 'participante', 'requerente']],
+    'doc-pessoa': ['Nome da pessoa interessada', 'text', ['nome completo', 'pessoa', 'interessado', 'interessada', 'nome do aluno', 'nome da aluna', 'aluno', 'aluna', 'estudante', 'participante', 'requerente', 'servidor', 'servidora']],
     'doc-identificacao': ['Identificação da pessoa (opcional)', 'text', ['identificacao', 'matricula escolar', 'registro escolar']],
     'doc-qualificacao': ['Qualificação / vínculo (opcional)', 'text', ['qualificacao', 'vinculo']],
     'doc-turma': ['Ano / turma', 'text', ['turma', 'turma do aluno', 'turma da aluna', 'ano turma', 'serie']],
@@ -18,6 +18,7 @@
     'doc-data-fato': ['Data do fato / atividade', 'date', ['data do fato', 'data do recebimento', 'data da entrega', 'data do evento', 'data da atividade', 'data do comparecimento', 'data da reuniao', 'data']],
     'doc-periodo-inicio': ['Início do período (se aplicável)', 'date', ['data inicial', 'data de inicio', 'inicio do periodo', 'inicio']],
     'doc-periodo-fim': ['Fim do período (se aplicável)', 'date', ['data final', 'data de termino', 'fim do periodo', 'fim']],
+    'doc-prazo-amplo': ['Prazo solicitado em dias (opcional)', 'text', ['prazo em dias', 'prazo solicitado', 'duracao em dias', 'prazo']],
     'doc-entrada-amplo': ['Horário inicial (se aplicável)', 'time', ['horario de entrada', 'hora inicial', 'entrada']],
     'doc-saida-amplo': ['Horário final (se aplicável)', 'time', ['horario de saida', 'hora final', 'saida']],
     'doc-projeto': ['Projeto / instituição / fornecedor', 'text', ['projeto', 'programa', 'instituicao', 'fornecedor', 'origem', 'doador', 'cedente']],
@@ -87,6 +88,7 @@
   add('memo-informacao','Comunicação de fato / ocorrência','memorando','informacao','doc-fatos doc-data-fato doc-acoes');
   add('memo-prestacao','Prestação de informações / contas','memorando','informacao','doc-fatos doc-documentos-amplos doc-acoes');
   add('memo-livre','Memorando de assunto livre','memorando','livre','doc-fatos doc-demanda');
+  add('memo-renovacao','Solicitação de renovação de contrato','memorando','renovacao','doc-pessoa doc-identificacao doc-qualificacao doc-periodo-inicio doc-periodo-fim doc-prazo-amplo doc-finalidade-ampla');
   add('requerimento-amplo','Requerimento de aluno, responsável ou outra pessoa','requerimento','requerimento',pessoa + ' doc-demanda doc-finalidade-ampla doc-documentos-amplos');
   add('oficio-solicitacao','Ofício de solicitação','oficio','solicitacao','doc-demanda doc-fatos doc-finalidade-ampla doc-documentos-amplos');
   add('oficio-encaminhamento','Ofício de encaminhamento','oficio','encaminhamento','doc-demanda doc-fatos doc-documentos-amplos');
@@ -132,12 +134,26 @@
     let livre='',inicio=0; for(const[a,b]of intervalos){livre+=texto.slice(inicio,a)+'\n';inicio=b;} livre+=texto.slice(inicio);
     return {campos,livre:limpar(livre)};
   }
-  function tirarInstrucao(texto) {
+  function tirarInicioPedido(texto) {
     let t=limpar(texto).replace(/^(?:(?:oi|ol[aá]|chat|bom dia|boa tarde|boa noite|por favor|pfv)[,!:. ]+)*/iu,'');
     t=t.replace(/^(?:(?:voc[eê]|vc)\s+)?(?:pode|poderia|consegue)\s+(?:me\s+)?/iu,'')
       .replace(/^(?:eu\s+)?(?:preciso|quero|gostaria)(?:\s+de|\s+que\s+(?:(?:voc[eê]|vc)\s+)?)?\s+/iu,'')
       .replace(/^(?:me\s+)?(?:fa[cç]a|fazer|crie|criar|elabore|elaborar|prepare|preparar|redija|redigir|gere|gerar|monte|montar|mand[ae]r?)\s+(?:(?:para|pra)\s+mim\s+)?/iu,'');
-    t=t.replace(/^(?:um(?:a)?\s+)?(?:declara[cç][aã]o|memorando|memo|of[ií]cio|requerimento|comprovante|comunicado|aviso|convoca[cç][aã]o|relat[oó]rio|ata|termo|autoriza[cç][aã]o|recibo)(?:\s+(?:institucional|personalizad[oa]|livre))?(?:\s+(?:sobre|informando|declarando|dizendo|comprovando|para (?:declarar|informar|comprovar))(?=\s|$)|\s*[:,-])?\s*/iu,'');
+    return t;
+  }
+  function cabecalhoNatural(texto) {
+    const t=tirarInicioPedido(texto);
+    // Só a identificação inicial do documento, nunca números citados em referências.
+    const m=/^(?:um(?:a)?\s+)?(memorando|memo|of[ií]cio|documento)\s*(?:(?:de\s+)?(?:n[uú]mero|n[º°o]?\.?|nro\.?|num\.?|#)\s*[:.º°-]?\s*)?(\d{1,8}(?:\s*\/\s*\d{4})?)(?=$|[\s,;.])/iu.exec(t);
+    return m?{numero:m[2].replace(/\s/g,''),livre:m[1]+' '+t.slice(m[0].length).replace(/^[,;: ]+/,'')}:{numero:'',livre:texto};
+  }
+  function numeracao(numero,data) {
+    const partes=limpar(numero).split(/\s*\/\s*/);
+    return {numero:partes[0],ano:partes[1]||data?.slice(0,4)||hojeBrasil().slice(0,4)};
+  }
+  function tirarInstrucao(texto) {
+    let t=tirarInicioPedido(texto);
+    t=t.replace(/^(?:um(?:a)?\s+)?(?:declara[cç][aã]o|memorando|memo|of[ií]cio|requerimento|comprovante|comunicado|aviso|convoca[cç][aã]o|relat[oó]rio|ata|termo|autoriza[cç][aã]o|recibo)(?:\s+(?:institucional|personalizad[oa]|livre))?(?:\s+(?:(?:falando|tratando)\s+sobre|sobre|informando|declarando|dizendo|comprovando|para (?:declarar|informar|comprovar))(?=\s|$)|\s*[:,-])?\s*/iu,'');
     t=t.replace(/^(?:comprovar|declarar|atestar|confirmar)\s+(?=que\b)/iu,'');
     return t.replace(/^(?:de\s+)?que\s+/iu,'que ').trim();
   }
@@ -180,6 +196,7 @@
       return 'declaracao-livre';
     }
     if(explicito==='requerimento')return 'legado:requerimento';
+    if(/\brenova\w*\s+(?:d[eo]\s+)?(?:o\s+)?contrato\b|\bcontrato\b[^.;\n]{0,50}\brenova/.test(n)&&!negacao)return 'memo-renovacao';
     // Os modelos oficiais de pessoal, transporte e calendário continuam no motor original.
     if(/\bprorrog|\bsubstituicao|\bcontratacao|\bcontratar|\bcalendario|\bsabado letivo|\bzeladoria|\bserventes?\b|\btransporte|\bonibus|\bexcursao|\bestagio|\bavanco de nivel/.test(n))return 'legado:auto';
     for(const[id,re]of [
@@ -205,6 +222,22 @@
         if(c['doc-fatos']?.startsWith(destinatario[0]))c['doc-fatos']=c['doc-fatos'].slice(destinatario[0].length).replace(/^(?:solicitando|pedindo|requerendo)\s+/iu,'solicitar ').replace(/^encaminhando\s+/iu,'encaminhar ');
       }
     }
+    if(modelo?.estrutura==='renovacao'){
+      pegar('doc-pessoa',/\b(?:servidor(?:a)?|profissional)\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:a partir|apartir|por|pelo prazo|com in[ií]cio|com dura[cç][aã]o|matr[ií]cula|ocupante)|[,;\n.]|$)/iu);
+      pegar('doc-pessoa',/\bcontrato\s+(?:de|da|do)\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:a partir|apartir|por|pelo prazo|com in[ií]cio|com dura[cç][aã]o)|[,;\n.]|$)/iu);
+      if(!c['doc-qualificacao']){const m=/\b(servidora|servidor|profissional)\s+/iu.exec(texto);if(m)c['doc-qualificacao']=m[1].toLocaleLowerCase('pt-BR');}
+      pegar('doc-identificacao',/\bmatr[ií]cula\s*(?:n[º°o.]?\s*)?[:#-]?\s*([\d./-]+)\b/iu);
+      for(const d of datas(texto,hoje)){
+        const antes=normalizar(texto.slice(Math.max(0,d.index-60),d.index));
+        if(/(?:a partir|apartir)(?:\s+(?:da )?data)?\s+de\s*$|(?:inici[oa]|iniciando)(?:\s+em)?\s*$/.test(antes))c['doc-periodo-inicio']||=d.valor;
+        if(/(?:ate|termino|fim)(?:\s+(?:em|do periodo))?\s*$/.test(antes))c['doc-periodo-fim']||=d.valor;
+      }
+      const prazos=[...texto.matchAll(/\b(?:por|durante|prazo\s+de)\s+(?:mais\s+)?(\d{1,4})\s+dias?(?:\s+(corridos|[uú]teis))?\b/giu)];
+      if(!c['doc-prazo-amplo']&&prazos.length===1)c['doc-prazo-amplo']=prazos[0][1]+' dias'+(prazos[0][2]?' '+prazos[0][2]:'');
+      if(prazos.length>1)avisos.push('Há vários prazos no pedido. Informe o prazo solicitado no campo próprio.');
+      pegar('doc-finalidade-ampla',/\b(?:sendo\s+necess[aá]ri[oa]|necess[aá]ri[oa])\s+(.+?)\s*[.!]?$/iu);
+    }
+    if(['memorando','oficio'].includes(modelo?.genero))pegar('doc-finalidade-ampla',/\b(?:porque|pois|uma vez que|tendo em vista que)\s+(.+?)\s*[.!]?$/iu);
     pegar('doc-pessoa',/\b(?:alun[oa]|estudante|participante|visitante)\s*(?:de nome|chamad[oa]|:)?\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:do|da|no|na)\s+(?:\d|primeir|segund|terceir|quart|quint)|\s+(?:que\s+)?(?:est[aá]|encontra|matriculad|compareceu|participou|frequenta|concluiu|recebeu|esteve|estuda|cursa|veio|no dia|nascid)|[,;\n.]|$)/iu);
     pegar('doc-pessoa',/^(?:que\s+)?([\p{L}][\p{L}'’ -]{2,100}?)\s+(?:est[aá]|encontra-se)\s+matriculad[oa]\b/iu);
     pegar('doc-responsavel-amplo',/\b(?:respons[aá]vel|m[aã]e|pai)\s+([\p{L}][\p{L}'’ -]{2,120}?)(?=\s+(?:compareceu|participou|esteve|veio|pelo|pela|do aluno|da aluna)|[,;\n.]|$)/iu);
@@ -246,7 +279,8 @@
     if(c['doc-ano-letivo']&&!/^(19|20|21)\d{2}$/.test(c['doc-ano-letivo']))throw new Error('Informe o ano letivo com quatro algarismos.');
     if(c['doc-periodo-inicio']&&c['doc-periodo-fim']&&c['doc-periodo-fim']<c['doc-periodo-inicio'])throw new Error('O fim do período deve ser igual ou posterior ao início.');
     if(c['doc-entrada-amplo']&&c['doc-saida-amplo']&&c['doc-saida-amplo']<=c['doc-entrada-amplo'])throw new Error('Confira os horários: a saída deve ser posterior à entrada. Para períodos que atravessam a meia-noite, descreva as datas e horários em Fatos.');
-    if(c['doc-numero']&&!/^\d{1,8}(?:\/\d{4})?$/.test(c['doc-numero']))throw new Error('Informe um número de documento válido, com até oito algarismos.');
+    if(c['doc-numero']){c['doc-numero']=c['doc-numero'].replace(/\s/g,'');if(!/^\d{1,8}(?:\/(?:19|20|21)\d{2})?$/.test(c['doc-numero']))throw new Error('Informe um número de documento válido, com até oito algarismos e, opcionalmente, o ano.');}
+    if(c['doc-prazo-amplo']&&!/^(?:[1-9]\d{0,3})(?:\s+dias?(?:\s+(?:corridos|úteis|uteis))?)?$/.test(c['doc-prazo-amplo']))throw new Error('Informe um prazo de 1 a 9999 dias e indique se são úteis, quando aplicável.');
   }
   function organizarRelato(texto){
     return limpar(texto).replace(/^(?:de\s+)?que\s+/iu,'')
@@ -260,7 +294,7 @@
     return texto.replace(new RegExp('(^|[^\\p{L}\\p{N}])'+escaparRegex(anterior)+'(?=$|[^\\p{L}\\p{N}])','gu'),(_m,borda)=>borda+novo);
   }
   function substituirCampo(texto,id,anterior,novo,hoje){
-    if(id==='doc-data')return texto; // Emissão pertence ao cabeçalho, não muda a data do fato.
+    if(['doc-data','doc-numero','doc-para','doc-ac','doc-setor','doc-assunto'].includes(id))return texto; // Cabeçalho separado do corpo.
     if(F[id]?.[1]==='date'&&dataValida(anterior)){
       for(const d of datas(texto,hoje).filter(d=>d.valor===anterior).reverse())texto=texto.slice(0,d.index)+br(novo)+texto.slice(d.fim);
       return texto;
@@ -271,14 +305,38 @@
     const fecho=/(?:\n\s*\n)?(?:Por ser express[aã]o da verdade[^\n]*|Nestes termos, pe[cç]o deferimento\.?)(?:\s*)$/iu.exec(texto);
     return fecho?texto.slice(0,fecho.index).trim()+'\n\n'+frase(adicional)+'\n\n'+fecho[0].trim():texto.trim()+'\n\n'+frase(adicional);
   }
+  function intencaoRevisao(texto){
+    const n=normalizar(texto).replace(/^[, ]*(?:por favor[, ]*|(?:voce |vc )?(?:pode|consegue)\s+)*/,'').replace(/[, .!?]+$/,'').replace(/\s+(?:por favor|pfv)$/,'');
+    if(/^(?:(?:deix[ae]|deixar|torne|tornar)\s+)(?:(?:o|esse|este|meu)\s+)?(?:(?:texto|documento|memorando|pedido|ele)\s+)?(?:mais|bem)\s+formal$|^formaliz(?:e|a|ar)(?:\s+(?:(?:o|esse|este)\s+)?(?:texto|documento|memorando|pedido|ele))?$/.test(n))return 'formalizar';
+    if(/^(?:(?:deix[ae]|deixar|torne|tornar)\s+)(?:(?:o|esse|este|meu)\s+)?(?:(?:texto|documento|memorando|pedido|ele)\s+)?(?:mais|bem)\s+(?:completo|detalhado)$|^(?:complement[ae]|complemente|completar|complet[ae]|desenvolva)(?:\s+(?:(?:o|esse|este)\s+)?(?:texto|documento|memorando|pedido|ele))?$/.test(n))return 'completar';
+    if(/^(?:melhor[ae]|melhorar|revise|reescreva|aperfeicoe)(?:\s+(?:(?:o|esse|este)\s+)?(?:texto|documento|memorando|pedido|ele))?$/.test(n))return 'melhorar';
+    return '';
+  }
+  function justificativa(texto){
+    const t=limpar(texto).replace(/^para\s+a\s+continuidade\s+de\s+atividades\b/iu,'assegurar a continuidade das atividades').replace(/^para\s+(?=assegurar|garantir|manter)/iu,'');
+    return /^(?:assegurar|garantir|manter|viabilizar)\b/iu.test(t)?'A solicitação tem por finalidade '+terminar(t):'A solicitação justifica-se pelo seguinte motivo: '+frase(t);
+  }
+  function organizarDemanda(texto){
+    let t=limpar(texto).replace(/\s*,?\s*(?:porque|pois|uma vez que|tendo em vista que)\s+[\s\S]*$/iu,'');
+    t=t.replace(/^(?:(?:a gente|n[oó]s)\s+)?(?:precisa(?:mos)?|estamos precisando)\s+(?:de|que)\s+/iu,'').replace(/^(?:solicitar|solicite|solicitando|solicitamos|solicito|pedir|pedindo|pe[cç]o|requerer|requerendo|requeiro|encaminhar|encaminhe|encaminhando|encaminhamos)\s+/iu,'').replace(/^para\s+(?:solicitar|pedir|requerer|encaminhar)\s+/iu,'');
+    t=t.replace(/^(?:arrum(?:ar|e|em)|consert(?:ar|e|em)|repar(?:ar|e|em))\s+(o|a|os|as)\s+/iu,(_m,a)=>'o reparo '+({o:'do',a:'da',os:'dos',as:'das'}[a.toLowerCase()])+' ');
+    return t;
+  }
+  function revisarDocumento(entrada,legado,campos,acao){
+    let texto=legado.revisar(entrada.modelo_base||'',acao==='completar'?'melhorar':acao,entrada.funcionarios||[],campos);
+    const m=porId(campos['doc-modelo-amplo']);
+    if(acao==='completar'&&m?.genero==='memorando'&&!/\b(?:provid[eê]ncias\s+(?:administrativas\s+)?cab[ií]veis|[àa]\s+disposi[cç][aã]o)\b/iu.test(texto))texto=acrescentarAntesFecho(texto,'Diante do exposto, solicitamos a análise do pedido e a adoção das providências administrativas cabíveis');
+    return texto;
+  }
   function interpretarComplemento(pedido,campos,corpo,hoje){
     const alterados={},substituicoes=[],perguntas=[],livres=[];
     const perguntar=pergunta=>perguntas.push({campo:'ia-extra-pedido',pergunta});
-    const mapa={nome:'doc-pessoa','nome do aluno':'doc-pessoa','nome da aluna':'doc-pessoa',aluno:'doc-pessoa',aluna:'doc-pessoa',estudante:'doc-pessoa','nome do responsavel':'doc-responsavel-amplo','nome da responsavel':'doc-responsavel-amplo',turma:'doc-turma',data:'doc-data-fato','data do fato':'doc-data-fato','data de emissao':'doc-data',turno:'doc-turno-amplo',projeto:'doc-projeto',finalidade:'doc-finalidade-ampla',quantidade:'doc-bens'};
+    const mapa={nome:'doc-pessoa','nome do aluno':'doc-pessoa','nome da aluna':'doc-pessoa','nome do servidor':'doc-pessoa','nome da servidora':'doc-pessoa',aluno:'doc-pessoa',aluna:'doc-pessoa',estudante:'doc-pessoa','nome do responsavel':'doc-responsavel-amplo','nome da responsavel':'doc-responsavel-amplo',turma:'doc-turma',data:campos['doc-periodo-inicio']?'doc-periodo-inicio':'doc-data-fato','data do fato':'doc-data-fato','data inicial':'doc-periodo-inicio','data de inicio':'doc-periodo-inicio','data final':'doc-periodo-fim','data de termino':'doc-periodo-fim','data de emissao':'doc-data',turno:'doc-turno-amplo',projeto:'doc-projeto',finalidade:'doc-finalidade-ampla',quantidade:'doc-bens',numero:'doc-numero','numero do memorando':'doc-numero','numero do documento':'doc-numero',destinatario:'doc-para',para:'doc-para',setor:'doc-setor',assunto:'doc-assunto','a/c':'doc-ac',prazo:'doc-prazo-amplo'};
     const nomes=Object.keys(mapa).sort((a,b)=>b.length-a.length).join('|');
-    let detectado=false;
-    for(const parte of pedido.split(/[;\n]+|\s+e\s+(?=(?:troque|altere|mude|corrija|inclua|adicione|acrescente)\b)/iu).map(limpar).filter(Boolean)){
+    let detectado=false,revisao='';
+    for(const parte of pedido.split(/[;\n]+|\s+e\s+(?=(?:troque|altere|mude|corrija|inclua|adicione|acrescente|deixe|melhore|complete|complemente|formalize)\b)/iu).map(limpar).filter(Boolean)){
       const n=normalizar(parte);
+      const estilo=intencaoRevisao(parte);if(estilo){detectado=true;revisao=estilo;continue;}
       const rotulo=/^([^:]+):/.exec(n);if(rotulo&&aliases.has(rotulo[1].trim())){livres.push(parte);continue;}
       const literal=/^(?:troque|substitua|altere)\s+["“'](.+?)["”']\s+(?:por|para)\s+["“'](.+?)["”']\s*[.!]?$/iu.exec(parte);
       if(literal){detectado=true;if(substituirTrecho(corpo,literal[1],'')===corpo)perguntar('Não encontrei “'+literal[1]+'” no documento atual. Confira o trecho que deseja substituir.');else substituicoes.push({antes:literal[1],depois:literal[2]});continue;}
@@ -291,7 +349,8 @@
         let quantidadeNova='';
         if(chave==='nome'&&campos['doc-responsavel-amplo']&&campos['doc-pessoa']){perguntar('Qual nome deseja corrigir? Use “nome do aluno” ou “nome do responsável”.');continue;}
         const anterior=campos[id];
-        if(!anterior){perguntar('Não identifiquei o valor atual de '+(F[id]?.[0]||chave)+'. Preencha o campo correspondente ou indique o trecho entre aspas.');continue;}
+        const cabecalho=['doc-data','doc-numero','doc-para','doc-ac','doc-setor','doc-assunto'].includes(id);
+        if(!anterior&&!cabecalho){perguntar('Não identifiquei o valor atual de '+(F[id]?.[0]||chave)+'. Preencha o campo correspondente ou indique o trecho entre aspas.');continue;}
         if(id==='doc-bens'){
           const atual=/^\d+(?:\s*\([\p{L} ]+\))?/u.exec(anterior),novo=/^(\d+)(?:\s+(.+))?$/u.exec(valor);
           if(!atual||!novo){perguntar('Informe a quantidade em algarismos e, se necessário, o material.');continue;}
@@ -300,15 +359,16 @@
           valor=novo[1]+' '+sufixo;
           if(campos['doc-quantidade-ampla'])quantidadeNova=novo[1];
         }
-        const constaNoCorpo=id==='doc-data'||(F[id]?.[1]==='date'?datas(corpo,hoje).some(d=>d.valor===anterior):substituirTrecho(corpo,anterior,'')!==corpo);
+        const constaNoCorpo=cabecalho||(F[id]?.[1]==='date'?datas(corpo,hoje).some(d=>d.valor===anterior):substituirTrecho(corpo,anterior,'')!==corpo);
         if(!constaNoCorpo){perguntar('O valor atual de '+F[id][0]+' nos campos difere do texto. Indique o trecho do documento entre aspas para corrigi-lo.');continue;}
         if(quantidadeNova)alterados['doc-quantidade-ampla']=quantidadeNova;
         alterados[id]=valor;continue;
       }
       if(/^(?:troque|altere|mude|corrija|substitua|na verdade|corrigindo)\b/iu.test(parte)){detectado=true;perguntar('Indique o que deve mudar, por exemplo: “mude a data para 24/10/2026” ou “troque "texto atual" por "novo texto"”.');continue;}
-      livres.push(parte.replace(/^(?:inclua|adicione|acrescente)\s+(?:tamb[eé]m\s+)?(?:a informa[cç][aã]o de\s+)?(?:que\s+)?/iu,''));
+      const livre=parte.replace(/^(?:inclua|adicione|acrescente|complemente|complete)\s+(?:tamb[eé]m\s+)?(?:a informa[cç][aã]o de\s+|com\s+)?(?:que\s+)?/iu,'');
+      if(!corpo.includes(frase(livre)))livres.push(livre);
     }
-    return{campos:alterados,substituicoes,perguntas,livre:livres.join('\n'),detectado};
+    return{campos:alterados,substituicoes,perguntas,livre:livres.join('\n'),detectado,revisao};
   }
   function redigir(modelo, c, perguntar) {
     const obter=(id,rotulo)=>c[id]||(perguntar(id,rotulo||F[id][0]),'[INFORMAR '+(rotulo||F[id][0]).toLocaleUpperCase('pt-BR')+']');
@@ -347,6 +407,11 @@
       case 'atendimento':p=[`Declaramos, para os devidos fins, que ${nome()} recebeu atendimento nesta unidade escolar, em ${data()}${horario()}${c['doc-atividade']?', referente a '+c['doc-atividade']:''}.`];break;
       case 'servico':p=[`Declaramos, para os devidos fins, a realização do seguinte serviço nesta unidade escolar: ${atividade()}, em ${data()}${periodo()}${c['doc-pessoa']?', por '+c['doc-pessoa']:''}.`];break;
       case 'solicitacao':p=[`Solicitamos ${terminar(obter('doc-demanda','providência / pedido detalhado'))}`];break;
+      case 'renovacao': {
+        const vinculo=/^servidor(?:a)?$/iu.test(c['doc-qualificacao']||'')?(c['doc-qualificacao']==='servidora'?'da servidora ':'do servidor '):'de ';
+        p=[`Solicitamos a renovação do contrato ${vinculo}${nome()}${c['doc-prazo-amplo']?', pelo prazo de '+c['doc-prazo-amplo'].replace(/^(\d+)$/,'$1 dias'):''}, a partir de ${br(obter('doc-periodo-inicio','data inicial da renovação'))}${c['doc-periodo-fim']?', com término em '+br(c['doc-periodo-fim']):''}.`];
+        break;
+      }
       case 'encaminhamento':p=[`Encaminhamos ${terminar(c['doc-demanda']||obter('doc-documentos-amplos','documentos / informações a encaminhar'))}`];break;
       case 'resposta':p=[`Em resposta a ${obter('doc-demanda','identificação da solicitação / documento respondido')}, prestamos as seguintes informações:`,frase(obter('doc-fatos','informações da resposta'))];break;
       case 'informacao':p=[frase(obter('doc-fatos','fato / informação a comunicar'))];break;
@@ -386,10 +451,11 @@
       if(c['doc-data-fato'])for(const t of ['hoje','ontem','amanha'])termosAdministrativos.add(t);
       if(modelo.estrutura==='comparecimento')for(const t of ['veio','aqui'])termosAdministrativos.add(t);
       if(modelo.id==='comparecimento-responsavel-amplo')for(const t of ['mae','pai','responsavel'])termosAdministrativos.add(t);
+      if(modelo.estrutura==='renovacao')for(const t of ['apartir','data','mais','sendo','necessario','necessaria'])termosAdministrativos.add(t);
       const faltantes=normal(c['doc-fatos']).filter(t=>t.length>2&&!cobertos.has(t)&&!termosAdministrativos.has(t));
       if(faltantes.length)p.push('Informações complementares: '+frase(c['doc-fatos']));
     }
-    if(c['doc-finalidade-ampla']&&modelo.estrutura!=='comparecimento')p.push('Finalidade / justificativa: '+frase(c['doc-finalidade-ampla']));
+    if(c['doc-finalidade-ampla']&&modelo.estrutura!=='comparecimento')p.push(['memorando','oficio'].includes(modelo.genero)?justificativa(c['doc-finalidade-ampla']):'Finalidade / justificativa: '+frase(c['doc-finalidade-ampla']));
     if(c['doc-complementos'])p.push(frase(c['doc-complementos']));
     if(c['doc-acoes'])p.push('Encaminhamentos informados: '+frase(c['doc-acoes']));
     if(c['doc-documentos-amplos']&&modelo.estrutura!=='encaminhamento')p.push('Documentos / referências informados: '+frase(c['doc-documentos-amplos']));
@@ -410,6 +476,8 @@
     const c={};for(const id of CAMPOS)if(typeof base[id]==='string')c[id]=seguro(base[id],id==='doc-texto-gerado'?24000:16000,'campo '+id);
     const correcao=acao==='complementar'?interpretarComplemento(pedido,c,entrada.modelo_base||'',hoje):{campos:{},substituicoes:[],perguntas:[],livre:pedido,detectado:false};
     const extra=extrairRotulos(correcao.livre), avisos=[], perguntas=[...correcao.perguntas];
+    const cabecalho=cabecalhoNatural(extra.livre);
+    if(cabecalho.numero){extra.campos['doc-numero']||=cabecalho.numero;extra.livre=cabecalho.livre;}
     Object.assign(extra.campos,correcao.campos);
     const perguntar=(campo,nome)=>{if(!perguntas.some(x=>x.campo===campo))perguntas.push({campo,pergunta:'Informe: '+nome+'.'});};
     const selecionado=limpar(entrada.modelo_escolhido||'');
@@ -421,14 +489,17 @@
     if(acao==='gerar'&&(!pedido&&!entrada.somente_campos)&&!selecionado)throw new Error('Descreva os fatos do documento.');
     if(!porId(id)&&!String(id).startsWith('legado:'))throw new Error('Selecione um modelo disponível.');
     if(['melhorar','resumir','formalizar'].includes(acao)) {
-      const texto=legado.revisar(entrada.modelo_base||'',acao,entrada.funcionarios||[]);
-      return {tipo:entrada.contexto?.tipo||'declaracao',campos:{...c,'doc-texto-gerado':texto},principal_id:entrada.principal_id||'',secundario_id:entrada.secundario_id||'',paragrafos:texto.split(/\n\s*\n/).filter(Boolean),perguntas:[],avisos:['A revisão local preserva os fatos e aplica ajustes de redação. Confira o resultado.'],resumo:'Redação revisada.'};
+      if(!c['doc-numero']&&cabecalho.numero)c['doc-numero']=cabecalho.numero;
+      validarValores(c,hoje);
+      const texto=revisarDocumento(entrada,legado,c,acao);
+      return {tipo:entrada.contexto?.tipo||'declaracao',campos:{...c,'doc-texto-gerado':texto},principal_id:entrada.principal_id||'',secundario_id:entrada.secundario_id||'',paragrafos:texto.split(/\n\s*\n/).filter(Boolean),perguntas:[],avisos:[texto===entrada.modelo_base?'Não encontrei outros ajustes seguros de redação neste texto.':'A redação foi ajustada preservando os dados do documento. Confira o resultado.'],resumo:texto===entrada.modelo_base?'Texto mantido após a revisão.':'Redação revisada.'};
     }
     if(String(id).startsWith('legado:')) {
       const tipo=id.slice(7), contexto={...(entrada.contexto||{})};if(tipo!=='auto')contexto.tipo=tipo;
       const nomes={declaracao:'Declaração funcional',requerimento:'Requerimento do servidor',prorrogacao:'Prorrogação de contrato',substituicao:'Substituição por afastamento',contratacao:'Contratação',calendario:'Calendário',transporte:'Transporte',zeladoria:'Zeladoria',estagio:'Estágio',avanco:'Avanço de nível'};
       if(tipo!=='auto'&&!Object.hasOwn(nomes,tipo))throw new Error('Modelo oficial inválido.');
-      const plano=legado.preparar({...entrada,contexto,pedido:tipo==='auto'?pedido:'Tipo: '+nomes[tipo]+'\n'+pedido});
+      const pedidoLegado=[tipo==='auto'?'':'Tipo: '+nomes[tipo],cabecalho.numero?'Número: '+cabecalho.numero:'',pedido].filter(Boolean).join('\n');
+      const plano=legado.preparar({...entrada,contexto,pedido:pedidoLegado});
       plano.campos['doc-modelo-amplo']='';plano.campos['doc-genero-amplo']='';plano.campos['doc-texto-gerado']='';return plano;
     }
     const modelo=porId(id);
@@ -446,6 +517,7 @@
       if(referencia)c['doc-complementos']=[c['doc-complementos'],referencia].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join('\n');
     }
     validarValores(c,hoje);
+    if(c['doc-numero']?.includes('/')&&numeracao(c['doc-numero'],c['doc-data']).ano!==(c['doc-data']||hoje).slice(0,4))avisos.push('O ano da numeração difere da data de emissão. A numeração informada foi preservada; confira o cabeçalho.');
     if(correcao.detectado){
       for(const id of Object.keys(correcao.campos))for(const texto of ['doc-fatos','doc-complementos'])if(c[texto]&&base[id])c[texto]=substituirCampo(c[texto],id,base[id],c[id],hoje);
       for(const s of correcao.substituicoes)for(const id of Object.keys(c))if(!['doc-dados-reconhecidos','doc-texto-gerado'].includes(id))c[id]=substituirTrecho(c[id],s.antes,s.depois);
@@ -463,10 +535,11 @@
     }
     c['doc-modelo-amplo']=id;c['doc-genero-amplo']=modelo.genero;c['doc-assunto']||=modelo.assunto;
     if(c['doc-fatos']&&!c['doc-demanda']&&['solicitacao','encaminhamento','requerimento'].includes(modelo.estrutura)) {
-      c['doc-demanda']=c['doc-fatos'].replace(/^(?:solicitar|solicite|solicitamos|solicito|requerer|requeiro|pedir|peço|peco|encaminhar|encaminhe|encaminhamos)\s+/i,'').replace(/^para\s+(?:solicitar|pedir|requerer|encaminhar)\s+/i,'');
+      c['doc-demanda']=organizarDemanda(c['doc-fatos']);
     }
     let paragrafos=redigir(modelo,c,perguntar);
-    if(acao==='complementar'&&entrada.modelo_base&&(correcao.detectado||entrada.modelo_base!==base['doc-texto-gerado'])) {
+    const soCabecalho=Object.keys(extra.campos).length>0&&Object.keys(extra.campos).every(id=>['doc-numero','doc-data','doc-para','doc-ac','doc-setor','doc-assunto'].includes(id));
+    if(acao==='complementar'&&entrada.modelo_base&&(correcao.detectado||soCabecalho||entrada.modelo_base!==base['doc-texto-gerado'])) {
       let original=seguro(entrada.modelo_base,24000,'texto editado');
       for(const k of Object.keys(extra.campos))if(base[k]&&base[k]!==c[k])original=substituirCampo(original,k,base[k],c[k],hoje);
       for(const s of correcao.substituicoes)original=substituirTrecho(original,s.antes,s.depois);
@@ -474,7 +547,12 @@
       const adicional=tirarInstrucao(extra.livre);if(adicional)original=acrescentarAntesFecho(original,adicional);
       if(referencia&&!original.includes(referencia))original=acrescentarAntesFecho(original,referencia);
       paragrafos=original.split(/\n\s*\n/).filter(Boolean);
-      avisos.push('Suas alterações manuais foram preservadas. Confira se os novos campos também precisam ser ajustados no texto.');
+      avisos.push('As alterações foram aplicadas ao documento atual. Confira os campos e a redação.');
+    }
+    if(correcao.revisao){
+      const texto=revisarDocumento({...entrada,modelo_base:paragrafos.join('\n\n')},legado,c,correcao.revisao);
+      paragrafos=texto.split(/\n\s*\n/).filter(Boolean);
+      avisos.push('O pedido de revisão foi aplicado ao texto atual. Confira a redação.');
     }
     if(perguntas.length)avisos.push('Preencha os dados indicados e clique em Atualizar texto para concluir o rascunho.');
     if(c['doc-fatos'])avisos.push('Os detalhes livres do pedido foram preservados. Confira se a redação corresponde aos registros da escola.');
@@ -483,5 +561,5 @@
     c['doc-dados-reconhecidos']=JSON.stringify(Object.fromEntries(Object.entries(c).filter(([id,v])=>F[id]&&!['doc-fatos','doc-complementos','doc-documentos-amplos'].includes(id)&&v.length<=1000)));
     return {tipo:modelo.tipo,campos:c,principal_id:'',secundario_id:'',paragrafos,perguntas,avisos,resumo:correcao.detectado?'Correção do documento atual — '+modelo.nome+'.':modelo.nome+' — rascunho preparado.'};
   }
-  global.AssistenteDocumentalAmplo=Object.freeze({preparar,pendencias,modelos:catalogo,campos:CAMPOS,definicoes:F,generos,porId,dataValida,versao:'20261026-rapido-1'});
+  global.AssistenteDocumentalAmplo=Object.freeze({preparar,pendencias,modelos:catalogo,campos:CAMPOS,definicoes:F,generos,porId,dataValida,numeracao,versao:'20261026-memorandos-1'});
 })(globalThis);
